@@ -8,7 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "^2.1.3",
+    "react-scripts": "^5.0.1",
     "typescript": "^4.8.3",
     "web-vitals": "^2.1.4"
   },
@@ -16,7 +16,8 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.11.59",
     "@types/react": "^18.0.20",
-    "@types/react-dom": "^18.0.6"
+    "@types/react-dom": "^18.0.6",
+    "sass": "^1.54.9"
   },
   "scripts": {
     "start": "react-scripts start",
