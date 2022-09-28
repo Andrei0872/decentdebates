@@ -11,3 +11,13 @@ cp .env.example .env
 ```
 
 and then fill in with your data.
+
+---
+
+## Spinning up the application
+
+1. Start the containers
+
+    ```bash
+    docker-compose up
+    ```
