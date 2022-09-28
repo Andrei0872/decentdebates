@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:13.6
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    restart: on-failure
+    healthcheck:
+      test: "psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'select 1;'"
+      interval: 1s
+      retries: 20
+    volumes:
+      - database_decent_debates_dev:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d/
+    networks:
+      - decent_debates_dev
+    ports:
+      - "5432:5432"
+
+  # Might need this to quickly generate a UML.
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: foo@bar.com
+  #     PGADMIN_DEFAULT_PASSWORD: "${POSTGRES_PASSWORD}"
+  #   ports:
+  #     - "3003:80"
+
+  #   volumes:
+  #     - database_decent_debates_pgadmin:/var/lib/pgadmin
+  #   networks:
+  #     - decent_debates_dev
+
+volumes:
+  database_decent_debates_dev:
+  database_decent_debates_pgadmin:
+
+networks:
+  decent_debates_dev:
