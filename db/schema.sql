@@ -17,7 +17,7 @@ CREATE TABLE notification (
   id serial primary key,
   title varchar(40) not null,
   content varchar(100) not null,
-  recipient_id serial not null,
+  recipient_id int not null,
   event notification_event not null,
 
   constraint fk_user_recipient_id foreign key(recipient_id) references "user"(id)
@@ -27,7 +27,7 @@ CREATE TABLE suggestion (
   id serial primary key,
   title varchar(40) not null,
   content text not null,
-  suggested_by serial not null,
+  suggested_by int not null,
 
   constraint fk_user_suggested_by foreign key(suggested_by) references "user"(id)
 );
@@ -39,9 +39,9 @@ CREATE TABLE board_list (
 
 CREATE TABLE ticket (
   id serial primary key,
-  created_by serial not null,
-  assigned_to serial not null,
-  list_id serial not null,
+  created_by int not null,
+  assigned_to int not null,
+  list_id int not null,
 
   constraint fk_user_created_by foreign key(created_by) references "user"(id),
   constraint fk_user_assigned_to foreign key(assigned_to) references "user"(id),
@@ -50,7 +50,7 @@ CREATE TABLE ticket (
 
 CREATE TABLE debate (
   id serial primary key,
-  ticket_id serial not null,
+  ticket_id int not null,
   title varchar(80) not null,
   created_at timestamp default now(),
   modified_at timestamp default now(),
@@ -59,8 +59,8 @@ CREATE TABLE debate (
 );
 
 create table user_debate_subscription (
-  user_id serial not null,
-  debate_id serial not null,
+  user_id int not null,
+  debate_id int not null,
   subscribed_at timestamp default now(),
 
   constraint fk_debate_id foreign key(debate_id) references debate(id),
@@ -73,8 +73,8 @@ create table ticket_tag(
 );
 
 create table assoc_ticket_tag (
-  ticket_id serial not null,
-  tag_id serial not null,
+  ticket_id int not null,
+  tag_id int not null,
 
   constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
   constraint fk_tag_id foreign key(tag_id) references ticket_tag(id)
@@ -86,8 +86,8 @@ create table debate_tag (
 );
 
 create table assoc_debate_tag (
-  debate_id serial not null,
-  tag_id serial not null,
+  debate_id int not null,
+  tag_id int not null,
 
   constraint fk_debate_id foreign key(debate_id) references debate(id),
   constraint fk_tag_id foreign key(tag_id) references debate_tag(id)
@@ -95,11 +95,11 @@ create table assoc_debate_tag (
 
 create table argument (
   id serial primary key,
-  debate_id serial not null,
-  ticket_id serial not null,
+  debate_id int not null,
+  ticket_id int not null,
   title varchar(80) not null,
   content text not null,
-  created_by serial not null,
+  created_by int not null,
   created_at timestamp default now(),
   type argument_type,
 
@@ -110,7 +110,7 @@ create table argument (
 
 create table external_reference (
   id serial primary key,
-  argument_id serial not null,
+  argument_id int not null,
   name varchar(100) not null,
   url varchar(2049) not null,
 
@@ -118,8 +118,8 @@ create table external_reference (
 );
 
 create table assoc_argument_counterargument (
-  argument_id serial not null,
-  counter_argument_id serial not null,
+  argument_id int not null,
+  counter_argument_id int not null,
 
   constraint fk_argument_id foreign key(argument_id) references argument(id),
   constraint fk_counter_argument_id foreign key(counter_argument_id) references argument(id),
@@ -128,9 +128,9 @@ create table assoc_argument_counterargument (
 
 create table ticket_comment (
   id serial primary key, 
-  ticket_id serial not null,
+  ticket_id int not null,
   content text not null,
-  commenter_id serial not null,
+  commenter_id int not null,
   created_at timestamp default now(),
   modified_at timestamp default now(),
 
