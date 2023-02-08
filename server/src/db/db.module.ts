@@ -1,4 +1,4 @@
-import { ConsoleLogger, FactoryProvider, Logger, Module } from '@nestjs/common';
+import { ConsoleLogger, FactoryProvider, Global, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 
@@ -42,6 +42,7 @@ const PG_PROVIDER: FactoryProvider<Pool> = {
   inject: [ConfigService]
 }
 
+@Global()
 @Module({
   providers: [PG_PROVIDER],
   exports: [
