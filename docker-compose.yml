@@ -21,6 +21,15 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: redis:7.0.5
+    networks:
+      - decent_debates_dev
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 1s
+      retries: 20
+
   # Might need this to quickly generate a UML.
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -29,7 +38,6 @@ services:
   #     PGADMIN_DEFAULT_PASSWORD: "${POSTGRES_PASSWORD}"
   #   ports:
   #     - "3003:80"
-
   #   volumes:
   #     - database_decent_debates_pgadmin:/var/lib/pgadmin
   #   networks:
@@ -37,7 +45,7 @@ services:
 
 volumes:
   database_decent_debates_dev:
-  database_decent_debates_pgadmin:
+  # database_decent_debates_pgadmin:
 
 networks:
   decent_debates_dev:
