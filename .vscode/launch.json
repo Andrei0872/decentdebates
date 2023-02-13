@@ -18,6 +18,17 @@
         "run",
         "start:debug"
       ]
+    },
+    {
+      "cwd": "${workspaceFolder}/next",
+      "name": "Next.js debugging + set-up process",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ]
     }
   ]
 }
