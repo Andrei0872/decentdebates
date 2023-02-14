@@ -3,6 +3,9 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserService } from 'src/user/user.service';
 import { RegisterUserDTO } from '../user/dtos/register-user.dto';
+import * as bcrypt from 'bcrypt';
+
+const SALT_OR_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -12,12 +15,17 @@ export class AuthService {
   ) { }
   
   public async register (registerUserDTO: RegisterUserDTO) {
-    // TODO: Hash password
     try {
+      registerUserDTO.password = await this.hashPassword(registerUserDTO.password);
       return await this.userService.insertOne(registerUserDTO);
     } catch (err) {
       throw new Error('An error occurred while registering the user.');
     }
+  }
+
+  private async hashPassword (rawPass: string) {
+    const hash = await bcrypt.hash(rawPass, SALT_OR_ROUNDS);
+    return hash;
   }
 
   public login () {}
