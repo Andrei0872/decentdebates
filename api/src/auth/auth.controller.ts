@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Res} from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res} from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterUserDTO } from '../user/dtos/register-user.dto';
@@ -10,9 +10,12 @@ export class AuthController {
   constructor (private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() registerUserDTO: RegisterUserDTO, @Res() res: Response) {
+  async register(@Body() registerUserDTO: RegisterUserDTO, @Res() res: Response, @Req() req: Request) {
     try {
-      await this.authService.register(registerUserDTO);
+      const user = await this.authService.register(registerUserDTO);
+
+      (req as any).session.user = this.authService.getUserCookieFields(user);
+      
       return res
         .status(HttpStatus.CREATED)
         .json({
@@ -24,9 +27,11 @@ export class AuthController {
   }
 
   @Post('login')
-  async login (@Body() loginUserDTO: LoginUserDTO, @Res() res: Response) {
+  async login (@Body() loginUserDTO: LoginUserDTO, @Res() res: Response, @Req() req: Request) {
     try {
       const user = await this.authService.login(loginUserDTO);
+
+      (req as any).session.user = this.authService.getUserCookieFields(user);
 
       return res
         .status(HttpStatus.CREATED)
@@ -36,10 +41,5 @@ export class AuthController {
     } catch (err) {
       throw new HttpException(err.message, 400);
     }
-  }
-
-  @Get('test')
-  test () {
-    return 'Hello!!'
   }
 }

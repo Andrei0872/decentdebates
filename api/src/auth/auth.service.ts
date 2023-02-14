@@ -6,6 +6,7 @@ import { RegisterUserDTO } from '../user/dtos/register-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from 'src/user/dtos/login-user.dto';
 import { InvalidCredentialsError } from './errors/invalid-credentials.error';
+import { PublicUser } from 'src/user/user.model';
 
 const SALT_OR_ROUNDS = 10;
 
@@ -37,6 +38,13 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  getUserCookieFields (u: PublicUser) {
+    return {
+      id: u.id,
+      role: u.role,
+    };
   }
 
   private async hashPassword (rawPass: string) {

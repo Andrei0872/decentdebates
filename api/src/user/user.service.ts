@@ -11,7 +11,7 @@ const TABLE_COLUMNS = `(username, password, email, role)`;
 export class UserService {
   constructor (@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
 
-  public async insertOne (registerUserDTO: RegisterUserDTO) {
+  public async insertOne (registerUserDTO: RegisterUserDTO): Promise<User> {
     const client = await this.pool.connect();
     const values = [registerUserDTO.username, registerUserDTO.password, registerUserDTO.email, 'USER'];
 
@@ -20,9 +20,12 @@ export class UserService {
         `
           insert into ${TABLE_NAME} ${TABLE_COLUMNS}
           values ($1, $2, $3, $4)
+          returning *
         `,
         values
       );
+
+      return res.rows[0];
     } catch (err) {
       console.error(err.message);
       throw err;
