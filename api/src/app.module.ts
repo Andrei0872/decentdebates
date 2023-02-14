@@ -1,5 +1,5 @@
 import { Inject, MiddlewareConsumer, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,6 +15,9 @@ import { authenticateMiddleware } from './middlewares/authenticate.middleware';
     DbModule,
     AuthModule,
     UserModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
   ],
   controllers: [AppController],
   providers: [
