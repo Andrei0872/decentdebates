@@ -11,12 +11,13 @@ export class AuthService {
     private userService: UserService,
   ) { }
   
-  public register (registerUserDTO: RegisterUserDTO) {
-    // Check if user exists
-    // If yes: throw error
-    // Hash password
-    // Insert into `users` table
-    this.userService.insertOne(registerUserDTO);
+  public async register (registerUserDTO: RegisterUserDTO) {
+    // TODO: Hash password
+    try {
+      return await this.userService.insertOne(registerUserDTO);
+    } catch (err) {
+      throw new Error('An error occurred while registering the user.');
+    }
   }
 
   public login () {}

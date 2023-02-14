@@ -22,9 +22,9 @@ export class UserService {
         `,
         values
       );
-      console.log(res);
     } catch (err) {
-      console.log(err);
+      console.error(err.message);
+      throw err;
     } finally {
       client.release();
     }
