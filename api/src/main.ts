@@ -11,6 +11,8 @@ async function bootstrap() {
     whitelist: true,
   }));
 
+  app.setGlobalPrefix('api');
+
   await app.listen(PORT, () => console.log(`Server up & running on PORT ${PORT}`));
 }
 bootstrap();

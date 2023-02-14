@@ -9,7 +9,7 @@
       "restart": true,
     },
     {
-      "cwd": "${workspaceFolder}/server",
+      "cwd": "${workspaceFolder}/api",
       "name": "NestJS debugging + set-up process",
       "type": "node",
       "request": "launch",
