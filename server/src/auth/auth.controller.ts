@@ -2,6 +2,8 @@ import { Body, Controller, Get, HttpException, HttpStatus, Post, Res} from '@nes
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterUserDTO } from '../user/dtos/register-user.dto';
+import { LoginUserDTO } from 'src/user/dtos/login-user.dto';
+import { getPublicUser } from 'src/user/user.model';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +24,19 @@ export class AuthController {
   }
 
   @Post('login')
-  login () {}
+  async login (@Body() loginUserDTO: LoginUserDTO, @Res() res: Response) {
+    try {
+      const user = await this.authService.login(loginUserDTO);
+
+      return res
+        .status(HttpStatus.CREATED)
+        .json({
+          data: getPublicUser(user),
+        })
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
 
   @Get('test')
   test () {
