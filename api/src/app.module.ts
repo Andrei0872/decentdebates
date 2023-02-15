@@ -7,8 +7,8 @@ import { DbModule, PG_PROVIDER_TOKEN } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SESSION_MIDDLEWARE_PROVIDER, SESSION_MIDDLEWARE_TOKEN } from './middlewares/session.middleware';
-import { ModuleRef } from '@nestjs/core';
-import { authenticateMiddleware } from './middlewares/authenticate.middleware';
+import { APP_GUARD, ModuleRef } from '@nestjs/core';
+import { AuthenticateGuard } from './guards/authenticate.guard';
 
 @Module({
   imports: [
@@ -23,15 +23,13 @@ import { authenticateMiddleware } from './middlewares/authenticate.middleware';
   providers: [
     AppService,
     SESSION_MIDDLEWARE_PROVIDER,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticateGuard,
+    },
   ],
 })
 export class AppModule {
   constructor (private moduleRef: ModuleRef) { }
   
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(authenticateMiddleware)
-      .exclude('/api/auth/(.*)')
-      .forRoutes('*');
-  }
 }

@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res} from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, SetMetadata} from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterUserDTO } from '../user/dtos/register-user.dto';
 import { LoginUserDTO } from 'src/user/dtos/login-user.dto';
 import { getPublicUser } from 'src/user/user.model';
 
+@SetMetadata('skipAuth', true)
 @Controller('auth')
 export class AuthController {
   constructor (private authService: AuthService) {}
