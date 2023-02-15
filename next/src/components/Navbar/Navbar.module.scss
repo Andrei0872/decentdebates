@@ -1,0 +1,9 @@
+.navbar {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: flex-end;
+  margin-inline-end: 6vw;
+}

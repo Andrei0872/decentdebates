@@ -1,0 +1,19 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form {
+  width: calc(20vw + 10rem);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.toggler {
+  cursor: pointer;
+}

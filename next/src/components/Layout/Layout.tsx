@@ -1,8 +1,6 @@
 import layoutStyles from './Layout.module.scss';
 
 import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
 import { ReactNode } from 'react';
 import Navbar from '../Navbar/Navbar';
 
@@ -13,10 +11,8 @@ interface Props {
 }
 
 export default function Layout({ children }: Props) {
-  console.log(layoutStyles);
-
   return (
-    <div>
+    <div className={layoutStyles.container}>
       <Head>
         <title>{SITE_TITLE}</title>
         <link rel="icon" href="/favicon.ico" />
@@ -26,14 +22,14 @@ export default function Layout({ children }: Props) {
         />
       </Head>
 
-      <header>
-        <h1>Decent Debates</h1>
+      <header className={layoutStyles.header}>
+        <h1 className={layoutStyles.title}>Decent Debates</h1>
         <Navbar user={null} />
       </header>
 
-      <main>{children}</main>
+      <main className={layoutStyles.main}>{children}</main>
 
-      <footer>footer</footer>
+      <footer className={layoutStyles.footer}>footer</footer>
     </div>
   );
 }
