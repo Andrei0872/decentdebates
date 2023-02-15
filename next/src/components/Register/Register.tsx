@@ -4,6 +4,7 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form"
+import styles from '@/styles/shared/form.module.scss';
 
 export interface RegisterData {
   email: string;
@@ -30,8 +31,10 @@ function Register () {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Register</h2>
+      
+      <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
         <input type="text" {...register('email')} />
         <input type="text" {...register('username')} />
         <input type="password" {...register('password')} />
