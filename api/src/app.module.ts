@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { SESSION_MIDDLEWARE_PROVIDER, SESSION_MIDDLEWARE_TOKEN } from './middlewares/session.middleware';
 import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { AuthenticateGuard } from './guards/authenticate.guard';
+import { DebatesModule } from './entities/debates/debates.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthenticateGuard } from './guards/authenticate.guard';
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
+    DebatesModule,
   ],
   controllers: [AppController],
   providers: [
