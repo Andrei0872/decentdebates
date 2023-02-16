@@ -1,4 +1,3 @@
-console.log('foo');
 import * as dotenv from 'dotenv'
 
 dotenv.config({

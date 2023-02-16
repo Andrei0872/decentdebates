@@ -43,7 +43,7 @@ CREATE TABLE ticket (
   assigned_to int not null,
   list_id int not null,
 
-  constraint fk_user_created_by foreign key(created_by) references "user"(id),
+  constraint fk_user_created_by foreign key(created_by) references "user"(id) on delete cascade,
   constraint fk_user_assigned_to foreign key(assigned_to) references "user"(id),
   constraint fk_list_id foreign key(list_id) references board_list(id)
 );
