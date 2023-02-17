@@ -3,6 +3,7 @@ import styles from '@/styles/Debates.module.scss';
 import Layout from "@/components/Layout/Layout";
 import { api } from '@/utils/api'
 import { Debate } from "@/store/slices/debates.slice";
+import DebateCard from "@/components/DebateCard/DebateCard";
 
 interface Props {
   debates: Debate[];
@@ -16,20 +17,26 @@ function Debates(props: Props) {
       <div className={styles.container}>
         <section className={styles.search}>
           <div className={styles.input}>
-            {/* <Input placeholder="Seach..." /> */}
+            <input type="text" placeholder="Search..." />
           </div>
 
           <div className={styles.tags}>
             tags
           </div>
 
-          {/* <Button type="primary" size="small">
-            Apply */}
-          {/* </Button> */}
+          <button type="button">
+            Apply
+          </button>
         </section>
 
         <section className={styles.debates}>
-          debates
+          {
+            debates?.length ? (
+              debates.map(d => (
+                <DebateCard key={d.id} cardData={d} />
+              ))
+            ) : <p>No Debates yet</p>
+          }
         </section>
       </div>
     </Layout>
@@ -45,7 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       cookie: context.req.headers.cookie,
     },
   });
-  const debates = res.data;
+  const debates = res.data?.data;
 
   return {
     props: {

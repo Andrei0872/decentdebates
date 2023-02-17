@@ -1,0 +1,16 @@
+.container {
+  border: 1px solid black;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.8rem;
+  padding-block: 0.4rem;
+}
+
+.info {
+  display: flex;
+  border-top: 1px solid black;
+  padding: 0.2rem;
+  justify-content: space-between;
+}

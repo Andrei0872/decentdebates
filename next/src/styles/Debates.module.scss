@@ -15,4 +15,10 @@
 .debates {
   align-self: stretch;
   flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-column-gap: 3rem;
+  grid-row-gap: 2rem;
+  grid-auto-rows: max-content;
+  padding: 2rem 5rem;
 }
