@@ -4,29 +4,39 @@ import Layout from "@/components/Layout/Layout";
 import { api } from '@/utils/api'
 import { Debate } from "@/store/slices/debates.slice";
 import DebateCard from "@/components/DebateCard/DebateCard";
+import Input from "@/components/Input/Input";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 interface Props {
   debates: Debate[];
 }
 
 function Debates(props: Props) {
-  const { debates } = props;
+  const [debates, setDebates] = useState(props.debates);
+
+  const onSearchInputChange = async (value: string) => {
+    const encodedQueryParams = btoa(JSON.stringify({ queryStr: value }));
+    const res = (await api.get(`/debates?q=${encodedQueryParams}`)).data.data;
+
+    setDebates(res);
+  }
 
   return (
     <Layout>
       <div className={styles.container}>
         <section className={styles.search}>
           <div className={styles.input}>
-            <input type="text" placeholder="Search..." />
+            <Input onChange={onSearchInputChange} />
           </div>
 
           <div className={styles.tags}>
             tags
+            <button type="button">
+              Apply
+            </button>
           </div>
 
-          <button type="button">
-            Apply
-          </button>
         </section>
 
         <section className={styles.debates}>
@@ -35,7 +45,7 @@ function Debates(props: Props) {
               debates.map(d => (
                 <DebateCard key={d.id} cardData={d} />
               ))
-            ) : <p>No Debates yet</p>
+            ) : <p>No Debates found.</p>
           }
         </section>
       </div>
