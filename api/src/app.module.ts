@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule, PG_PROVIDER_TOKEN } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './entities/user/user.module';
 import { SESSION_MIDDLEWARE_PROVIDER, SESSION_MIDDLEWARE_TOKEN } from './middlewares/session.middleware';
 import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { AuthenticateGuard } from './guards/authenticate.guard';

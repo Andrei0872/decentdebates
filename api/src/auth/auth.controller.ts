@@ -1,9 +1,9 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, SetMetadata} from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterUserDTO } from '../user/dtos/register-user.dto';
-import { LoginUserDTO } from 'src/user/dtos/login-user.dto';
-import { getPublicUser } from 'src/user/user.model';
+import { RegisterUserDTO } from '../entities/user/dtos/register-user.dto';
+import { LoginUserDTO } from 'src/entities/user/dtos/login-user.dto';
+import { getPublicUser } from 'src/entities/user/user.model';
 
 @SetMetadata('skipAuth', true)
 @Controller('auth')

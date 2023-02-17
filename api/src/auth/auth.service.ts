@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
-import { UserService } from 'src/user/user.service';
-import { RegisterUserDTO } from '../user/dtos/register-user.dto';
+import { UserService } from 'src/entities/user/user.service';
+import { RegisterUserDTO } from '../entities/user/dtos/register-user.dto';
 import * as bcrypt from 'bcrypt';
-import { LoginUserDTO } from 'src/user/dtos/login-user.dto';
+import { LoginUserDTO } from 'src/entities/user/dtos/login-user.dto';
 import { InvalidCredentialsError } from './errors/invalid-credentials.error';
-import { PublicUser } from 'src/user/user.model';
+import { PublicUser } from 'src/entities/user/user.model';
 
 const SALT_OR_ROUNDS = 10;
 
