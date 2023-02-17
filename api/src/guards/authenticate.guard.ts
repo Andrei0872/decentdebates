@@ -9,7 +9,9 @@ export class AuthenticateGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const shouldSkipAuth = this.reflector.get<boolean>('skipAuth', context.getClass());
+    const hasSkipFlagOnController = !!this.reflector.get<boolean>('skipAuth', context.getClass());
+    const hasSkipFlagOnHandler = !!this.reflector.get<boolean>('skipAuth', context.getHandler());
+    const shouldSkipAuth = hasSkipFlagOnController || hasSkipFlagOnHandler;
     if (shouldSkipAuth) {
       return true;
     }

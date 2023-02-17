@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, Query, Req, Res } from '@nestjs/common';
+import { Controller, Get, HttpException, Query, Req, Res, SetMetadata } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { DebatesService, Filters } from './debates.service';
@@ -7,6 +7,7 @@ import { DebatesService, Filters } from './debates.service';
 export class DebatesController {
   constructor(private debatesService: DebatesService) { }
 
+  @SetMetadata('skipAuth', true)
   @Get('/')
   async getAll(@Res() res: Response, @Query('q', new DebatesQueryPipe()) filters: Filters) {
     try {
