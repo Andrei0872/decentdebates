@@ -3,11 +3,16 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { Debate } from './debates.model';
 
+interface Filters {
+  queryStr: string;
+  tags: string;
+}
+
 @Injectable()
 export class DebatesService {
   constructor (@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
   
-  async getAll (): Promise<Debate[]> {
+  async getAll (filters?: Filters): Promise<Debate[]> {
     const client = await this.pool.connect();
     let sqlStr = `
       with debates_tags as (
@@ -38,12 +43,46 @@ export class DebatesService {
         on d.id = dts."debateId"
     `;
 
+    if (filters) {
+      sqlStr += '\n' + 'where ' + this.getFiltersAsSQLString(filters);
+    }
+
+    const values = filters ? this.getFiltersValues(filters) : [];
+
     try {
-      const res = await client.query(sqlStr);
+      const res = await client.query(sqlStr, values);
       return res.rows;
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the debates.');
     }
+  }
+
+  private getFiltersAsSQLString (filters: Filters) {
+    const queryStrFilter = filters.queryStr || null;
+    const tagsFilter = filters.tags || null;
+
+    const hasAll = queryStrFilter && tagsFilter;
+    if (hasAll) {
+      return `d.title = $1 and dt.id in ($2)`;
+    }
+
+    if (queryStrFilter) {
+      return 'd.title::text ilike $1';
+    }
+
+    return 'dt.id in ($2)';
+  }
+
+  private getFiltersValues (filters: Filters) {
+    const queryStrFilter = filters.queryStr ? `%${filters.queryStr}%` : null;
+    const tagsFilter = filters.tags || null;
+
+    const hasAll = queryStrFilter && tagsFilter;
+    if (hasAll) {
+      return [queryStrFilter, tagsFilter];
+    }
+
+    return [queryStrFilter || tagsFilter];
   }
 }
