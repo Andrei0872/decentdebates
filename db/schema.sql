@@ -43,7 +43,7 @@ CREATE TABLE ticket (
   assigned_to int not null,
   list_id int not null,
 
-  constraint fk_user_created_by foreign key(created_by) references "user"(id) on delete cascade,
+  constraint fk_user_created_by foreign key(created_by) references "user"(id) on delete no action,
   constraint fk_user_assigned_to foreign key(assigned_to) references "user"(id),
   constraint fk_list_id foreign key(list_id) references board_list(id)
 );
@@ -55,7 +55,7 @@ CREATE TABLE debate (
   created_at timestamp default now(),
   modified_at timestamp default now(),
 
-  constraint fk_ticket_id foreign key(ticket_id) references ticket(id)
+  constraint fk_ticket_id foreign key(ticket_id) references ticket(id) on delete no action
 );
 
 create table user_debate_subscription (

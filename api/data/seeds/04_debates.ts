@@ -19,4 +19,14 @@ export async function seed(knex: Knex): Promise<void> {
         { id: 4, ticket_id: 4, title: "An interesting topic#4", },
         { id: 5, ticket_id: 5, title: "An interesting topic#5", },
     ]);
+
+    await knex("assoc_debate_tag").insert([
+        { debate_id: 1, tag_id: 1 },
+        { debate_id: 1, tag_id: 2 },
+        { debate_id: 2, tag_id: 1 },
+        { debate_id: 3, tag_id: 2 },
+        { debate_id: 3, tag_id: 3 },
+        { debate_id: 4, tag_id: 3 },
+        { debate_id: 5, tag_id: 3 },
+    ]);
 };
