@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { Debate } from './debates.model';
 
-interface Filters {
+export interface Filters {
   queryStr: string;
   tags: string;
 }
