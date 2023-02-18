@@ -46,6 +46,7 @@ export class DebatesService {
         on u.id = t.created_by
       join debates_tags dts
         on d.id = dts."debateId"
+      where t.board_list = 'ACCEPTED'
     `;
 
     if (filters) {

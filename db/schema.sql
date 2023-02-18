@@ -3,6 +3,7 @@
 CREATE TYPE user_role AS ENUM ('USER', 'MODERATOR', 'ADMIN');
 CREATE TYPE notification_event AS ENUM ('ARGUMENT', 'TICKET', 'DEBATE', 'SUGGESTION');
 create type argument_type as enum ('PRO', 'CON');
+create type board_list_type as enum ('PENDING', 'IN REVIEW', 'BLOCKED', 'DONE', 'ACCEPTED');
 
 CREATE TABLE "user" (
 	id serial primary key,
@@ -32,20 +33,14 @@ CREATE TABLE suggestion (
   constraint fk_user_suggested_by foreign key(suggested_by) references "user"(id)
 );
 
-CREATE TABLE board_list (
-  id serial primary key,
-  title varchar(30) not null
-);
-
 CREATE TABLE ticket (
   id serial primary key,
   created_by int not null,
   assigned_to int,
-  list_id int not null,
+  board_list board_list_type null,
 
   constraint fk_user_created_by foreign key(created_by) references "user"(id) on delete no action,
-  constraint fk_user_assigned_to foreign key(assigned_to) references "user"(id),
-  constraint fk_list_id foreign key(list_id) references board_list(id)
+  constraint fk_user_assigned_to foreign key(assigned_to) references "user"(id)
 );
 
 CREATE TABLE debate (

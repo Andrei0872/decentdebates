@@ -5,11 +5,11 @@ export async function seed(knex: Knex): Promise<void> {
     await knex("debate").del();
 
     await knex("ticket").insert([
-        { /* id: 1, */ created_by: 1, assigned_to: 2, list_id: 1 },
-        { /* id: 2, */ created_by: 1, assigned_to: 2, list_id: 1 },
-        { /* id: 3, */ created_by: 1, assigned_to: 2, list_id: 1 },
-        { /* id: 4, */ created_by: 1, assigned_to: 2, list_id: 1 },
-        { /* id: 5, */ created_by: 1, assigned_to: 2, list_id: 1 },
+        { /* id: 1, */ created_by: 1, assigned_to: 2, board_list: 'ACCEPTED' },
+        { /* id: 2, */ created_by: 1, assigned_to: 2, board_list: 'ACCEPTED' },
+        { /* id: 3, */ created_by: 1, assigned_to: 2, board_list: 'ACCEPTED' },
+        { /* id: 4, */ created_by: 1, assigned_to: 2, board_list: 'ACCEPTED' },
+        { /* id: 5, */ created_by: 1, assigned_to: 2, board_list: 'ACCEPTED' },
     ]);
 
     await knex("debate").insert([
