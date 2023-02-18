@@ -13,6 +13,7 @@ export interface User {
 }
 
 export type PublicUser = Omit<User, 'password'>;
+export type UserCookieData = Pick<User, 'id' | 'role'>;
 
 export const getPublicUser = (u: User): PublicUser => {
   const { password, ...rest } = u;

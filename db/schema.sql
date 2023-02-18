@@ -40,7 +40,7 @@ CREATE TABLE board_list (
 CREATE TABLE ticket (
   id serial primary key,
   created_by int not null,
-  assigned_to int not null,
+  assigned_to int,
   list_id int not null,
 
   constraint fk_user_created_by foreign key(created_by) references "user"(id) on delete no action,

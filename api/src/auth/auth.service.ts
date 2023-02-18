@@ -6,7 +6,7 @@ import { RegisterUserDTO } from '../entities/user/dtos/register-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from 'src/entities/user/dtos/login-user.dto';
 import { InvalidCredentialsError } from './errors/invalid-credentials.error';
-import { PublicUser } from 'src/entities/user/user.model';
+import { PublicUser, UserCookieData } from 'src/entities/user/user.model';
 
 const SALT_OR_ROUNDS = 10;
 
@@ -40,7 +40,7 @@ export class AuthService {
     return user;
   }
 
-  getUserCookieFields (u: PublicUser) {
+  getUserCookieFields (u: PublicUser): UserCookieData {
     return {
       id: u.id,
       role: u.role,

@@ -1,6 +1,8 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { Filters } from 'src/entities/debates/debates.service';
 
+// TODO: make sure no other filter keys beyond the established ones are accepted.
+
 @Injectable()
 export class DebatesQueryPipe implements PipeTransform {
   transform(encodedQuery: any, metadata: ArgumentMetadata) {

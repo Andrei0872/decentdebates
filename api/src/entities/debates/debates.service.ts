@@ -1,18 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { UserCookieData } from '../user/user.model';
 import { Debate } from './debates.model';
+import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 export interface Filters {
   queryStr: string;
   tags: string;
 }
 
+// By convention.
+const PENDING_BOARD_LIST_ID = 1;
+
 @Injectable()
 export class DebatesService {
-  constructor (@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
-  
-  async getAll (filters?: Filters): Promise<Debate[]> {
+  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+
+  async getAll(filters?: Filters): Promise<Debate[]> {
     const client = await this.pool.connect();
     let sqlStr = `
       with debates_tags as (
@@ -58,7 +63,57 @@ export class DebatesService {
     }
   }
 
-  private getFiltersAsSQLString (filters: Filters) {
+  async createDebate(user: UserCookieData, debateData: CreateDebateDTO) {
+    // Create ticket.
+    // Create debate.
+    // Insert into `assoc_debate_tag`.
+
+    const client = await this.pool.connect();
+
+    const createTicketSqlStr = `
+      insert into ticket
+      values (default, $1, null, ${PENDING_BOARD_LIST_ID})
+      returning id;
+    `;
+    const createTicketValues = [user.id];
+
+    const createDebateSql = `
+      insert into debate
+      values (default, $1, $2, default, default)
+      returning id;
+    `;
+
+    const assocDebateTagSql = `
+      insert into assoc_debate_tag
+      select * from unnest ($1::int[], $2::int[])
+    `;
+    const tagsIdsArr = debateData.tagsIds.split(',').map(tagIdStr => +tagIdStr);
+
+    try {
+      await client.query('BEGIN');
+
+      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+
+      const createDebateValues = [ticketId, debateData.title];
+      const { rows: [{ id: debateId }] } = await client.query(createDebateSql, createDebateValues);
+      
+      const assocDebateTagValues = [
+        tagsIdsArr.map(() => debateId),
+        tagsIdsArr,
+      ];
+      await client.query(assocDebateTagSql, assocDebateTagValues);
+
+      await client.query('COMMIT');
+    } catch (err) {
+      console.log(err.message);
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  private getFiltersAsSQLString(filters: Filters) {
     const queryStrFilter = filters.queryStr || null;
     const tagsFilter = filters.tags || null;
 
@@ -74,7 +129,7 @@ export class DebatesService {
     return 'dt.id in ($2)';
   }
 
-  private getFiltersValues (filters: Filters) {
+  private getFiltersValues(filters: Filters) {
     const queryStrFilter = filters.queryStr ? `%${filters.queryStr}%` : null;
     const tagsFilter = filters.tags || null;
 
