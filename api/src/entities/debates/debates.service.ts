@@ -10,8 +10,8 @@ export interface Filters {
   tags: string;
 }
 
-// By convention.
-const PENDING_BOARD_LIST_ID = 1;
+// This corresponds to the ENUM type.
+const PENDING_BOARD_LIST = 'PENDING';
 
 @Injectable()
 export class DebatesService {
@@ -65,18 +65,14 @@ export class DebatesService {
   }
 
   async createDebate(user: UserCookieData, debateData: CreateDebateDTO) {
-    // Create ticket.
-    // Create debate.
-    // Insert into `assoc_debate_tag`.
-
     const client = await this.pool.connect();
 
     const createTicketSqlStr = `
       insert into ticket
-      values (default, $1, null, ${PENDING_BOARD_LIST_ID})
+      values (default, $1, null, $2)
       returning id;
     `;
-    const createTicketValues = [user.id];
+    const createTicketValues = [user.id, PENDING_BOARD_LIST];
 
     const createDebateSql = `
       insert into debate
