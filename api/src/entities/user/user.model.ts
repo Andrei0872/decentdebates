@@ -12,6 +12,15 @@ export interface User {
   role: UserRoles;
 }
 
+export interface UserOngoingActivity {
+  ticketId: number;
+  boardList: string;
+  title: string;
+  debateId: number;
+  itemType: number;
+  moderatorUsername: string;
+}
+
 export type PublicUser = Omit<User, 'password'>;
 export type UserCookieData = Pick<User, 'id' | 'role'>;
 
