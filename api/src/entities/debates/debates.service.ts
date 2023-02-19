@@ -61,6 +61,8 @@ export class DebatesService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the debates.');
+    } finally {
+      client.release();
     }
   }
 

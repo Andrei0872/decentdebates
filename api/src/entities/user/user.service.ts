@@ -85,6 +85,8 @@ export class UserService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the ongoing activities');
+    } finally {
+      client.release();
     }
   }
 
@@ -118,6 +120,8 @@ export class UserService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the solved activities');
+    } finally {
+      client.release();
     }
   }
 }
