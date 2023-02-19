@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { RegisterUserDTO } from './dtos/register-user.dto';
-import { User, UserCookieData, UserOngoingActivity } from './user.model';
+import { User, UserActivity, UserCookieData } from './user.model';
 
 const TABLE_NAME = `"user"`;
 const TABLE_COLUMNS = `(username, password, email, role)`;
@@ -55,7 +55,7 @@ export class UserService {
     return res.rows[0];
   }
 
-  async getOngoingItems(user: UserCookieData): Promise<UserOngoingActivity[]> {
+  async getOngoingItems(user: UserCookieData): Promise<UserActivity[]> {
     const sqlStl = `
       select
         t.id "ticketId",
@@ -85,6 +85,39 @@ export class UserService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the ongoing activities');
+    }
+  }
+
+  async getSolvedItems(user: UserCookieData): Promise<UserActivity[]> {
+    const sqlStl = `
+      select
+        t.id "ticketId",
+        t.board_list "boardList",
+        d.title,
+        d.id "debateId",
+        case
+          when d.id is not null then 'DEBATE'
+        end "itemType",
+        u.username "moderatorUsername"
+      from ticket t
+      join debate d
+        on d.ticket_id = t.id
+      join "user" u
+        on u.id = t.assigned_to
+      where
+        t.created_by = $1
+        and t.board_list = 'ACCEPTED'
+    `;
+    const values = [user.id];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStl, values);
+      return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the solved activities');
     }
   }
 }

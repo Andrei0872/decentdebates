@@ -12,7 +12,7 @@ export interface User {
   role: UserRoles;
 }
 
-export interface UserOngoingActivity {
+export interface UserActivity {
   ticketId: number;
   boardList: string;
   title: string;
