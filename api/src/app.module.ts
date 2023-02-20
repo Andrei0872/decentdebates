@@ -10,6 +10,7 @@ import { SESSION_MIDDLEWARE_PROVIDER, SESSION_MIDDLEWARE_TOKEN } from './middlew
 import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { AuthenticateGuard } from './guards/authenticate.guard';
 import { DebatesModule } from './entities/debates/debates.module';
+import { ModeratorModule } from './entities/moderator/moderator.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DebatesModule } from './entities/debates/debates.module';
       envFilePath: '.env',
     }),
     DebatesModule,
+    ModeratorModule,
   ],
   controllers: [AppController],
   providers: [

@@ -3,7 +3,7 @@
 CREATE TYPE user_role AS ENUM ('USER', 'MODERATOR', 'ADMIN');
 CREATE TYPE notification_event AS ENUM ('ARGUMENT', 'TICKET', 'DEBATE', 'SUGGESTION');
 create type argument_type as enum ('PRO', 'CON');
-create type board_list_type as enum ('PENDING', 'IN REVIEW', 'BLOCKED', 'DONE', 'ACCEPTED');
+create type board_list_type as enum ('PENDING', 'IN REVIEW', 'CANCELED', 'ACCEPTED');
 
 CREATE TABLE "user" (
 	id serial primary key,
