@@ -10,12 +10,19 @@ export class ModeratorService {
     const sqlStr = `
       select
         t.id "ticketId",
-        t.board_list "boardList",
+        case
+          when t.board_list is null then boardListTypes."boardList"
+          else t.board_list
+        end "boardList",
         t.assigned_to "moderatorId",
         d.title "ticketTitle"
       from ticket t
       join debate d
         on d.ticket_id = t.id
+      right join (
+        select unnest(enum_range(NULL::board_list_type)) "boardList"
+      ) boardListTypes
+        on t.board_list = boardListTypes."boardList"
     `;
     const client = await this.pool.connect();
 
