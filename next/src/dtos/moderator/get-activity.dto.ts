@@ -21,8 +21,8 @@ export enum CardLabels {
 export interface CardData {
   ticketTitle: string;
   ticketLabel: CardLabels;
-  moderatorUsername: string;
-  moderatorId: number;
+  moderatorUsername: string | null;
+  moderatorId: number | null;
   ticketId: number;
 }
 

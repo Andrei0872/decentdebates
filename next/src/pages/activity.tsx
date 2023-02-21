@@ -76,7 +76,7 @@ const Card: React.FC<CardProps> = (props) => {
 
 
   return (
-    <div className={`${styles.card} ${canDragTicket ? styles.canDrag: ''}`} ref={drag}>
+    <div className={`${styles.card} ${canDragTicket ? styles.canDrag : ''}`} ref={drag}>
       <div className={styles.cardHeader}>
         #{cardData.ticketLabel}
       </div>
@@ -106,6 +106,20 @@ function Activity() {
       if (a.boardList === item.fromBoardList) {
         a.cards = a.cards.filter(c => c.ticketId !== item.cardData.ticketId);
       } else if (a.boardList === toBoardList) {
+        if (item.fromBoardList !== BoardLists.PENDING && toBoardList === BoardLists.PENDING) {
+          item.cardData = {
+            ...item.cardData,
+            moderatorId: null,
+            moderatorUsername: null,
+          }
+        } else if (item.fromBoardList === BoardLists.PENDING && toBoardList !== BoardLists.PENDING) {
+          item.cardData = {
+            ...item.cardData,
+            moderatorId: crtModerator?.id!,
+            moderatorUsername: crtModerator?.username!,
+          }
+        }
+
         a.cards = [...a.cards, item.cardData];
       }
 
@@ -113,6 +127,11 @@ function Activity() {
     });
 
     setActivityBoards(newActivityBoards);
+
+    const data = {
+      boardList: toBoardList,
+    }
+    api.patch(`/moderator/activity/ticket/${item.cardData.ticketId}`, data)
   }
 
   return (
