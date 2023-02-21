@@ -24,7 +24,7 @@ export class ModeratorService {
       from ticket t
       right join debate d
         on d.ticket_id = t.id
-      join "user" u
+      left join "user" u
         on u.id = t.assigned_to
       right join (
         select unnest(enum_range(NULL::board_list_type)) "boardList"
