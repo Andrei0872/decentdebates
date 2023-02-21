@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { ModeratorActivity } from './moderator.model';
 
 @Injectable()
 export class ModeratorService {
   constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
 
-  async getActivity() {
+  async getActivity(): Promise<ModeratorActivity[]> {
     const sqlStr = `
       select
         t.id "ticketId",
