@@ -13,16 +13,15 @@ const BOARD_LISTS_SORT_ORDER = {
 }
 
 export enum CardLabels {
-  DEBATE,
-  ARGUMENT,
-  REPORT,
+  DEBATE = 'debate',
+  ARGUMENT = 'argument',
+  REPORT = 'report',
 }
 
-// TODO: other props.
 export interface CardData {
   ticketTitle: string;
-  // label: CardLabels;
-  // moderatorUsername: string;
+  ticketLabel: CardLabels;
+  moderatorUsername: string;
   moderatorId: number;
   ticketId: number;
 }

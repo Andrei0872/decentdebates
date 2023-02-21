@@ -3,6 +3,6 @@ export interface ModeratorActivity {
   boardList: string;
   ticketTitle: string;
   moderatorId: number;
-  // itemType: number;
-  // moderatorUsername: string;
+  ticketLabel: string;
+  moderatorUsername: string;
 }

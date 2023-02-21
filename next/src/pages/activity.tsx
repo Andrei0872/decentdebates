@@ -69,15 +69,13 @@ const Card: React.FC<CardProps> = (props) => {
   return (
     <div className={styles.card} ref={drag}>
       <div className={styles.cardHeader}>
-        {/* #{cardData.label} */}
-        #label
+        #{cardData.ticketLabel}
       </div>
       <div className={styles.cardBody}>
         {cardData.ticketTitle}
       </div>
       <div className={styles.cardFooter}>
-        {/* {cardData.moderatorUsername} */}
-        moderatorUsername
+        {cardData.moderatorUsername}
       </div>
     </div>
   )

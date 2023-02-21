@@ -16,10 +16,16 @@ export class ModeratorService {
           else t.board_list
         end "boardList",
         t.assigned_to "moderatorId",
-        d.title "ticketTitle"
+        d.title "ticketTitle",
+        u.username "moderatorUsername",
+        case
+          when d.id is not null then 'debate'
+        end "ticketLabel"
       from ticket t
-      join debate d
+      right join debate d
         on d.ticket_id = t.id
+      join "user" u
+        on u.id = t.assigned_to
       right join (
         select unnest(enum_range(NULL::board_list_type)) "boardList"
       ) boardListTypes
