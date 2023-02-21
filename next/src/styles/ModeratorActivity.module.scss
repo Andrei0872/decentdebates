@@ -1,0 +1,31 @@
+.container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  padding-block: 4rem;
+  gap: 3rem;
+}
+
+.board {
+  border: 1px solid black;
+  flex-basis: calc(8rem + 11vw);
+  display: flex;
+  flex-direction: column;
+}
+
+.boardHeader {
+  padding: .2rem .5rem;
+  border-bottom: 1px solid black;
+}
+
+.boardBody {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: .5rem .3rem;
+  gap: .7rem;
+}
+
+.card {
+  border: 1px solid green
+}
