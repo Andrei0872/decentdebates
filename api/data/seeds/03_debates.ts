@@ -33,8 +33,9 @@ export async function seed(knex: Knex): Promise<void> {
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
-        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
-        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+
+        { created_by: user.id, assigned_to: moderators[1].id, board_list: 'PENDING' },
+        { created_by: user.id, assigned_to: moderators[1].id, board_list: 'PENDING' },
 
         { created_by: user.id, assigned_to: null, board_list: 'PENDING' },
         { created_by: user.id, assigned_to: null, board_list: 'PENDING' },
