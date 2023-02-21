@@ -3,17 +3,24 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
 import Layout from "@/components/Layout/Layout";
-import { BoardData, CardData, getActivityDTO } from "@/dtos/moderator/get-activity.dto";
+import { BoardData, BoardLists, CardData, getActivityDTO } from "@/dtos/moderator/get-activity.dto";
 import { api } from "@/utils/api";
 
 enum DNDItemTypes {
   CARD = 'CARD',
 }
 
+interface DragItem {
+  fromBoardList: BoardLists;
+  cardData: CardData;
+}
+
 interface BoardProps {
   header: ReactNode;
   cards: ReactNode;
-  boardType: string;
+  boardType: BoardLists;
+
+  itemDropped: (item: DragItem, toBoardList: BoardLists) => void;
 }
 const Board: React.FC<BoardProps> = (props) => {
   const { header, cards } = props;
@@ -21,9 +28,8 @@ const Board: React.FC<BoardProps> = (props) => {
   // TODO: should `board_list` be provided as deps ?
   const [{ isOver }, drop] = useDrop(() => ({
     accept: DNDItemTypes.CARD,
-    drop: (item, monitor) => {
-      console.log(item);
-      console.log(props.boardType);
+    drop: (item: DragItem, monitor) => {
+      props.itemDropped(item, props.boardType);
     },
     collect: monitor => ({
       isOver: !!monitor.isOver(),
@@ -44,6 +50,7 @@ const Board: React.FC<BoardProps> = (props) => {
 
 interface CardProps {
   cardData: CardData;
+  boardList: BoardLists;
 }
 const Card: React.FC<CardProps> = (props) => {
   const { cardData } = props;
@@ -53,7 +60,10 @@ const Card: React.FC<CardProps> = (props) => {
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging()
     }),
-    item: props.cardData,
+    item: () => ({
+      cardData: props.cardData,
+      fromBoardList: props.boardList,
+    }),
   }));
 
   return (
@@ -82,6 +92,20 @@ function Activity() {
       .then(r => setActivityBoards(r));
   }, []);
 
+  const onItemDropped = (item: DragItem, toBoardList: BoardLists) => {
+    const newActivityBoards = activityBoards.map(a => {
+      if (a.boardList === item.fromBoardList) {
+        a.cards = a.cards.filter(c => c.ticketId !== item.cardData.ticketId);
+      } else if (a.boardList === toBoardList) {
+        a.cards = [...a.cards, item.cardData];
+      }
+
+      return a;
+    });
+
+    setActivityBoards(newActivityBoards);
+  }
+
   return (
     <Layout>
       <DndProvider backend={HTML5Backend}>
@@ -94,9 +118,10 @@ function Activity() {
                 header={<p>{b.boardList}</p>}
                 cards={
                   b.cards.map(c => (
-                    <Card key={c.ticketId} cardData={c} />
+                    <Card boardList={b.boardList} key={c.ticketId} cardData={c} />
                   ))
                 }
+                itemDropped={onItemDropped}
               />
             ))
           }

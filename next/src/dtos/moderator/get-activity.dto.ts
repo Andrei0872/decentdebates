@@ -5,6 +5,13 @@ export enum BoardLists {
   CANCELED = 'CANCELED',
 }
 
+const BOARD_LISTS_SORT_ORDER = {
+  [BoardLists.PENDING]: 0,
+  [BoardLists.IN_REVIEW]: 1,
+  [BoardLists.ACCEPTED]: 2,
+  [BoardLists.CANCELED]: 3,
+}
+
 export enum CardLabels {
   DEBATE,
   ARGUMENT,
@@ -25,4 +32,8 @@ export interface BoardData {
   cards: CardData[];
 }
 
-export const getActivityDTO = (data: BoardData[]) => data;
+export const getActivityDTO = (data: BoardData[]) => {
+  data.sort((b1, b2) => BOARD_LISTS_SORT_ORDER[b1.boardList] - BOARD_LISTS_SORT_ORDER[b2.boardList]);
+
+  return data;
+};
