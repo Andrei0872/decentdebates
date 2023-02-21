@@ -5,6 +5,8 @@ import styles from '@/styles/ModeratorActivity.module.scss';
 import Layout from "@/components/Layout/Layout";
 import { BoardData, BoardLists, CardData, getActivityDTO } from "@/dtos/moderator/get-activity.dto";
 import { api } from "@/utils/api";
+import { useAppSelector } from "@/utils/hooks/store";
+import { selectCurrentUser, User } from "@/store/slices/user.slice";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -51,9 +53,14 @@ const Board: React.FC<BoardProps> = (props) => {
 interface CardProps {
   cardData: CardData;
   boardList: BoardLists;
+  crtUser: User;
 }
 const Card: React.FC<CardProps> = (props) => {
   const { cardData } = props;
+
+  const isOwnTicket = cardData.moderatorId === props.crtUser?.id;
+  const isTicketAvailable = cardData.moderatorId === null;
+  const canDragTicket = isOwnTicket || isTicketAvailable;
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DNDItemTypes.CARD,
@@ -64,10 +71,12 @@ const Card: React.FC<CardProps> = (props) => {
       cardData: props.cardData,
       fromBoardList: props.boardList,
     }),
+    canDrag: canDragTicket,
   }));
 
+
   return (
-    <div className={styles.card} ref={drag}>
+    <div className={`${styles.card} ${canDragTicket ? styles.canDrag: ''}`} ref={drag}>
       <div className={styles.cardHeader}>
         #{cardData.ticketLabel}
       </div>
@@ -75,7 +84,7 @@ const Card: React.FC<CardProps> = (props) => {
         {cardData.ticketTitle}
       </div>
       <div className={styles.cardFooter}>
-        {cardData.moderatorUsername}
+        {cardData.moderatorUsername ? cardData.moderatorUsername : <b>unassigned</b>}
       </div>
     </div>
   )
@@ -83,7 +92,9 @@ const Card: React.FC<CardProps> = (props) => {
 
 function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
-  
+
+  const crtModerator = useAppSelector(selectCurrentUser);
+
   useEffect(() => {
     api.get('/moderator/activity')
       .then(r => getActivityDTO(r.data.data))
@@ -116,7 +127,7 @@ function Activity() {
                 header={<p>{b.boardList}</p>}
                 cards={
                   b.cards.map(c => (
-                    <Card boardList={b.boardList} key={c.ticketId} cardData={c} />
+                    <Card crtUser={crtModerator} boardList={b.boardList} key={c.ticketId} cardData={c} />
                   ))
                 }
                 itemDropped={onItemDropped}

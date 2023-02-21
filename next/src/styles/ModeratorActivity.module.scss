@@ -29,3 +29,7 @@
 .card {
   border: 1px solid green
 }
+
+.card:not(.canDrag) {
+  opacity: .8;
+}

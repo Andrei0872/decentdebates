@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { RootState } from '..';
 
 const LS_KEY = '@@user';
 let LSUser = null;
@@ -21,6 +22,8 @@ export interface UserState {
     role: UserRoles,
   } | null;
 }
+
+export type User = UserState['currentUser'];
 
 const initialState: UserState = {
   currentUser: LSUser,
@@ -45,3 +48,5 @@ export const userSlice = createSlice({
 export const { setCurrentUser } = userSlice.actions;
 
 export const userReducer = userSlice.reducer;
+
+export const selectCurrentUser = (s: RootState) => s.user.currentUser;
