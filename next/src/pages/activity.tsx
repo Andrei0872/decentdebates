@@ -5,8 +5,9 @@ import styles from '@/styles/ModeratorActivity.module.scss';
 import Layout from "@/components/Layout/Layout";
 import { BoardData, BoardLists, CardData, getActivityDTO } from "@/dtos/moderator/get-activity.dto";
 import { api } from "@/utils/api";
-import { useAppSelector } from "@/utils/hooks/store";
-import { selectCurrentUser, User } from "@/store/slices/user.slice";
+import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
+import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
+import { useRouter } from "next/router";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -94,11 +95,20 @@ function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
 
   const crtModerator = useAppSelector(selectCurrentUser);
+  const router = useRouter();
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     api.get('/moderator/activity')
       .then(r => getActivityDTO(r.data.data))
-      .then(r => setActivityBoards(r));
+      .then(r => setActivityBoards(r))
+      .catch(err => {
+        if ([401, 403].includes(err.response.status)) {
+          dispatch(setCurrentUser(null));
+          router.push('/');
+        }
+      })
   }, []);
 
   const onItemDropped = (item: DragItem, toBoardList: BoardLists) => {
