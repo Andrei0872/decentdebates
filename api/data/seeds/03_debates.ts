@@ -1,5 +1,6 @@
 import { Knex } from "knex";
 import * as bcrypt from 'bcrypt';
+import { longText } from "../fixtures";
 
 export async function seed(knex: Knex): Promise<void> {
     await knex("ticket").del();
@@ -7,6 +8,8 @@ export async function seed(knex: Knex): Promise<void> {
     await knex("assoc_debate_tag").del();
     await knex("user").del();
     await knex("debate_tag").del();
+    await knex("argument").del();
+    await knex("external_reference").del();
 
     const [user, ...moderators] = await knex("user").insert([
         {
@@ -74,5 +77,31 @@ export async function seed(knex: Knex): Promise<void> {
         { debate_id: debateIds[6].id, tag_id: tags[1].id },
         { debate_id: debateIds[7].id, tag_id: tags[2].id },
     ]);
+
+    // ===== ARGUMENTS =====
+    const argTickets = await knex("ticket").insert([
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
+    ], ['id']);
+
+    const args = await knex("argument").insert([
+        { debate_id: debateIds[0].id, ticket_id: argTickets[0].id, title: 'Pro#1', content: 'some content', created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[1].id, title: 'Pro#2', content: 'some content', created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[2].id, title: 'Pro#3', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[3].id, title: 'Con#1', content: 'some content', created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[4].id, title: 'Con#2', content: longText, created_by: user.id, type: 'CON' },
+    ], ['id']);
+
+    await knex("external_reference").insert([
+        { argument_id: args[0].id, name: 'foo', url: 'https://andreigatej.dev' },
+        { argument_id: args[0].id, name: 'bar', url: 'https://andreigatej.dev' },
+        { argument_id: args[1].id, name: 'bar', url: 'https://andreigatej.dev' },
+        { argument_id: args[2].id, name: 'bar', url: 'https://andreigatej.dev' },
+        { argument_id: args[3].id, name: 'bar', url: 'https://andreigatej.dev' },
+        { argument_id: args[4].id, name: 'bar', url: 'https://andreigatej.dev' },
+    ], ['id']);
 };
 

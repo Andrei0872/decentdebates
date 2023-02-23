@@ -100,17 +100,17 @@ create table argument (
   type argument_type,
 
   constraint fk_debate_id foreign key(debate_id) references debate(id) on delete cascade,
-  constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
+  -- constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
   constraint fk_created_by foreign key(created_by) references "user"(id)
 );
 
 create table external_reference (
   id serial primary key,
   argument_id int not null,
-  name varchar(100) not null,
+  name varchar(100),
   url varchar(2049) not null,
 
-  constraint fk_argument_id foreign key(argument_id) references argument(id)
+  constraint fk_argument_id foreign key(argument_id) references argument(id) on delete cascade
 );
 
 create table assoc_argument_counterargument (
