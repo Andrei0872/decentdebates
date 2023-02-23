@@ -155,6 +155,11 @@ function Activity() {
     setPreviewedCard(cardData);
   }
 
+  const expandCardModal = () => {
+    console.log(previewedCard);
+    router.push(`/item/debate/${previewedCard?.ticketId}`);
+  }
+
   return (
     <Layout>
       <DndProvider backend={HTML5Backend}>
@@ -184,7 +189,7 @@ function Activity() {
               card title
             </div>
             <div className={styles.cardActions}>
-              <Icon className={styles.cardIcon} icon="maximize" size={14} />
+              <Icon onClick={expandCardModal} className={styles.cardIcon} icon="maximize" size={14} />
               <Icon onClick={onPreviewCardModalClose} className={styles.cardIcon} icon="cross" />
             </div>
           </div>
