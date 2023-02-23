@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
 import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
+import { selectPreviewedCard, setActivityPreviewedCard } from "@/store/slices/moderator.slice";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -95,7 +96,8 @@ const Card: React.FC<CardProps> = (props) => {
 
 function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
-  const [previewedCard, setPreviewedCard] = useState<CardData | null>(null);
+
+  const previewedCard = useAppSelector(selectPreviewedCard);
 
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
@@ -147,12 +149,11 @@ function Activity() {
     api.patch(`/moderator/activity/ticket/${item.cardData.ticketId}`, data)
   }
 
-  const onPreviewCardModalClose = () => setPreviewedCard(null);
+  const onPreviewCardModalClose = () => dispatch(setActivityPreviewedCard(null));
   const shouldShowPreviewCardModal = previewedCard !== null;
 
   const onCardClick = (cardData: CardData) => {
-    console.log(cardData);
-    setPreviewedCard(cardData);
+    dispatch(setActivityPreviewedCard(cardData))
   }
 
   const expandCardModal = () => {
