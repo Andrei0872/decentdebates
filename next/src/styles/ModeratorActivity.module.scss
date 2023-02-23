@@ -27,9 +27,41 @@
 }
 
 .card {
-  border: 1px solid green
+  border: 1px solid green;
+  cursor: pointer;
 }
 
 .card:not(.canDrag) {
   opacity: .8;
+  cursor: auto;
+}
+
+.cardDialogBodyContainer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardDialogHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: .6rem;
+  border-bottom: 1px solid black;
+}
+
+.cardActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.cardIcon {
+  cursor: pointer;
+}
+
+.cardIcon:hover {
+  transform: scale(1.1);
+}
+
+.cardDialogBody {
+  padding: .5rem;
 }

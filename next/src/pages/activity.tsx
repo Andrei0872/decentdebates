@@ -8,6 +8,7 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
+import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -55,13 +56,15 @@ interface CardProps {
   cardData: CardData;
   boardList: BoardLists;
   crtUser: User;
+
+  cardClick: (cardData: CardData) => void;
 }
 const Card: React.FC<CardProps> = (props) => {
   const { cardData } = props;
 
   const isOwnTicket = cardData.moderatorId === props.crtUser?.id;
   const isTicketAvailable = cardData.moderatorId === null;
-  const canDragTicket = isOwnTicket || isTicketAvailable;
+  const hasRightsOnTicket = isOwnTicket || isTicketAvailable;
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: DNDItemTypes.CARD,
@@ -72,12 +75,11 @@ const Card: React.FC<CardProps> = (props) => {
       cardData: props.cardData,
       fromBoardList: props.boardList,
     }),
-    canDrag: canDragTicket,
+    canDrag: hasRightsOnTicket,
   }));
 
-
   return (
-    <div className={`${styles.card} ${canDragTicket ? styles.canDrag : ''}`} ref={drag}>
+    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag}>
       <div className={styles.cardHeader}>
         #{cardData.ticketLabel}
       </div>
@@ -93,6 +95,7 @@ const Card: React.FC<CardProps> = (props) => {
 
 function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
+  const [previewedCard, setPreviewedCard] = useState<CardData | null>(null);
 
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
@@ -144,6 +147,14 @@ function Activity() {
     api.patch(`/moderator/activity/ticket/${item.cardData.ticketId}`, data)
   }
 
+  const onPreviewCardModalClose = () => setPreviewedCard(null);
+  const shouldShowPreviewCardModal = previewedCard !== null;
+
+  const onCardClick = (cardData: CardData) => {
+    console.log(cardData);
+    setPreviewedCard(cardData);
+  }
+
   return (
     <Layout>
       <DndProvider backend={HTML5Backend}>
@@ -156,7 +167,7 @@ function Activity() {
                 header={<p>{b.boardList}</p>}
                 cards={
                   b.cards.map(c => (
-                    <Card crtUser={crtModerator} boardList={b.boardList} key={c.ticketId} cardData={c} />
+                    <Card cardClick={onCardClick} crtUser={crtModerator} boardList={b.boardList} key={c.ticketId} cardData={c} />
                   ))
                 }
                 itemDropped={onItemDropped}
@@ -165,6 +176,24 @@ function Activity() {
           }
         </div>
       </DndProvider>
+
+      <Dialog isOpen={shouldShowPreviewCardModal} onClose={onPreviewCardModalClose}>
+        <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
+          <div className={styles.cardDialogHeader}>
+            <div className={styles.cardTitle}>
+              card title
+            </div>
+            <div className={styles.cardActions}>
+              <Icon className={styles.cardIcon} icon="maximize" size={14} />
+              <Icon onClick={onPreviewCardModalClose} className={styles.cardIcon} icon="cross" />
+            </div>
+          </div>
+
+          <div className={styles.cardDialogBody}>
+            card content
+          </div>
+        </DialogBody>
+      </Dialog>
     </Layout>
   )
 }
