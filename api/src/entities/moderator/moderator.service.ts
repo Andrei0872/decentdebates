@@ -2,13 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
-import { ModeratorActivity, UpdateTicketData } from './moderator.model';
+import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
 
 @Injectable()
 export class ModeratorService {
   constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
 
-  async getActivity(): Promise<ModeratorActivity[]> {
+  async getDebateCards(): Promise<ModeratorActivityDebate[]> {
     const sqlStr = `
       select
         t.id "ticketId",
@@ -40,13 +40,52 @@ export class ModeratorService {
       return res.rows;
     } catch (err) {
       console.error(err);
-      throw new Error('An error occurred while fetching the moderator\'s activity.');
+      throw new Error('An error occurred while fetching the moderator\'s activity(debates).');
     } finally {
       client.release();
     }
   }
 
-  async updateTicket (ticket: UpdateTicketData) {
+  async getArgumentCards(): Promise<ModeratorActivityArgument[]> {
+    const sqlStr = `
+      select
+        t.id "ticketId",
+        case
+          when t.board_list is null then boardListTypes."boardList"
+          else t.board_list
+        end "boardList",
+        t.assigned_to "moderatorId",
+        a.title,
+        substring(a.content, 1, 50) "content",
+        a.type "argumentType",
+        a.debate_id "debateId",
+        u.username "moderatorUsername",
+        'argument' "ticketLabel"
+      from ticket t
+      join argument a
+        on a.ticket_id = t.id
+      left join "user" u
+        on u.id = t.assigned_to
+      right join (
+        select unnest(enum_range(NULL::board_list_type)) "boardList"
+      ) boardListTypes
+        on t.board_list = boardListTypes."boardList"
+    `;
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr);
+
+      return res.rows;
+    } catch (err) {
+      console.error(err);
+      throw new Error('An error occurred while fetching the moderator\'s activity(arguments).');
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateTicket(ticket: UpdateTicketData) {
     const sqlStr = `
       update ticket 
       set

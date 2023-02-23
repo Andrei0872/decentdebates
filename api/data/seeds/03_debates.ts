@@ -85,6 +85,7 @@ export async function seed(knex: Knex): Promise<void> {
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[1].id, board_list: 'PENDING' },
     ], ['id']);
 
     const args = await knex("argument").insert([
@@ -93,6 +94,7 @@ export async function seed(knex: Knex): Promise<void> {
         { debate_id: debateIds[0].id, ticket_id: argTickets[2].id, title: 'Pro#3', content: longText, created_by: user.id, type: 'PRO' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[3].id, title: 'Con#1', content: 'some content', created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[4].id, title: 'Con#2', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[5].id, title: 'Con#3', content: longText, created_by: user.id, type: 'CON' },
     ], ['id']);
 
     await knex("external_reference").insert([
@@ -102,6 +104,7 @@ export async function seed(knex: Knex): Promise<void> {
         { argument_id: args[2].id, name: 'bar', url: 'https://andreigatej.dev' },
         { argument_id: args[3].id, name: 'bar', url: 'https://andreigatej.dev' },
         { argument_id: args[4].id, name: 'bar', url: 'https://andreigatej.dev' },
+        { argument_id: args[5].id, name: 'bar', url: 'https://andreigatej.dev' },
     ], ['id']);
 };
 

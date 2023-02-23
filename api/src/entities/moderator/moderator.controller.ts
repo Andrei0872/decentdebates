@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, filter, from, groupBy, map, mergeAll, mergeMap, reduce, throwError } from 'rxjs';
+import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, throwError } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -16,8 +16,9 @@ export class ModeratorController {
 
   @Get('/activity')
   getActivity(@Res() res: Response) {
-    return from(this.moderatorService.getActivity())
+    return forkJoin([this.moderatorService.getDebateCards(), this.moderatorService.getArgumentCards()])
       .pipe(
+        mergeAll(),
         mergeAll(),
         groupBy(r => r.boardList, { element: ({ boardList, ...cardData }) => cardData }),
         mergeMap(
