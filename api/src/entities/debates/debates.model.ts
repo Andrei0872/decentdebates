@@ -22,4 +22,5 @@ export interface DebateArgument {
   createdById: number;
   argumentType: ArgumentType;
   createdAt: string;
+  username: string;
 }

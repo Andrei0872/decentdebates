@@ -123,12 +123,15 @@ export class DebatesService {
         substring(a.content, 1, 100) "content",
         a.created_by "createdById",
         a.type "argumentType",
-        a.created_at "createdAt"
+        a.created_at "createdAt",
+        u.username
       from argument a
       join ticket t
         on a.ticket_id = t.id
       join debate d
         on a.debate_id = d.id
+      join "user" u
+        on a.created_by = u.id
       where debate_id = $1 and t.board_list = 'ACCEPTED'
     `;
     const values = [debateId];
