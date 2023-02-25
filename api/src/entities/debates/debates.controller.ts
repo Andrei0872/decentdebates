@@ -24,7 +24,7 @@ export class DebatesController {
   }
 
   @Post('/')
-  async createDebate (@Res() res: Response, @Req() req: Request, @Body() body: CreateDebateDTO) {
+  async createDebate(@Res() res: Response, @Req() req: Request, @Body() body: CreateDebateDTO) {
     const user = (req as any).session.user as UserCookieData;
 
     try {
@@ -39,10 +39,25 @@ export class DebatesController {
 
   @SetMetadata('skipAuth', true)
   @Get('/:id')
-  async getDebate (@Res() res: Response, @Param('id') debateId: string) {
+  async getDebate(@Res() res: Response, @Param('id') debateId: string) {
     return from(this.debatesService.getDebateInformation(debateId))
       .pipe(
-        map((args) => res.status(HttpStatus.OK).json({ data: args })),
+        map(debateArgs => {
+          const res = debateArgs.reduce(
+            (acc, crt) => {
+              const { debateId, debateTitle, ...argData } = crt;
+
+              acc.metadata = { debateId, debateTitle };
+              acc.args.push(argData);
+
+              return acc;
+            },
+            { metadata: null, args: [] }
+          );
+
+          return res;
+        }),
+        map((data) => res.status(HttpStatus.OK).json({ data: data })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

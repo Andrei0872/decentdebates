@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { Debate, DebateInformation } from './debates.model';
+import { Debate, DebateArgument } from './debates.model';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 export interface Filters {
@@ -112,10 +112,12 @@ export class DebatesService {
     }
   }
 
-  async getDebateInformation(debateId: string): Promise<DebateInformation[]> {
+  async getDebateInformation(debateId: string): Promise<DebateArgument[]> {
     const sqlStr = `
       select
         a.debate_id "debateId",
+        a.id "argumentId",
+        d.title "debateTitle",
         a.ticket_id "ticketId",
         a.title,
         substring(a.content, 1, 100) "content",
@@ -125,6 +127,8 @@ export class DebatesService {
       from argument a
       join ticket t
         on a.ticket_id = t.id
+      join debate d
+        on a.debate_id = d.id
       where debate_id = $1 and t.board_list = 'ACCEPTED'
     `;
     const values = [debateId];

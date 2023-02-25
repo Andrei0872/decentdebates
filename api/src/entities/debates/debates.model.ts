@@ -12,12 +12,14 @@ export enum ArgumentType {
   CON = 'CON',
 }
 
-export interface DebateInformation {
+export interface DebateArgument {
+  argumentId: number;
   debateId: number;
+  debateTitle: string;
   ticketId: number;
   title: string;
   content: string;
   createdById: number;
-  type: ArgumentType;
+  argumentType: ArgumentType;
   createdAt: string;
 }
