@@ -1,0 +1,32 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1.5rem 2rem;
+}
+
+.titleContainer {
+  text-align: center;
+}
+
+.title {
+  font-size: 2.4rem;
+}
+
+.argumentContainer {
+  flex-grow: 1;
+  width: 60vw;
+  margin-inline: auto;
+  margin-top: 3rem;
+}
+
+.argumentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
