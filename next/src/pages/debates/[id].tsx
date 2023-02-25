@@ -1,7 +1,7 @@
 import Layout from '@/components/Layout/Layout';
 import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
-import React from 'react'
+import React, { useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgument, { ArgumentType, DebateArgumentData } from '@/components/DebateArgument/DebateArgument';
 
@@ -20,8 +20,14 @@ interface Props {
 function DebatePage(props: Props) {
   const { debateInfo: { metadata, args } } = props;
 
+  const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
+
   const pros = args.filter(a => a.argumentType === ArgumentType.PRO);
   const cons = args.filter(a => a.argumentType === ArgumentType.CON);
+
+  const onReadArgument = (argId: number | null) => {
+    setCrtReadArgumentId(argId);
+  }
 
   return (
     <Layout>
@@ -46,8 +52,8 @@ function DebatePage(props: Props) {
             {
               pros.length ? (
                 pros.map(p => (
-                  <li className={styles.argument} key={p.argumentId}>
-                    <DebateArgument debateArgumentData={p} />
+                  <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
+                    <DebateArgument isExpanded={p.argumentId === crtReadArgumentId} readArgument={onReadArgument} debateArgumentData={p} />
                   </li>
                 ))
               ) : <p>No pro-arguments</p>
@@ -58,11 +64,11 @@ function DebatePage(props: Props) {
             {
               cons.length ? (
                 cons.map(p => (
-                  <li className={styles.argument} key={p.argumentId}>
-                    <DebateArgument debateArgumentData={p} />
+                  <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
+                    <DebateArgument isExpanded={p.argumentId === crtReadArgumentId} readArgument={onReadArgument} debateArgumentData={p} />
                   </li>
                 ))
-              ) : <p>No pro-arguments</p>
+              ) : <p>No cons-arguments</p>
             }
           </ul>
         </section>

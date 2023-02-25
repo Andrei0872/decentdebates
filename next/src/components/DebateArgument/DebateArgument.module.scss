@@ -2,6 +2,7 @@
   border: 1px solid black;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .header {
@@ -24,4 +25,8 @@
   border-top: 1px solid black;
   display: flex;
   justify-content: space-between;
+}
+
+.body {
+  flex-grow: 1;
 }

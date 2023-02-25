@@ -20,10 +20,13 @@ export interface DebateArgumentData {
 
 interface Props {
   debateArgumentData: DebateArgumentData;
+
+  readArgument: (argId: number | null) => void;
+  isExpanded: boolean;
 }
 
 function DebateArgument(props: Props) {
-  const { debateArgumentData } = props;
+  const { debateArgumentData, isExpanded } = props;
 
   return (
     <div className={styles.argument}>
@@ -42,8 +45,13 @@ function DebateArgument(props: Props) {
         </div>
 
         <div className={styles.expand}>
-          {/* TODO: conditional */}
-          <button type='button'>Read more</button>
+          {
+            !isExpanded ? (
+              <button onClick={() => props.readArgument(debateArgumentData.argumentId)} type='button'>Read more</button>
+            ) : (
+              <button onClick={() => props.readArgument(null)} type='button'>Collapse</button>
+            )
+          }
         </div>
       </div>
     </div>
