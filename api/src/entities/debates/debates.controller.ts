@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Query, Req, Res, SetMetadata } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res, SetMetadata } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { from, map, catchError } from 'rxjs';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { UserCookieData } from '../user/user.model';
 import { DebatesService, Filters } from './debates.service';
@@ -34,5 +35,17 @@ export class DebatesController {
     } catch (err) {
       throw new HttpException(err.message, 400);
     }
+  }
+
+  @SetMetadata('skipAuth', true)
+  @Get('/:id')
+  async getDebate (@Res() res: Response, @Param('id') debateId: string) {
+    return from(this.debatesService.getDebateInformation(debateId))
+      .pipe(
+        map((args) => res.status(HttpStatus.OK).json({ data: args })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
   }
 }

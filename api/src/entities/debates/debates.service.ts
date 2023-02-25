@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { Debate } from './debates.model';
+import { Debate, DebateInformation } from './debates.model';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 export interface Filters {
@@ -95,7 +95,7 @@ export class DebatesService {
 
       const createDebateValues = [ticketId, debateData.title];
       const { rows: [{ id: debateId }] } = await client.query(createDebateSql, createDebateValues);
-      
+
       const assocDebateTagValues = [
         tagsIdsArr.map(() => debateId),
         tagsIdsArr,
@@ -107,6 +107,36 @@ export class DebatesService {
       console.log(err.message);
       await client.query('ROLLBACK');
       throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getDebateInformation(debateId: string): Promise<DebateInformation[]> {
+    const sqlStr = `
+      select
+        a.debate_id "debateId",
+        a.ticket_id "ticketId",
+        a.title,
+        substring(a.content, 1, 100) "content",
+        a.created_by "createdById",
+        a.type "argumentType",
+        a.created_at "createdAt"
+      from argument a
+      join ticket t
+        on a.ticket_id = t.id
+      where debate_id = $1 and t.board_list = 'ACCEPTED'
+    `;
+    const values = [debateId];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the debate\'s information.');
     } finally {
       client.release();
     }
