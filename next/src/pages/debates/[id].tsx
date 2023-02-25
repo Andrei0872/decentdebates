@@ -1,9 +1,10 @@
 import Layout from '@/components/Layout/Layout';
 import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgument, { ArgumentType, DebateArgumentData } from '@/components/DebateArgument/DebateArgument';
+import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 
 export interface DebateMetadata {
   debateId: number;
@@ -29,6 +30,16 @@ function DebatePage(props: Props) {
     setCrtReadArgumentId(argId);
   }
 
+  const renderAdditionalActions = useCallback(() => (
+    <Menu key="menu">
+      <MenuDivider title="Actions" />
+      <MenuItem icon="add-to-artifact" text="Add counterargument" />
+      {/* TODO: disable if there are no counterarguments. */}
+      <MenuItem icon="eye-open" text="See the counterarguments" />
+      <MenuItem icon="comparison" text="See thread" />
+    </Menu>
+  ), []);
+
   return (
     <Layout>
       <div className={styles.container}>
@@ -53,7 +64,12 @@ function DebatePage(props: Props) {
               pros.length ? (
                 pros.map(p => (
                   <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
-                    <DebateArgument isExpanded={p.argumentId === crtReadArgumentId} readArgument={onReadArgument} debateArgumentData={p} />
+                    <DebateArgument
+                      additionalActions={renderAdditionalActions()}
+                      isExpanded={p.argumentId === crtReadArgumentId}
+                      readArgument={onReadArgument}
+                      debateArgumentData={p}
+                    />
                   </li>
                 ))
               ) : <p>No pro-arguments</p>
@@ -65,7 +81,12 @@ function DebatePage(props: Props) {
               cons.length ? (
                 cons.map(p => (
                   <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
-                    <DebateArgument isExpanded={p.argumentId === crtReadArgumentId} readArgument={onReadArgument} debateArgumentData={p} />
+                    <DebateArgument
+                      additionalActions={renderAdditionalActions()}
+                      isExpanded={p.argumentId === crtReadArgumentId}
+                      readArgument={onReadArgument}
+                      debateArgumentData={p}
+                    />
                   </li>
                 ))
               ) : <p>No cons-arguments</p>

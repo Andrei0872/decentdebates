@@ -1,4 +1,7 @@
+import { Button, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { Classes, Popover2 } from '@blueprintjs/popover2';
 import styles from './DebateArgument.module.scss';
+import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 
 export enum ArgumentType {
   PRO = 'PRO',
@@ -23,6 +26,7 @@ interface Props {
 
   readArgument: (argId: number | null) => void;
   isExpanded: boolean;
+  additionalActions: JSX.Element;
 }
 
 function DebateArgument(props: Props) {
@@ -32,7 +36,20 @@ function DebateArgument(props: Props) {
     <div className={styles.argument}>
       <div className={styles.header}>
         <h3>{debateArgumentData.title}</h3>
-        <div className={styles.actions}>...</div>
+        <div className={styles.actions}>
+          <Popover2
+            interactionKind="click"
+            // popoverClassName={Classes.POPOVER2_CONTENT_SIZING}
+            placement="right"
+            usePortal={true}
+            content={props.additionalActions}
+            renderTarget={({ isOpen, ref, ...targetProps }) => (
+              <span {...targetProps} ref={ref}>
+                <Icon icon="more" />
+              </span>
+            )}
+          />
+        </div>
       </div>
 
       <div className={styles.body}>
