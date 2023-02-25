@@ -1,0 +1,27 @@
+.argument {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: relative;
+  text-align: center;
+  border-bottom: 1px solid black;
+}
+
+.actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.content {
+  flex-grow: 1;
+}
+
+.footer {
+  border-top: 1px solid black;
+  display: flex;
+  justify-content: space-between;
+}

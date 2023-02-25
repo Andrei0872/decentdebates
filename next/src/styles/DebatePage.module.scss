@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 2rem 3rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.title {
+  position: sticky;
+  top: 0;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.argumentsContainer {
+  width: 80vw;
+  margin-inline: auto;
+  margin-block-start: 2rem;
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 7rem;
+}
+
+.pros, .cons {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.argument {
+}
