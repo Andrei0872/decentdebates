@@ -3,6 +3,7 @@ import styles from './ArgumentEditor.module.scss';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { LinkNode } from "@lexical/link";
+import { CodeNode } from '@lexical/code';
 
 export const editorConfig: InitialConfigType = {
   theme: {
@@ -42,5 +43,6 @@ export const editorConfig: InitialConfigType = {
     ListItemNode,
     QuoteNode,
     LinkNode,
+    CodeNode,
   ],
 }

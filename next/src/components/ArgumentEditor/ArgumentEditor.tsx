@@ -9,6 +9,8 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { TRANSFORMERS } from "@lexical/markdown";
 
 function Placeholder() {
   return <div className={styles.placeholder}>Describe your argument here...</div>;
@@ -29,12 +31,7 @@ function ArgumentEditor() {
           <ListPlugin />
           <HistoryPlugin />
           <LinkPlugin />
-          {/* 
-          <TreeViewPlugin />
-          <CodeHighlightPlugin />
-          <ListMaxIndentLevelPlugin maxDepth={7} />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} /> */}
-          {/* <LexicalTableOfContentsPlugin /> */}
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} /> 
         </div>
       </div>
     </LexicalComposer>
