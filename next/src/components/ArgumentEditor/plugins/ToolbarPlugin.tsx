@@ -377,7 +377,7 @@ function BlockOptionsDropdownList({
   };
 
   return (
-    <div className={styles.dropDown} ref={dropDownRef}>
+    <div className={styles.dropdown} ref={dropDownRef}>
       <button type="button" className={styles.item} onClick={formatParagraph}>
         <span className={`${styles.icon} ${styles.paragraph}`} />
         <span className={styles.text} >Normal</span>

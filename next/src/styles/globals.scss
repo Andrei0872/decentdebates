@@ -8,7 +8,7 @@ html, body {
   height: 100%;
 }
 
-body > div {
+body > div:first-child {
   height: 100%;
 }
 
