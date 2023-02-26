@@ -1,5 +1,6 @@
 import { InitialConfigType } from "@lexical/react/LexicalComposer";
 import styles from './ArgumentEditor.module.scss';
+import { HeadingNode } from '@lexical/rich-text'
 
 export const editorConfig: InitialConfigType = {
   theme: {
@@ -32,5 +33,8 @@ export const editorConfig: InitialConfigType = {
   onError(err) {
     throw err;
   },
-  namespace: 'decentdebates'
+  namespace: 'decentdebates',
+  nodes: [
+    HeadingNode,
+  ]
 }

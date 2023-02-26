@@ -6,4 +6,11 @@
   flex-direction: column;
 }
 
-.inner {}
+.input {
+  padding: .8rem .6rem;
+  outline: 0;
+}
+
+.input h1 {
+  font-size: 2rem;
+}
