@@ -7,7 +7,8 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 
 function Placeholder() {
   return <div className={styles.placeholder}>Describe your argument here...</div>;
@@ -27,11 +28,10 @@ function ArgumentEditor() {
           <AutoFocusPlugin />
           <ListPlugin />
           <HistoryPlugin />
-          {/* <HistoryPlugin />
+          <LinkPlugin />
+          {/* 
           <TreeViewPlugin />
           <CodeHighlightPlugin />
-          <LinkPlugin />
-          <AutoLinkPlugin />
           <ListMaxIndentLevelPlugin maxDepth={7} />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} /> */}
           {/* <LexicalTableOfContentsPlugin /> */}

@@ -2,7 +2,7 @@ import { InitialConfigType } from "@lexical/react/LexicalComposer";
 import styles from './ArgumentEditor.module.scss';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
-
+import { LinkNode } from "@lexical/link";
 
 export const editorConfig: InitialConfigType = {
   theme: {
@@ -41,5 +41,6 @@ export const editorConfig: InitialConfigType = {
     ListNode,
     ListItemNode,
     QuoteNode,
+    LinkNode,
   ],
 }
