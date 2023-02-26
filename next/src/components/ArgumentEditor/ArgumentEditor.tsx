@@ -5,6 +5,7 @@ import { editorConfig } from './config';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 
 function Placeholder() {
   return <div className={styles.placeholder}>Describe your argument here...</div>;
@@ -21,6 +22,7 @@ function ArgumentEditor() {
             placeholder={<Placeholder />}
             ErrorBoundary={LexicalErrorBoundary}
           />
+          <ListPlugin />
           {/* <HistoryPlugin />
           <TreeViewPlugin />
           <AutoFocusPlugin />
