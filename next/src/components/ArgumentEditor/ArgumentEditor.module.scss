@@ -4,6 +4,9 @@
   width: max-content;
   display: flex;
   flex-direction: column;
+
+  --quote-bar-clr: rgb(206, 208, 212);
+  --quote-text-clr: rgb(101, 103, 107);
 }
 
 .input {
@@ -15,7 +18,8 @@
   font-size: 2rem;
 }
 
-.ul, .ol {
+.ul,
+.ol {
   margin: 0;
   padding: 0;
   margin-inline-start: 1rem;
@@ -23,4 +27,15 @@
 
 .ul {
   list-style: disc;
+}
+
+.quote {
+  margin: 0;
+  margin-left: 20px;
+  font-size: 15px;
+  color: var(--quote-text-clr);
+  border-left-color: var(--quote-bar-clr);
+  border-left-width: 4px;
+  border-left-style: solid;
+  padding-left: 16px;
 }
