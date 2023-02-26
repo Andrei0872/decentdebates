@@ -12,6 +12,8 @@
 .input {
   padding: .8rem .6rem;
   outline: 0;
+  font-size: 1rem;
+  min-height: 150px;
 }
 
 .input h1 {
@@ -22,7 +24,7 @@
 .ol {
   margin: 0;
   padding: 0;
-  margin-inline-start: 1rem;
+  margin-inline-start: 1.3rem;
 }
 
 .ul {
@@ -54,4 +56,21 @@
 
 .textStrikethrough {
   text-decoration: line-through;
+}
+
+.placeholder {
+  color: #999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: .8rem;
+  left: .6rem;
+  font-size: 1rem;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
 }
