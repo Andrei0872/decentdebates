@@ -10,12 +10,43 @@ export interface Debate {
   userId: number;
 }
 
+export interface DebateMetadata {
+  debateId: number;
+  debateTitle: string;
+}
+
+export enum ArgumentType {
+  PRO = 'PRO',
+  CON = 'CON',
+}
+
+export interface DebateArgument {
+  argumentId: number;
+  debateId: number;
+  debateTitle: string;
+  ticketId: number;
+  title: string;
+  content: string;
+  createdById: number;
+  argumentType: ArgumentType;
+  createdAt: string;
+  username: string;
+}
+
+
+export interface CurrentDebate {
+  args: DebateArgument[];
+  metadata: DebateMetadata;
+}
+
 export interface DebatesState {
   list: Debate[] | null;
+  crtDebate: CurrentDebate | null;
 }
 
 const initialState: DebatesState = {
   list: null,
+  crtDebate: null,
 };
 
 export const debatesSlice = createSlice({
@@ -24,6 +55,9 @@ export const debatesSlice = createSlice({
   reducers: {
     setDebates(state, action: PayloadAction<DebatesState['list'] | null>) {
       state.list = action.payload;
+    },
+    setCurrentDebate (state, action: PayloadAction<CurrentDebate | null>) {
+      state.crtDebate = action.payload;
     },
   },
   extraReducers: {
@@ -36,4 +70,4 @@ export const debatesSlice = createSlice({
   },
 });
 
-export const { setDebates } = debatesSlice.actions;
+export const { setDebates, setCurrentDebate } = debatesSlice.actions;

@@ -3,19 +3,14 @@ import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
 import React, { useCallback, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
-import DebateArgument, { ArgumentType, DebateArgumentData } from '@/components/DebateArgument/DebateArgument';
+import DebateArgument from '@/components/DebateArgument/DebateArgument';
 import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
-
-export interface DebateMetadata {
-  debateId: number;
-  debateTitle: string;
-}
+import { wrapper } from '@/store';
+import { ArgumentType, CurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
+import { useRouter } from 'next/router';
 
 interface Props {
-  debateInfo: {
-    args: DebateArgumentData[];
-    metadata: DebateMetadata;
-  };
+  debateInfo: CurrentDebate;
 }
 
 function DebatePage(props: Props) {
@@ -23,11 +18,17 @@ function DebatePage(props: Props) {
 
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
 
+  const router = useRouter();
+
   const pros = args.filter(a => a.argumentType === ArgumentType.PRO);
   const cons = args.filter(a => a.argumentType === ArgumentType.CON);
 
   const onReadArgument = (argId: number | null) => {
     setCrtReadArgumentId(argId);
+  }
+
+  const redirectToNewArgumentPage = () => {
+    router.push(`${router.asPath}/new-argument`);
   }
 
   const renderAdditionalActions = useCallback(() => (
@@ -45,7 +46,7 @@ function DebatePage(props: Props) {
       <div className={styles.container}>
         <section className={styles.buttons}>
           <div className={styles.actionButtons}>
-            <button type='button'>Add PRO/CON argument</button>
+            <button onClick={redirectToNewArgumentPage} type='button'>Add PRO/CON argument</button>
             <button type='button'>Subscribe to discussion</button>
           </div>
 
@@ -100,38 +101,41 @@ function DebatePage(props: Props) {
 
 export default DebatePage
 
+export const getServerSideProps = wrapper.getServerSideProps(
+  store => async (context) => {
+    const { id: debateId } = context.params || {};
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id: debateId } = context.params || {};
-
-  if (!debateId) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
+    if (!debateId) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        }
       }
     }
-  }
 
-  const isIdNumber = Number.isNaN(+debateId) === false;
-  if (!isIdNumber) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
+    const isIdNumber = Number.isNaN(+debateId) === false;
+    if (!isIdNumber) {
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        }
       }
     }
-  }
 
-  const res = await api.get(`/debates/${debateId}`, {
-    withCredentials: true,
-    headers: {
-      cookie: context.req.headers.cookie,
-    },
-  });
-  const debateInfo = res.data?.data;
+    const res = await api.get(`/debates/${debateId}`, {
+      withCredentials: true,
+      headers: {
+        cookie: context.req.headers.cookie,
+      },
+    });
+    const debateInfo = res.data?.data;
 
-  return {
-    props: { debateInfo }
+    store.dispatch(setCurrentDebate(debateInfo));
+
+    return {
+      props: { debateInfo }
+    }
   }
-}
+);

@@ -2,27 +2,11 @@ import { Button, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { Classes, Popover2 } from '@blueprintjs/popover2';
 import styles from './DebateArgument.module.scss';
 import '@blueprintjs/popover2/src/blueprint-popover2.scss'
+import { DebateArgument } from '@/store/slices/debates.slice';
 
-export enum ArgumentType {
-  PRO = 'PRO',
-  CON = 'CON',
-}
-
-export interface DebateArgumentData {
-  argumentId: number;
-  debateId: number;
-  debateTitle: string;
-  ticketId: number;
-  title: string;
-  content: string;
-  createdById: number;
-  argumentType: ArgumentType;
-  createdAt: string;
-  username: string;
-}
 
 interface Props {
-  debateArgumentData: DebateArgumentData;
+  debateArgumentData: DebateArgument;
 
   readArgument: (argId: number | null) => void;
   isExpanded: boolean;
