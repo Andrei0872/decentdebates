@@ -8,6 +8,7 @@ import Input from "@/components/Input/Input";
 import { useRef, useState } from "react";
 import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastProps } from '@blueprintjs/core';
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 interface Props {
   debates: Debate[];
@@ -36,12 +37,17 @@ function Debates(props: Props) {
   } = useForm<NewDebateData>();
 
   const toasterRef = useRef<Toaster>(null);
+  const router = useRouter();
 
   const onSearchInputChange = async (value: string) => {
     const encodedQueryParams = btoa(JSON.stringify({ queryStr: value }));
     const res = (await api.get(`/debates?q=${encodedQueryParams}`)).data.data;
 
     setDebates(res);
+  }
+
+  const redirectToDebatePage = (debate: Debate) => {
+    router.push(`${router.asPath}/${debate.id}`);
   }
 
   const startDebate = () => {
@@ -89,7 +95,7 @@ function Debates(props: Props) {
             {
               debates?.length ? (
                 debates.map(d => (
-                  <li key={d.id}>
+                  <li className={styles.debate} onClick={() => redirectToDebatePage(d)} key={d.id}>
                     <DebateCard cardData={d} />
                   </li>
                 ))
