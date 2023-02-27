@@ -4,6 +4,7 @@ import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
+import { Collapse, Icon } from '@blueprintjs/core';
 
 function NewArgument() {
   const {
@@ -14,6 +15,7 @@ function NewArgument() {
   } = useForm<any>();
 
   const [counterarguments, setCounterarguments] = useState([]);
+  const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(false);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
@@ -24,6 +26,7 @@ function NewArgument() {
   }
 
   const isCounterargument = watch('isCounterargument') === true;
+  const counterargumentId = isCounterargument ? watch('counterargumentId') : false;
 
   return (
     <Layout>
@@ -60,6 +63,7 @@ function NewArgument() {
                 </label>
 
                 <select {...register('counterargumentId')} disabled={!isCounterargument}>
+                  <option value="">Select counterargument</option>
                   <option value="1">cArg 1</option>
                   <option value="2">cArg 2</option>
                   <option value="3">cArg 3</option>
@@ -67,10 +71,16 @@ function NewArgument() {
               </div>
             </div>
 
-            {/* TODO: if above checkbox is selected. */}
-            <div>
-              accordion with counterargument
-            </div>
+            {
+              !!counterargumentId ? (
+                <div>
+                  <button onClick={() => setIsCounterargumentExpanded(!isCounterargumentExpanded)} type='button'>title <Icon icon="chevron-down" /></button>
+                  <Collapse isOpen={isCounterargumentExpanded}>
+                    counterargument content
+                  </Collapse>
+                </div>
+              ) : null
+            }
 
             <div className={styles.argumentTitle}>
               <input {...register('argumentTitle')} type="text" placeholder='arg title' />
