@@ -11,12 +11,16 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
+import { ReactNode } from 'react';
 
 function Placeholder() {
   return <div className={styles.placeholder}>Describe your argument here...</div>;
 }
 
-function ArgumentEditor() {
+interface Props {
+  additionalPlugins?: ReactNode;
+}
+function ArgumentEditor(props: Props) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className={styles.container}>
@@ -31,7 +35,8 @@ function ArgumentEditor() {
           <ListPlugin />
           <HistoryPlugin />
           <LinkPlugin />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} /> 
+          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+          {props.additionalPlugins || null}
         </div>
       </div>
     </LexicalComposer>

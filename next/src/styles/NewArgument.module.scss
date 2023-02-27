@@ -30,3 +30,39 @@
   flex-direction: column;
   gap: 1rem;
 }
+
+.argumentType {
+  display: flex;
+  gap: .7rem;
+}
+
+.radioGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.isDisabled {
+  cursor: not-allowed;
+  color: #ccc;
+}
+
+.counterargumentCheck {
+  display: flex;
+  gap: .7rem;
+}
+
+.counterargumentSelect {
+  display: flex;
+  gap: .7rem;
+}
+
+.argumentTitle {
+  text-align: center;
+}
+
+.argumentTitle input {
+  font-size: 2.3rem;
+  border: none;
+  text-align: center;
+}
