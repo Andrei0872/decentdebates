@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { HYDRATE } from "next-redux-wrapper";
 
 export interface Debate {
   id: number;
@@ -23,6 +24,14 @@ export const debatesSlice = createSlice({
   reducers: {
     setDebates(state, action: PayloadAction<DebatesState['list'] | null>) {
       state.list = action.payload;
+    },
+  },
+  extraReducers: {
+    [HYDRATE]: (state, action) => {
+      return {
+        ...state,
+        ...action.payload.debates
+      };
     },
   },
 });
