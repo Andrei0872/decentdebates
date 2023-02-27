@@ -31,6 +31,10 @@ function DebatePage(props: Props) {
     router.push(`${router.asPath}/new-argument`);
   }
 
+  const redirectToDebates = () => {
+    router.push('/debates');
+  }
+
   const renderAdditionalActions = useCallback(() => (
     <Menu key="menu">
       <MenuDivider title="Actions" />
@@ -51,7 +55,7 @@ function DebatePage(props: Props) {
           </div>
 
           <div className={styles.backButton}>
-            <button type='button'>Back to debates</button>
+            <button onClick={redirectToDebates} type='button'>Back to debates</button>
           </div>
         </section>
 
