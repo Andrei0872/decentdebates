@@ -1,13 +1,14 @@
 import Layout from '@/components/Layout/Layout';
 import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgument from '@/components/DebateArgument/DebateArgument';
 import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { wrapper } from '@/store';
 import { ArgumentType, CurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
+import { useAppDispatch } from '@/utils/hooks/store';
 
 interface Props {
   debateInfo: CurrentDebate;
@@ -19,6 +20,19 @@ function DebatePage(props: Props) {
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
 
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const handleRouteLeave = () => {
+      dispatch(setCurrentDebate(null));
+    };
+    
+    router.events.on('routeChangeStart', handleRouteLeave);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteLeave);
+    }
+  }, []);
 
   const pros = args.filter(a => a.argumentType === ArgumentType.PRO);
   const cons = args.filter(a => a.argumentType === ArgumentType.CON);
