@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { Debate, DebateArgument } from './debates.model';
+import { CreateArgumentData, Debate, DebateArgument } from './debates.model';
+import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 export interface Filters {
@@ -10,7 +11,7 @@ export interface Filters {
   tags: string;
 }
 
-// This corresponds to the ENUM type.
+// This corresponds to the DB's ENUM type.
 const PENDING_BOARD_LIST = 'PENDING';
 
 @Injectable()
@@ -154,6 +155,51 @@ export class DebatesService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the debate\'s information.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async createArgument (argumentData: CreateArgumentData) {
+    const client = await this.pool.connect();
+
+    const createTicketSqlStr = `
+      insert into ticket
+      values (default, $1, null, $2)
+      returning id;
+    `;
+    const createTicketValues = [argumentData.user.id, PENDING_BOARD_LIST];
+
+    const createArgumentSql = `
+      insert into argument
+      values (default, $1, $2, $3, $4, $5, default, $6)
+      returning id;
+    `;
+
+    const createArgCounterargRelationSql = `
+      insert into assoc_argument_counterargument
+      values ($1, $2)
+    `;
+
+    try {
+      await client.query('BEGIN');
+
+      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+
+      const createArgumentValues = [argumentData.debateId, ticketId, argumentData.argumentDetails.title, argumentData.argumentDetails.content, argumentData.user.id, argumentData.argumentDetails.argumentType];
+      const { rows: [{ id: argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
+
+      const counterargumentId = argumentData.argumentDetails.counterargumentId;
+      if (!!counterargumentId) {
+        const values = [argumentId, counterargumentId];
+        await client.query(createArgCounterargRelationSql, values);
+      }
+
+      await client.query('COMMIT');
+    } catch (err) {
+      console.log(err.message);
+      await client.query('ROLLBACK');
+      throw err;
     } finally {
       client.release();
     }

@@ -1,3 +1,6 @@
+import { UserCookieData } from "../user/user.model";
+import { CreateArgumentDTO } from "./dtos/create-argument.dto";
+
 export interface Debate {
   id: number;
   title: string;
@@ -26,4 +29,10 @@ export interface DebateArgument {
 
 export interface DetailedDebateArgument extends DebateArgument {
   content: string;
+}
+
+export interface CreateArgumentData {
+  user: UserCookieData;
+  debateId: number;
+  argumentDetails: CreateArgumentDTO;
 }

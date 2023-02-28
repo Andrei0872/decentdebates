@@ -3,7 +3,9 @@ import { Request, Response } from 'express';
 import { from, map, catchError, mergeAll } from 'rxjs';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { UserCookieData } from '../user/user.model';
+import { CreateArgumentData } from './debates.model';
 import { DebatesService, Filters } from './debates.service';
+import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 @Controller('debates')
@@ -73,6 +75,27 @@ export class DebatesController {
       .pipe(
         mergeAll(),
         map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+
+  @Post('/:debateId/argument')
+  async createArgument(@Res() res: Response, @Req() req: Request, @Body() body: CreateArgumentDTO) {
+    const user = (req as any).session.user as UserCookieData;
+    const { debateId } = req.params;
+
+    const argData: CreateArgumentData = {
+      user,
+      debateId: +debateId,
+      argumentDetails: body,
+    };
+
+    return from(this.debatesService.createArgument(argData))
+      .pipe(
+        map((arg) => res.status(HttpStatus.CREATED).json({ message: 'The argument has been successfully created.' })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
