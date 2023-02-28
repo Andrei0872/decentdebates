@@ -112,7 +112,7 @@ export class DebatesService {
     }
   }
 
-  async getDebateInformation(debateId: string): Promise<DebateArgument[]> {
+  async getDebateArguments(debateId: string): Promise<DebateArgument[]> {
     const sqlStr = `
       select
         a.debate_id "debateId",
@@ -120,7 +120,6 @@ export class DebatesService {
         d.title "debateTitle",
         a.ticket_id "ticketId",
         a.title,
-        substring(a.content, 1, 100) "content",
         a.created_by "createdById",
         a.type "argumentType",
         a.created_at "createdAt",
@@ -135,6 +134,44 @@ export class DebatesService {
       where debate_id = $1 and t.board_list = 'ACCEPTED'
     `;
     const values = [debateId];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the debate\'s information.');
+    } finally {
+      client.release();
+    }
+  }
+
+
+  async getDebateArgument(debateId: string, argumentId: string): Promise<DebateArgument[]> {
+    const sqlStr = `
+      select
+        a.debate_id "debateId",
+        a.id "argumentId",
+        d.title "debateTitle",
+        a.ticket_id "ticketId",
+        a.title,
+        a.content,
+        a.created_by "createdById",
+        a.type "argumentType",
+        a.created_at "createdAt",
+        u.username
+      from argument a
+      join ticket t
+        on a.ticket_id = t.id
+      join debate d
+        on a.debate_id = d.id
+      join "user" u
+        on a.created_by = u.id
+      where debate_id = $1 and t.board_list = 'ACCEPTED' and a.id = $2
+    `;
+    const values = [debateId, argumentId];
 
     const client = await this.pool.connect();
 

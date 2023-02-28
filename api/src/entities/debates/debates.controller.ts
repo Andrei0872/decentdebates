@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res, SetMetadata } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { from, map, catchError } from 'rxjs';
+import { from, map, catchError, mergeAll } from 'rxjs';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { UserCookieData } from '../user/user.model';
 import { DebatesService, Filters } from './debates.service';
@@ -40,7 +40,7 @@ export class DebatesController {
   @SetMetadata('skipAuth', true)
   @Get('/:id')
   async getDebate(@Res() res: Response, @Param('id') debateId: string) {
-    return from(this.debatesService.getDebateInformation(debateId))
+    return from(this.debatesService.getDebateArguments(debateId))
       .pipe(
         map(debateArgs => {
           const res = debateArgs.reduce(
@@ -58,6 +58,19 @@ export class DebatesController {
           return res;
         }),
         map((data) => res.status(HttpStatus.OK).json({ data: data })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @SetMetadata('skipAuth', true)
+  @Get('/:debateId/argument/:argumentId')
+  async getDebateArgument(@Res() res: Response, @Param('debateId') debateId: string, @Param('argumentId') argumentId: string) {
+    return from(this.debatesService.getDebateArgument(debateId, argumentId))
+      .pipe(
+        mergeAll(),
+        map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

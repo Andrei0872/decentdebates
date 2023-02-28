@@ -18,9 +18,12 @@ export interface DebateArgument {
   debateTitle: string;
   ticketId: number;
   title: string;
-  content: string;
   createdById: number;
   argumentType: ArgumentType;
   createdAt: string;
   username: string;
+}
+
+export interface DetailedDebateArgument extends DebateArgument {
+  content: string;
 }
