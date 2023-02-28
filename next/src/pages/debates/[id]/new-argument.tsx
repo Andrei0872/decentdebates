@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout/Layout'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
@@ -14,8 +14,12 @@ function NewArgument() {
     register,
     handleSubmit,
     watch,
-    // TODO: types
-  } = useForm<any>();
+    setValue,
+  } = useForm<any>({
+    defaultValues: {
+      argType: 'PRO',
+    },
+  });
 
   // const [counterarguments, setCounterarguments] = useState([]);
   const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(false);
@@ -40,6 +44,21 @@ function NewArgument() {
 
   const isCounterargument = watch('isCounterargument') === true;
   const counterargumentId = isCounterargument ? watch('counterargumentId') : false;
+  const argType = watch('argType');
+
+  const debateArguments = useMemo(() => {
+    return crtDebate?.args.filter(arg => arg.argumentType !== argType);
+  }, [argType]);
+
+  useEffect(() => {
+    setValue('counterargumentId', null);
+  }, [argType]);
+
+  useEffect(() => {
+    if (!isCounterargument) {
+      setValue('counterargumentId', null);
+    }
+  }, [isCounterargument]);
 
   return (
     <Layout>
@@ -66,12 +85,12 @@ function NewArgument() {
             <div className={styles.argumentType}>
               <div className={styles.radioGroup}>
                 <label htmlFor="pro">Pro</label>
-                <input checked={true} type="radio" id="pro" value="pro" {...register('argType')} />
+                <input type="radio" id="pro" value="PRO" {...register('argType')} />
               </div>
 
               <div className={styles.radioGroup}>
                 <label htmlFor="con">Con</label>
-                <input type="radio" id="con" value="con" {...register('argType')} />
+                <input type="radio" id="con" value="CON" {...register('argType')} />
               </div>
             </div>
 
@@ -84,9 +103,11 @@ function NewArgument() {
 
                 <select {...register('counterargumentId')} disabled={!isCounterargument}>
                   <option value="">Select counterargument</option>
-                  <option value="1">cArg 1</option>
-                  <option value="2">cArg 2</option>
-                  <option value="3">cArg 3</option>
+                  {
+                    debateArguments?.map(arg => (
+                      <option key={arg.argumentId} value={arg.argumentId}>{arg.title}</option>
+                    ))
+                  }
                 </select>
               </div>
             </div>
