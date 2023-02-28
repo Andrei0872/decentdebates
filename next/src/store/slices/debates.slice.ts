@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
+import { RootState } from "..";
 
 export interface Debate {
   id: number;
@@ -71,3 +72,5 @@ export const debatesSlice = createSlice({
 });
 
 export const { setDebates, setCurrentDebate } = debatesSlice.actions;
+
+export const selectCurrentDebate = (state: RootState) => state.debates.crtDebate;

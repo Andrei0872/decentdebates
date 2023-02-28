@@ -1,10 +1,13 @@
 import Layout from '@/components/Layout/Layout'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
 import { Collapse, Icon } from '@blueprintjs/core';
+import { useAppSelector } from '@/utils/hooks/store';
+import { selectCurrentDebate } from '@/store/slices/debates.slice';
+import { useRouter } from 'next/router';
 
 function NewArgument() {
   const {
@@ -14,10 +17,20 @@ function NewArgument() {
     // TODO: types
   } = useForm<any>();
 
-  const [counterarguments, setCounterarguments] = useState([]);
+  // const [counterarguments, setCounterarguments] = useState([]);
   const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(false);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
+
+  const router = useRouter();
+
+  const crtDebate = useAppSelector(selectCurrentDebate);
+
+  useEffect(() => {
+    if (!crtDebate) {
+      router.push('/debates');
+    }
+  }, []);
 
   const onSubmit = (formData: any) => {
     console.log(formData);

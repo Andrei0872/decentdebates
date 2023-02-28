@@ -23,7 +23,11 @@ function DebatePage(props: Props) {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const handleRouteLeave = () => {
+    const handleRouteLeave = (url: string) => {
+      if (url === `${router.asPath}/new-argument`) {
+        return;
+      }
+      
       dispatch(setCurrentDebate(null));
     };
     
