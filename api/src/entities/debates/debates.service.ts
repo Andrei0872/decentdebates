@@ -132,8 +132,19 @@ export class DebatesService {
       join "user" u
         on a.created_by = u.id
       where debate_id = $1 and t.board_list = 'ACCEPTED'
+      union all
+      select
+        $2 "debateId",
+        null "argumentId",
+        (select title from debate where id = $3) "debateTitle",
+        null "ticketId",
+        null "title",
+        null "createdById",
+        null "argumentType",
+        null "createdAt",
+        null "username"
     `;
-    const values = [debateId];
+    const values = [debateId, debateId, debateId];
 
     const client = await this.pool.connect();
 

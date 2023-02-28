@@ -6,16 +6,17 @@ import styles from '@/styles/DebatePage.module.scss'
 import DebateArgument from '@/components/DebateArgument/DebateArgument';
 import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { wrapper } from '@/store';
-import { ArgumentType, CurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
+import { ArgumentType, CurrentDebate, selectCurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
-import { useAppDispatch } from '@/utils/hooks/store';
+import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 
 interface Props {
   debateInfo: CurrentDebate;
 }
 
 function DebatePage(props: Props) {
-  const { debateInfo: { metadata, args } } = props;
+  const crtDebate = useAppSelector(selectCurrentDebate);
+  const { metadata, args } = crtDebate!;
 
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
 
@@ -157,7 +158,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     store.dispatch(setCurrentDebate(debateInfo));
 
     return {
-      props: { debateInfo }
+      props: {}
     }
   }
 );

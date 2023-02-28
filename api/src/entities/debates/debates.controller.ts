@@ -48,7 +48,9 @@ export class DebatesController {
               const { debateId, debateTitle, ...argData } = crt;
 
               acc.metadata = { debateId, debateTitle };
-              acc.args.push(argData);
+              if (argData.argumentId) {
+                acc.args.push(argData);
+              }
 
               return acc;
             },
