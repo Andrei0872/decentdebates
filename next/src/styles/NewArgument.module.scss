@@ -22,7 +22,7 @@
   flex-grow: 1;
   width: 60vw;
   margin-inline: auto;
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .argumentForm {
@@ -65,4 +65,24 @@
   font-size: 2.3rem;
   border: none;
   text-align: center;
+}
+
+.debateTitleContainer {
+  display: flex;
+  gap: .3rem;
+  align-items: center;
+}
+
+.debateIcon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  background-image: url(/icons/paragraph.svg);
+}
+
+.debateInfo {
+  width: fit-content;
+  margin-inline: auto;
+  margin-block-start: 1rem;
+  border-radius: 6px;
 }

@@ -4,7 +4,7 @@ import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
-import { Collapse, Icon } from '@blueprintjs/core';
+import { Callout, Collapse, Icon } from '@blueprintjs/core';
 import { useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
@@ -53,6 +53,13 @@ function NewArgument() {
         <section className={styles.titleContainer}>
           <h2 className={styles.title}>Adding a new argument</h2>
         </section>
+
+        <Callout className={styles.debateInfo}>
+          <div className={styles.debateTitleContainer}>
+            <i className={styles.debateIcon}></i>
+            <h3>{crtDebate?.metadata.debateTitle}</h3>
+          </div>
+        </Callout>
 
         <section className={styles.argumentContainer}>
           <form className={styles.argumentForm} onSubmit={handleSubmit(onSubmit)}>
