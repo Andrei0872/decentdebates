@@ -4,12 +4,27 @@ import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon } from '@blueprintjs/core';
+import { Callout, Collapse, Icon, Intent, Position, Toaster } from '@blueprintjs/core';
 import { useAppSelector } from '@/utils/hooks/store';
-import { selectCurrentDebate, DebateArgument } from '@/store/slices/debates.slice';
+import { selectCurrentDebate, DebateArgument, ArgumentType } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
+import { createArgument, CreateArgumentData } from '@/utils/api/debate';
+
+interface CreateArgumentFormData {
+  counterargumentId?: number;
+  argType: ArgumentType;
+  isCounterargument: boolean;
+  argumentTitle: string;
+}
+
+const toasterOptions = {
+  autoFocus: false,
+  canEscapeKeyClear: true,
+  position: Position.TOP,
+  usePortal: true,
+};
 
 function NewArgument() {
   const {
@@ -17,9 +32,9 @@ function NewArgument() {
     handleSubmit,
     watch,
     setValue,
-  } = useForm<any>({
+  } = useForm<CreateArgumentFormData>({
     defaultValues: {
-      argType: 'PRO',
+      argType: ArgumentType.PRO,
     },
   });
 
@@ -30,6 +45,8 @@ function NewArgument() {
 
   const router = useRouter();
 
+  const toasterRef = useRef<Toaster>(null);
+
   const crtDebate = useAppSelector(selectCurrentDebate);
 
   useEffect(() => {
@@ -38,10 +55,49 @@ function NewArgument() {
     }
   }, []);
 
-  const onSubmit = (formData: any) => {
-    console.log(formData);
+  const onSubmit = (formData: CreateArgumentFormData) => {
     const serializedEditorContent = exportEditorContentRef.current?.getEditorContent();
-    console.log(JSON.stringify(serializedEditorContent));
+
+    const createdArgument: CreateArgumentData = {
+      title: formData.argumentTitle,
+      content: JSON.stringify(serializedEditorContent),
+      argumentType: formData.argType,
+      ...formData.counterargumentId && { counterargumentId: +formData.counterargumentId },
+    };
+    createArgument(crtDebate?.metadata.debateId!, createdArgument)
+      .then(res => {
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.SUCCESS,
+          message: res.message,
+          timeout: 3000,
+        });
+
+        setTimeout(() => {
+          router.push(`/debates/${crtDebate?.metadata.debateId!}`);
+        }, 1500);
+      })
+      .catch((err) => {
+        const message = err.response.data.message;
+
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.DANGER,
+          message,
+          timeout: 2000,
+        });
+
+        // Not using the Toaster's `onDismiss` prop because it will show
+        // the below toaster twice.
+        setTimeout(() => {
+          toasterRef.current?.show({
+            icon: 'tick-circle',
+            intent: Intent.NONE,
+            message: 'Please try again and, if the errors persists, please contact support.',
+            timeout: 5000,
+          });
+        }, 1000);
+      })
   }
 
   const isCounterargument = watch('isCounterargument') === true;
@@ -59,12 +115,12 @@ function NewArgument() {
   }
 
   useEffect(() => {
-    setValue('counterargumentId', null);
+    setValue('counterargumentId', undefined);
   }, [argType]);
 
   useEffect(() => {
     if (!isCounterargument) {
-      setValue('counterargumentId', null);
+      setValue('counterargumentId', undefined);
     }
   }, [isCounterargument]);
 
@@ -186,6 +242,8 @@ function NewArgument() {
             </div>
           </form>
         </section>
+
+        <Toaster {...toasterOptions} ref={toasterRef} />
       </div>
     </Layout>
   )
