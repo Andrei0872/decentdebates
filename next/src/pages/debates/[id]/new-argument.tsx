@@ -6,8 +6,10 @@ import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
 import { Callout, Collapse, Icon } from '@blueprintjs/core';
 import { useAppSelector } from '@/utils/hooks/store';
-import { selectCurrentDebate } from '@/store/slices/debates.slice';
+import { selectCurrentDebate, DebateArgument } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
+import { api } from '@/utils/api';
+import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 
 function NewArgument() {
   const {
@@ -21,8 +23,8 @@ function NewArgument() {
     },
   });
 
-  // const [counterarguments, setCounterarguments] = useState([]);
   const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(false);
+  const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
@@ -50,6 +52,12 @@ function NewArgument() {
     return crtDebate?.args.filter(arg => arg.argumentType !== argType);
   }, [argType]);
 
+  const fetchCounterargument = async () => {
+    const debateId = router.query.id;
+    const arg = (await api.get(`debates/${debateId}/argument/${counterargumentId}`)).data.data;
+    setCounterargument(arg);
+  }
+
   useEffect(() => {
     setValue('counterargumentId', null);
   }, [argType]);
@@ -59,6 +67,39 @@ function NewArgument() {
       setValue('counterargumentId', null);
     }
   }, [isCounterargument]);
+
+  useEffect(() => {
+    if (!counterargumentId) {
+      return;
+    }
+
+    setCounterargument(null);
+    if (isCounterargumentExpanded) {
+      fetchCounterargument();
+    }
+  }, [counterargumentId]);
+
+  const expandCounterargument = async () => {
+    setIsCounterargumentExpanded(!isCounterargumentExpanded);
+
+    if (isCounterargumentExpanded) {
+      return;
+    }
+
+    if (!!counterargument) {
+      return;
+    }
+
+    fetchCounterargument();
+  }
+
+  const unexpandedArg = useMemo(() => {
+    if (!counterargumentId) {
+      return null;
+    }
+
+    return crtDebate?.args.find(arg => +arg.argumentId === +counterargumentId);
+  }, [counterargumentId]);
 
   return (
     <Layout>
@@ -115,9 +156,15 @@ function NewArgument() {
             {
               !!counterargumentId ? (
                 <div>
-                  <button onClick={() => setIsCounterargumentExpanded(!isCounterargumentExpanded)} type='button'>title <Icon icon="chevron-down" /></button>
+                  <button onClick={expandCounterargument} type='button'>{unexpandedArg!.title} <Icon icon="chevron-down" /></button>
                   <Collapse isOpen={isCounterargumentExpanded}>
-                    counterargument content
+                    <div className={styles.counterArgContainer}>
+                      {
+                        counterargument ? (
+                          <DebateArgumentCard isExpanded={true} debateArgumentData={counterargument} />
+                        ) : <p>Loading..</p>
+                      }
+                    </div>
                   </Collapse>
                 </div>
               ) : null

@@ -8,52 +8,71 @@ import { DebateArgument } from '@/store/slices/debates.slice';
 interface Props {
   debateArgumentData: DebateArgument;
 
-  readArgument: (argId: number | null) => void;
-  isExpanded: boolean;
-  additionalActions: JSX.Element;
+  readArgument?: (argId: number | null) => void;
+  isExpanded?: boolean;
+  additionalActions?: JSX.Element;
 }
 
 function DebateArgument(props: Props) {
-  const { debateArgumentData, isExpanded } = props;
+  const {
+    debateArgumentData,
+    isExpanded,
+    additionalActions,
+    readArgument
+  } = props;
+
+  const isAbleToExpand = !!readArgument;
 
   return (
     <div className={styles.argument}>
       <div className={styles.header}>
         <h3>{debateArgumentData.title}</h3>
-        <div className={styles.actions}>
-          <Popover2
-            interactionKind="click"
-            // popoverClassName={Classes.POPOVER2_CONTENT_SIZING}
-            placement="right"
-            usePortal={true}
-            content={props.additionalActions}
-            renderTarget={({ isOpen, ref, ...targetProps }) => (
-              <span {...targetProps} ref={ref}>
-                <Icon icon="more" />
-              </span>
-            )}
-          />
-        </div>
+        {
+          additionalActions ? (
+            <div className={styles.actions}>
+              <Popover2
+                interactionKind="click"
+                // popoverClassName={Classes.POPOVER2_CONTENT_SIZING}
+                placement="right"
+                usePortal={true}
+                content={additionalActions}
+                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                  <span {...targetProps} ref={ref}>
+                    <Icon icon="more" />
+                  </span>
+                )}
+              />
+            </div>
+          ) : null
+        }
       </div>
 
-      <div className={styles.body}>
-        {debateArgumentData.content}
-      </div>
+      {
+        isExpanded ? (
+          <div className={styles.body}>
+            {debateArgumentData.content}
+          </div>
+        ) : null
+      }
 
       <div className={styles.footer}>
         <div className={styles.username}>
           {debateArgumentData.username}
         </div>
 
-        <div className={styles.expand}>
-          {
-            !isExpanded ? (
-              <button onClick={() => props.readArgument(debateArgumentData.argumentId)} type='button'>Read more</button>
-            ) : (
-              <button onClick={() => props.readArgument(null)} type='button'>Collapse</button>
-            )
-          }
-        </div>
+        {
+          isAbleToExpand ? (
+            <div className={styles.expand}>
+              {
+                !isExpanded ? (
+                  <button onClick={() => readArgument(debateArgumentData.argumentId)} type='button'>Read more</button>
+                ) : (
+                  <button onClick={() => readArgument(null)} type='button'>Collapse</button>
+                )
+              }
+            </div>
+          ) : null
+        }
       </div>
     </div>
   )
