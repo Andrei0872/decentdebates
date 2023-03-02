@@ -1,22 +1,22 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ForwardedRef, forwardRef, RefObject, useImperativeHandle } from 'react';
-import { SerializedEditor } from 'lexical/LexicalEditor';
+import { LexicalEditor, SerializedEditor } from 'lexical/LexicalEditor';
 
 export interface ExportContentRefData {
-  getEditorContent: () => SerializedEditor;
+  getEditor: () => LexicalEditor;
 }
 
 function ExportContentPlugin(props: any, ref: ForwardedRef<ExportContentRefData>) {
   const [editor] = useLexicalComposerContext();
   
-  const getEditorContent = () => {
-    return editor.toJSON();
+  const getEditor = () => {
+    return editor;
   }
 
   useImperativeHandle(
     ref,
     () => ({
-      getEditorContent,
+      getEditor,
     }),
     [],
   )
