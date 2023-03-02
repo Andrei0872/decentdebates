@@ -74,11 +74,11 @@ function NewArgument() {
   }, []);
 
   const onSubmit = (formData: CreateArgumentFormData) => {
-    const serializedEditorContent = exportEditorContentRef.current?.getEditorContent();
+    const editor = exportEditorContentRef.current?.getEditor();
 
     const createdArgument: CreateArgumentData = {
       title: formData.argumentTitle,
-      content: JSON.stringify(serializedEditorContent),
+      content: JSON.stringify(editor?.getEditorState()),
       argumentType: formData.argType,
       ...formData.counterargumentId && { counterargumentId: +formData.counterargumentId },
     };
