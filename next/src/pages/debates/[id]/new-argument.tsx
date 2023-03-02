@@ -100,6 +100,10 @@ function NewArgument() {
       })
   }
 
+  const redirectToDebate = () => {
+    router.push(`/debates/${crtDebate?.metadata.debateId}`);
+  }
+
   const isCounterargument = watch('isCounterargument') === true;
   const counterargumentId = isCounterargument ? watch('counterargumentId') : false;
   const argType = watch('argType');
@@ -161,7 +165,7 @@ function NewArgument() {
     <Layout>
       <div className={styles.container}>
         <section className={styles.buttons}>
-          <button type='button'>
+          <button onClick={redirectToDebate} type='button'>
             Back to debate
           </button>
         </section>
