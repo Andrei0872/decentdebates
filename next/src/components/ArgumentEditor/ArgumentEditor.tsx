@@ -1,5 +1,5 @@
 import styles from './ArgumentEditor.module.scss';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer';
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { editorConfig } from './config';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -19,12 +19,20 @@ function Placeholder() {
 
 interface Props {
   additionalPlugins?: ReactNode;
+  configOptions?: Partial<InitialConfigType>;
+  containerClassName?: string;
 }
 function ArgumentEditor(props: Props) {
+  const shouldDisplayToolbar = (props.configOptions?.editable ?? true) === true;
+  
   return (
-    <LexicalComposer initialConfig={editorConfig}>
-      <div className={styles.container}>
-        <ToolbarPlugin />
+    <LexicalComposer initialConfig={{ ...editorConfig, ...props.configOptions }}>
+      <div className={`${styles.container} ${props.containerClassName ?? ''}`}>
+        {
+          shouldDisplayToolbar ? (
+            <ToolbarPlugin />
+          ) : null
+        }
         <div className={styles.inner}>
           <RichTextPlugin
             contentEditable={<ContentEditable className={styles.input} />}
