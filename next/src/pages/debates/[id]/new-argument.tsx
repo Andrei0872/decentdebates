@@ -214,7 +214,7 @@ function NewArgument() {
             </div>
 
             <div className={styles.counterargumentCheck}>
-              <input id='counterargumentCheck' type="checkbox" {...register('isCounterargument')} />
+              <input id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
               <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
                 <label htmlFor='counterargumentCheck'>
                   is counterargument for
