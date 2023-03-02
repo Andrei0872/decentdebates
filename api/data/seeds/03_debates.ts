@@ -89,10 +89,10 @@ export async function seed(knex: Knex): Promise<void> {
     ], ['id']);
 
     const args = await knex("argument").insert([
-        { debate_id: debateIds[0].id, ticket_id: argTickets[0].id, title: 'Pro#1', content: 'some content', created_by: user.id, type: 'PRO' },
-        { debate_id: debateIds[0].id, ticket_id: argTickets[1].id, title: 'Pro#2', content: 'some content', created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[0].id, title: 'Pro#1', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[1].id, title: 'Pro#2', content: longText, created_by: user.id, type: 'PRO' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[2].id, title: 'Pro#3', content: longText, created_by: user.id, type: 'PRO' },
-        { debate_id: debateIds[0].id, ticket_id: argTickets[3].id, title: 'Con#1', content: 'some content', created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[3].id, title: 'Con#1', content: longText, created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[4].id, title: 'Con#2', content: longText, created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[5].id, title: 'Con#3', content: longText, created_by: user.id, type: 'CON' },
     ], ['id']);
