@@ -24,18 +24,28 @@ function DebatePage(props: Props) {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    // Using this small `hack` because, if `dispatch()` is invoked when `routeChangeStart`
+    // occurs, it will cause the current component to re-render again. The reason for that
+    // is because this component is subscribed to the store via `useAppSelector`.
+    // By invoking `teardownFn` during the `destroy` hook, we ensure that there will be no more
+    // active subscriptions.
+    let teardownFn: (() => void) | null = null;
+
     const handleRouteLeave = (url: string) => {
       if (url === `${router.asPath}/new-argument`) {
         return;
       }
-      
-      dispatch(setCurrentDebate(null));
+
+      teardownFn = () => {
+        dispatch(setCurrentDebate(null));
+      };
     };
-    
+
     router.events.on('routeChangeStart', handleRouteLeave);
 
     return () => {
       router.events.off('routeChangeStart', handleRouteLeave);
+      teardownFn?.();
     }
   }, []);
 
