@@ -3,12 +3,14 @@ import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
-import DebateArgument from '@/components/DebateArgument/DebateArgument';
+import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
 import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { wrapper } from '@/store';
-import { ArgumentType, CurrentDebate, selectCurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
+import { ArgumentType, CurrentDebate, DebateArgument, selectCurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
+
+const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
 interface Props {
   debateInfo: CurrentDebate;
@@ -32,7 +34,7 @@ function DebatePage(props: Props) {
     let teardownFn: (() => void) | null = null;
 
     const handleRouteLeave = (url: string) => {
-      if (url === `${router.asPath}/new-argument`) {
+      if (NEW_ARGUMENT_PAGE_REGEX.test(url)) {
         return;
       }
 
@@ -64,15 +66,19 @@ function DebatePage(props: Props) {
     router.push('/debates');
   }
 
-  const renderAdditionalActions = useCallback(() => (
+  const addCounterargument = (arg: DebateArgument) => {
+    router.push(`${router.asPath}/new-argument?counterargumentId=${arg.argumentId}`);
+  }
+
+  const renderAdditionalActions = (arg: DebateArgument) => (
     <Menu key="menu">
       <MenuDivider title="Actions" />
-      <MenuItem icon="add-to-artifact" text="Add counterargument" />
+      <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
       {/* TODO: disable if there are no counterarguments. */}
       <MenuItem icon="eye-open" text="See the counterarguments" />
       <MenuItem icon="comparison" text="See thread" />
     </Menu>
-  ), []);
+  );
 
   return (
     <Layout>
@@ -98,8 +104,8 @@ function DebatePage(props: Props) {
               pros.length ? (
                 pros.map(p => (
                   <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
-                    <DebateArgument
-                      additionalActions={renderAdditionalActions()}
+                    <DebateArgumentCard
+                      additionalActions={renderAdditionalActions(p)}
                       isExpanded={p.argumentId === crtReadArgumentId}
                       readArgument={onReadArgument}
                       debateArgumentData={p}
@@ -115,8 +121,8 @@ function DebatePage(props: Props) {
               cons.length ? (
                 cons.map(p => (
                   <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
-                    <DebateArgument
-                      additionalActions={renderAdditionalActions()}
+                    <DebateArgumentCard
+                      additionalActions={renderAdditionalActions(p)}
                       isExpanded={p.argumentId === crtReadArgumentId}
                       readArgument={onReadArgument}
                       debateArgumentData={p}

@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 import { createArgument, CreateArgumentData } from '@/utils/api/debate';
+import { getCorrespondingCounterargumentType } from '@/utils/debate';
 
 interface CreateArgumentFormData {
   counterargumentId?: number;
@@ -27,6 +28,13 @@ const toasterOptions = {
 };
 
 function NewArgument() {
+  const router = useRouter();
+  const { counterargumentId: counterargumentIdParam } = router.query;
+
+  const isCounterargumentExplicit = !!counterargumentIdParam;
+
+  const crtDebate = useAppSelector(selectCurrentDebate);
+
   const {
     register,
     handleSubmit,
@@ -35,23 +43,33 @@ function NewArgument() {
   } = useForm<CreateArgumentFormData>({
     defaultValues: {
       argType: ArgumentType.PRO,
+      ...isCounterargumentExplicit && {
+        counterargumentId: +counterargumentIdParam,
+        isCounterargument: true,
+        argType: getCorrespondingCounterargumentType(crtDebate?.args.find(a => +a.argumentId === +counterargumentIdParam))
+      },
     },
   });
 
-  const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(false);
+  const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(() => isCounterargumentExplicit);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
-  const router = useRouter();
-
   const toasterRef = useRef<Toaster>(null);
-
-  const crtDebate = useAppSelector(selectCurrentDebate);
 
   useEffect(() => {
     if (!crtDebate) {
       router.push('/debates');
+    }
+
+    // It appears that setting the `useForm`'s default values is not enough.
+    // Nor setting the value without using a timeout.
+    // For now, resorting to this doesn't cause any troubles(yet!).
+    if (isCounterargumentExplicit) {
+      setTimeout(() => {
+        setValue('counterargumentId', +counterargumentIdParam!);
+      }, 0)
     }
   }, []);
 
