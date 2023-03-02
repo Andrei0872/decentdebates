@@ -117,8 +117,8 @@ create table assoc_argument_counterargument (
   argument_id int not null,
   counter_argument_id int not null,
 
-  constraint fk_argument_id foreign key(argument_id) references argument(id),
-  constraint fk_counter_argument_id foreign key(counter_argument_id) references argument(id),
+  constraint fk_argument_id foreign key(argument_id) references argument(id) on delete cascade,
+  constraint fk_counter_argument_id foreign key(counter_argument_id) references argument(id) on delete cascade,
   check(argument_id <> counter_argument_id)
 );
 
