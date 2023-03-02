@@ -199,7 +199,7 @@ export class DebatesService {
     } catch (err) {
       console.log(err.message);
       await client.query('ROLLBACK');
-      throw err;
+      throw new Error('An error occurred while adding the argument to the debate.');
     } finally {
       client.release();
     }
