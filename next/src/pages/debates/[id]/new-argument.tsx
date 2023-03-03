@@ -10,7 +10,7 @@ import { selectCurrentDebate, DebateArgument, ArgumentType } from '@/store/slice
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 
 interface CreateArgumentFormData {
@@ -130,11 +130,6 @@ function NewArgument() {
     return crtDebate?.args.filter(arg => arg.argumentType !== argType);
   }, [argType]);
 
-  const fetchCounterargument = async () => {
-    const debateId = router.query.id;
-    const arg = (await api.get(`debates/${debateId}/argument/${counterargumentId}`)).data.data;
-    setCounterargument(arg);
-  }
 
   useEffect(() => {
     setValue('counterargumentId', undefined);
@@ -153,7 +148,8 @@ function NewArgument() {
 
     setCounterargument(null);
     if (isCounterargumentExpanded) {
-      fetchCounterargument();
+      fetchArgument(crtDebate?.metadata.debateId!, counterargumentId)
+        .then(arg => setCounterargument(arg));
     }
   }, [counterargumentId]);
 
@@ -168,7 +164,10 @@ function NewArgument() {
       return;
     }
 
-    fetchCounterargument();
+    if (counterargumentId) {
+      fetchArgument(crtDebate?.metadata.debateId!, counterargumentId)
+        .then(arg => setCounterargument(arg));
+    }
   }
 
   const unexpandedArg = useMemo(() => {
