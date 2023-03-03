@@ -1,10 +1,10 @@
-import { CardData } from "@/dtos/moderator/get-activity.dto";
+import { ModeratorActivity, ModeratorActivityArgument } from "@/dtos/moderator/get-activity.dto";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
 
 export interface ModeratorState {
   activity: {
-    previewedCard: CardData | null;
+    previewedCard: ModeratorActivity | null;
   }
 }
 
@@ -18,12 +18,15 @@ export const moderatorSlice = createSlice({
   name: 'moderator',
   initialState,
   reducers: {
-    setActivityPreviewedCard (state, action: PayloadAction<CardData | null>) {
+    setActivityPreviewedCard(state, action: PayloadAction<ModeratorActivity | null>) {
+      state.activity.previewedCard = action.payload;
+    },
+    setActivityPreviewedCardArgument(state, action: PayloadAction<ModeratorActivityArgument | null>) {
       state.activity.previewedCard = action.payload;
     },
   }
 });
 
-export const { setActivityPreviewedCard } = moderatorSlice.actions;
+export const { setActivityPreviewedCard, setActivityPreviewedCardArgument } = moderatorSlice.actions;
 
 export const selectPreviewedCard = (s: RootState) => s.moderator.activity.previewedCard;

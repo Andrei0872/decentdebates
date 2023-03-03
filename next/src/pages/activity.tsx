@@ -3,13 +3,15 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
 import Layout from "@/components/Layout/Layout";
-import { BoardData, BoardLists, ModeratorActivity, getActivityDTO, CardLabels } from "@/dtos/moderator/get-activity.dto";
+import { BoardData, BoardLists, ModeratorActivity, getActivityDTO, CardLabels, ModeratorActivityArgument } from "@/dtos/moderator/get-activity.dto";
 import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
 import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
-import { selectPreviewedCard, setActivityPreviewedCard } from "@/store/slices/moderator.slice";
+import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument } from "@/store/slices/moderator.slice";
+import ArgumentEditor from "@/components/ArgumentEditor/ArgumentEditor";
+import { fetchArgument } from "@/utils/api/moderator";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -107,6 +109,7 @@ function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
 
   const previewedCard = useAppSelector(selectPreviewedCard);
+  const [isArgumentLoading, setIsArgumentLoading] = useState(false);
 
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
@@ -162,7 +165,17 @@ function Activity() {
   const shouldShowPreviewCardModal = previewedCard !== null;
 
   const onCardClick = (cardData: ModeratorActivity) => {
-    dispatch(setActivityPreviewedCard(cardData))
+    if (cardData.ticketLabel === CardLabels.ARGUMENT) {
+      setIsArgumentLoading(true);
+
+      fetchArgument(cardData.debateId, cardData.argumentId)
+        .then((arg: ModeratorActivityArgument) => {
+          setIsArgumentLoading(false);
+          dispatch(setActivityPreviewedCardArgument({ ...cardData, ...arg }));
+        });
+    }
+
+    dispatch(setActivityPreviewedCard(cardData));
   }
 
   const expandCardModal = () => {
@@ -196,7 +209,7 @@ function Activity() {
         <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
           <div className={styles.cardDialogHeader}>
             <div className={styles.cardTitle}>
-              card title
+              {previewedCard?.ticketTitle}
             </div>
             <div className={styles.cardActions}>
               <Icon onClick={expandCardModal} className={styles.cardIcon} icon="maximize" size={14} />
@@ -205,7 +218,15 @@ function Activity() {
           </div>
 
           <div className={styles.cardDialogBody}>
-            card content
+            {
+              previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
+                isArgumentLoading ? <p>Loading...</p> : (
+                  <ArgumentEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
+                )
+              ) : (
+                <div>some debate info</div>
+              )
+            }
           </div>
         </DialogBody>
       </Dialog>
