@@ -104,15 +104,6 @@ create table argument (
   constraint fk_created_by foreign key(created_by) references "user"(id)
 );
 
-create table external_reference (
-  id serial primary key,
-  argument_id int not null,
-  name varchar(100),
-  url varchar(2049) not null,
-
-  constraint fk_argument_id foreign key(argument_id) references argument(id) on delete cascade
-);
-
 create table assoc_argument_counterargument (
   argument_id int not null,
   counter_argument_id int not null,
