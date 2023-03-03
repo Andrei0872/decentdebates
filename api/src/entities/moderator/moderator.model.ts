@@ -24,6 +24,7 @@ export interface ModeratorActivityArgument extends ModeratorActivityBase {
   content: string;
   debateId: number;
   argumentType: string;
+  debateTitle: string;
 }
 
 export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;

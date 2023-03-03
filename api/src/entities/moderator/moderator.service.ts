@@ -55,15 +55,18 @@ export class ModeratorService {
           else t.board_list
         end "boardList",
         t.assigned_to "moderatorId",
-        a.title,
+        a.title "ticketTitle",
         substring(a.content, 1, 50) "content",
         a.type "argumentType",
         a.debate_id "debateId",
         u.username "moderatorUsername",
-        'argument' "ticketLabel"
+        'argument' "ticketLabel",
+        d.title "debateTitle"
       from ticket t
       join argument a
         on a.ticket_id = t.id
+      join debate d
+        on a.debate_id = d.id
       left join "user" u
         on u.id = t.assigned_to
       right join (

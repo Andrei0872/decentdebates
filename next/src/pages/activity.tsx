@@ -3,7 +3,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
 import Layout from "@/components/Layout/Layout";
-import { BoardData, BoardLists, ModeratorActivity, getActivityDTO } from "@/dtos/moderator/get-activity.dto";
+import { BoardData, BoardLists, ModeratorActivity, getActivityDTO, CardLabels } from "@/dtos/moderator/get-activity.dto";
 import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
@@ -85,7 +85,16 @@ const Card: React.FC<CardProps> = (props) => {
         #{cardData.ticketLabel}
       </div>
       <div className={styles.cardBody}>
-        {cardData.ticketTitle}
+        {
+          cardData.ticketLabel === CardLabels.DEBATE ? (
+            <div>{cardData.ticketTitle}</div>
+          ) : (
+            <>
+              <div>{cardData.debateTitle}</div>
+              <div>{cardData.ticketTitle}</div>
+            </>
+          )
+        }
       </div>
       <div className={styles.cardFooter}>
         {cardData.moderatorUsername ? cardData.moderatorUsername : <b>unassigned</b>}
