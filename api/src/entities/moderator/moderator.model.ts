@@ -21,10 +21,11 @@ export interface ModeratorActivityDebate extends ModeratorActivityBase {
 
 export interface ModeratorActivityArgument extends ModeratorActivityBase {
   ticketLabel: CardLabels.ARGUMENT;
-  content: string;
+  content?: string;
   debateId: number;
   argumentType: string;
   debateTitle: string;
+  argumentId: number;
 }
 
 export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;

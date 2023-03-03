@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, throwError } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { DebatesService } from '../debates/debates.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { UpdateTicketData } from './moderator.model';
@@ -12,7 +13,10 @@ import { ModeratorService } from './moderator.service';
 @UseGuards(RolesGuard)
 @Roles(UserRoles.MODERATOR)
 export class ModeratorController {
-  constructor(private moderatorService: ModeratorService) { }
+  constructor(
+    private moderatorService: ModeratorService,
+    private debatesService: DebatesService,
+  ) { }
 
   @Get('/activity')
   getActivity(@Res() res: Response) {
@@ -49,6 +53,19 @@ export class ModeratorController {
     return from(this.moderatorService.updateTicket(ticket))
       .pipe(
         map(() => res.status(HttpStatus.NO_CONTENT).end()),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+
+  @Get('debates/:debateId/argument/:argumentId')
+  async getDebateArgumentAsModerator(@Res() res: Response, @Param('debateId') debateId: string, @Param('argumentId') argumentId: string) {
+    return from(this.debatesService.getDebateArgumentAsModerator(debateId, argumentId))
+      .pipe(
+        mergeAll(),
+        map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

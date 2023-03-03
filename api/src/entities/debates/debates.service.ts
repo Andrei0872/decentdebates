@@ -243,6 +243,43 @@ export class DebatesService {
     }
   }
 
+  async getDebateArgumentAsModerator(debateId: string, argumentId: string): Promise<DebateArgument[]> {
+    const sqlStr = `
+      select
+        a.debate_id "debateId",
+        a.id "argumentId",
+        d.title "debateTitle",
+        a.ticket_id "ticketId",
+        a.title "ticketTitle",
+        a.content,
+        a.created_by "createdById",
+        a.type "argumentType",
+        a.created_at "createdAt",
+        u.username
+      from argument a
+      join ticket t
+        on a.ticket_id = t.id
+      join debate d
+        on a.debate_id = d.id
+      join "user" u
+        on a.created_by = u.id
+      where debate_id = $1 and a.id = $2
+    `;
+    const values = [debateId, argumentId];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the debate\'s information.');
+    } finally {
+      client.release();
+    }
+  }
+
   private getFiltersAsSQLString(filters: Filters) {
     const queryStrFilter = filters.queryStr || null;
     const tagsFilter = filters.tags || null;
