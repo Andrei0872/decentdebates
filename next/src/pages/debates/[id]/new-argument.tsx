@@ -12,6 +12,7 @@ import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 import { createArgument, CreateArgumentData, fetchArgument } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
+import { selectCurrentUser } from '@/store/slices/user.slice';
 
 interface CreateArgumentFormData {
   counterargumentId?: number;
@@ -34,6 +35,7 @@ function NewArgument() {
   const isCounterargumentExplicit = !!counterargumentIdParam;
 
   const crtDebate = useAppSelector(selectCurrentDebate);
+  const crtUser = useAppSelector(selectCurrentUser);
 
   const {
     register,
@@ -61,6 +63,12 @@ function NewArgument() {
   useEffect(() => {
     if (!crtDebate) {
       router.push('/debates');
+      return () => {};
+    }
+
+    if (!crtUser) {
+      router.push('/');
+      return () => {};
     }
 
     // It appears that setting the `useForm`'s default values is not enough.
