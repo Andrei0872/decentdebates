@@ -18,17 +18,30 @@ export enum CardLabels {
   REPORT = 'report',
 }
 
-export interface CardData {
-  ticketTitle: string;
-  ticketLabel: CardLabels;
-  moderatorUsername: string | null;
-  moderatorId: number | null;
+export interface ModeratorActivityBase {
   ticketId: number;
+  boardList: string;
+  ticketTitle: string;
+  moderatorId: number | null;
+  moderatorUsername: string | null;
 }
+
+export interface ModeratorActivityDebate extends ModeratorActivityBase {
+  ticketLabel: CardLabels.DEBATE;
+}
+
+export interface ModeratorActivityArgument extends ModeratorActivityBase {
+  ticketLabel: CardLabels.ARGUMENT;
+  content: string;
+  debateId: number;
+  argumentType: string;
+}
+
+export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;
 
 export interface BoardData {
   boardList: BoardLists;
-  cards: CardData[];
+  cards: ModeratorActivity[];
 }
 
 export const getActivityDTO = (data: BoardData[]) => {

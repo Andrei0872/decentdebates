@@ -85,6 +85,7 @@ export async function seed(knex: Knex): Promise<void> {
         { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[1].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[1].id, board_list: 'PENDING' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'PENDING' },
     ], ['id']);
 
     const args = await knex("argument").insert([
@@ -94,6 +95,7 @@ export async function seed(knex: Knex): Promise<void> {
         { debate_id: debateIds[0].id, ticket_id: argTickets[3].id, title: 'Con#1', content: longText, created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[4].id, title: 'Con#2', content: longText, created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[5].id, title: 'Con#3', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[0].id, ticket_id: argTickets[6].id, title: 'Con#4', content: longText, created_by: user.id, type: 'CON' },
     ], ['id']);
 };
 
