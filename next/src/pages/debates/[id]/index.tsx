@@ -1,6 +1,5 @@
 import Layout from '@/components/Layout/Layout';
 import { api } from '@/utils/api';
-import { GetServerSideProps } from 'next'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
@@ -10,6 +9,7 @@ import { ArgumentType, CurrentDebate, DebateArgument, selectCrtExpandedArgument,
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
+import { selectCurrentUser } from '@/store/slices/user.slice';
 
 const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
@@ -28,6 +28,7 @@ function DebatePage(props: Props) {
   const dispatch = useAppDispatch();
 
   const crtExpandedArg = useAppSelector(selectCrtExpandedArgument);
+  const crtUser = useAppSelector(selectCurrentUser);
 
   useEffect(() => {
     // Using this small `hack` because, if `dispatch()` is invoked when `routeChangeStart`
@@ -106,14 +107,20 @@ function DebatePage(props: Props) {
     </Menu>
   );
 
+  const isAuthenticatedUser = !!crtUser;
+
   return (
     <Layout>
       <div className={styles.container}>
         <section className={styles.buttons}>
-          <div className={styles.actionButtons}>
-            <button onClick={redirectToNewArgumentPage} type='button'>Add PRO/CON argument</button>
-            <button type='button'>Subscribe to discussion</button>
-          </div>
+          {
+            isAuthenticatedUser ? (
+              <div className={styles.actionButtons}>
+                <button onClick={redirectToNewArgumentPage} type='button'>Add PRO/CON argument</button>
+                <button type='button'>Subscribe to discussion</button>
+              </div>
+            ) : null
+          }
 
           <div className={styles.backButton}>
             <button onClick={redirectToDebates} type='button'>Back to debates</button>
