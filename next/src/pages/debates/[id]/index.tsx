@@ -1,14 +1,15 @@
 import Layout from '@/components/Layout/Layout';
 import { api } from '@/utils/api';
 import { GetServerSideProps } from 'next'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
 import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { wrapper } from '@/store';
-import { ArgumentType, CurrentDebate, DebateArgument, selectCurrentDebate, setCurrentDebate } from '@/store/slices/debates.slice';
+import { ArgumentType, CurrentDebate, DebateArgument, selectCrtExpandedArgument, selectCurrentDebate, setCrtExpandedArgument, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
+import { fetchArgument } from '@/utils/api/debate';
 
 const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
@@ -21,9 +22,12 @@ function DebatePage(props: Props) {
   const { metadata, args } = crtDebate!;
 
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
+  const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const crtExpandedArg = useAppSelector(selectCrtExpandedArgument);
 
   useEffect(() => {
     // Using this small `hack` because, if `dispatch()` is invoked when `routeChangeStart`
@@ -51,11 +55,33 @@ function DebatePage(props: Props) {
     }
   }, []);
 
-  const pros = args.filter(a => a.argumentType === ArgumentType.PRO);
-  const cons = args.filter(a => a.argumentType === ArgumentType.CON);
+  const detailedArgs = useMemo(() => {
+    if (!crtExpandedArg) {
+      return args;
+    }
+
+    return args.map(a => +a.argumentId === +crtExpandedArg.id ? ({ ...a, content: crtExpandedArg.content }) : a);
+  }, [crtExpandedArg?.id]);
+
+  const pros = detailedArgs.filter(a => a.argumentType === ArgumentType.PRO);
+  const cons = detailedArgs.filter(a => a.argumentType === ArgumentType.CON);
 
   const onReadArgument = (argId: number | null) => {
-    setCrtReadArgumentId(argId);
+    if (!argId) {
+      dispatch(setCrtExpandedArgument(undefined));
+      setCrtReadArgumentId(argId);
+      return;
+    }
+
+    setIsReadArgumentLoading(true);
+
+    const debateId = +router.query.id!;
+    fetchArgument(debateId, argId)
+      .then(arg => {
+        dispatch(setCrtExpandedArgument({ id: argId, content: arg.content }));
+        setCrtReadArgumentId(argId);
+        setIsReadArgumentLoading(false);
+      });
   }
 
   const redirectToNewArgumentPage = () => {

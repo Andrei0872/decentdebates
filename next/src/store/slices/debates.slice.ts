@@ -27,17 +27,22 @@ export interface DebateArgument {
   debateTitle: string;
   ticketId: number;
   title: string;
-  content: string;
+  content?: string;
   createdById: number;
   argumentType: ArgumentType;
   createdAt: string;
   username: string;
 }
 
+interface ExpandedArgument {
+  id: number;
+  content: string;
+}
 
 export interface CurrentDebate {
   args: DebateArgument[];
   metadata: DebateMetadata;
+  crtExpandedArgument?: ExpandedArgument;
 }
 
 export interface DebatesState {
@@ -60,6 +65,13 @@ export const debatesSlice = createSlice({
     setCurrentDebate (state, action: PayloadAction<CurrentDebate | null>) {
       state.crtDebate = action.payload;
     },
+    setCrtExpandedArgument (state, action: PayloadAction<ExpandedArgument | undefined>) {
+      if (!state.crtDebate) {
+        return;
+      }
+
+      state.crtDebate.crtExpandedArgument = action.payload;
+    },
   },
   extraReducers: {
     [HYDRATE]: (state, action) => {
@@ -71,6 +83,7 @@ export const debatesSlice = createSlice({
   },
 });
 
-export const { setDebates, setCurrentDebate } = debatesSlice.actions;
+export const { setDebates, setCurrentDebate, setCrtExpandedArgument } = debatesSlice.actions;
 
 export const selectCurrentDebate = (state: RootState) => state.debates.crtDebate;
+export const selectCrtExpandedArgument = (state: RootState) => state.debates.crtDebate?.crtExpandedArgument;

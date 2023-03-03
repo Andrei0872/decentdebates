@@ -2,7 +2,6 @@
   border: 1px solid black;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .header {
@@ -37,7 +36,7 @@
   flex-grow: 1;
 }
 
-.argumentEditorContainer {
+.argumentEditorContainer[class] {
   width: 100%;
   border: none;
 }
