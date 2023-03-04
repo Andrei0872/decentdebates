@@ -83,7 +83,7 @@ function DebatePage(props: Props) {
     }
 
     return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId]);
+  }, [counterargumentsOfArgId, crtExpandedArg?.id]);
 
   const cons = useMemo(() => {
     if (!counterargumentsOfArgId) {
@@ -95,7 +95,7 @@ function DebatePage(props: Props) {
     }
 
     return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId]);
+  }, [counterargumentsOfArgId, crtExpandedArg?.id]);
 
 
   const onReadArgument = (argId: number | null) => {
