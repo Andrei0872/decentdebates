@@ -78,7 +78,7 @@ export async function seed(knex: Knex): Promise<void> {
     ]);
 
     // ===== ARGUMENTS =====
-    const argTickets = await knex("ticket").insert([
+    let argTickets = await knex("ticket").insert([
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
@@ -88,7 +88,7 @@ export async function seed(knex: Knex): Promise<void> {
         { created_by: user.id, assigned_to: moderators[0].id, board_list: 'IN REVIEW' },
     ], ['id']);
 
-    const args = await knex("argument").insert([
+    await knex("argument").insert([
         { debate_id: debateIds[0].id, ticket_id: argTickets[0].id, title: 'Pro#1', content: longText, created_by: user.id, type: 'PRO' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[1].id, title: 'Pro#2', content: longText, created_by: user.id, type: 'PRO' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[2].id, title: 'Pro#3', content: longText, created_by: user.id, type: 'PRO' },
@@ -97,5 +97,75 @@ export async function seed(knex: Knex): Promise<void> {
         { debate_id: debateIds[0].id, ticket_id: argTickets[5].id, title: 'Con#3', content: longText, created_by: user.id, type: 'CON' },
         { debate_id: debateIds[0].id, ticket_id: argTickets[6].id, title: 'Con#4', content: longText, created_by: user.id, type: 'CON' },
     ], ['id']);
+
+    // ===== ARGUMENTS & COUNTERARGUMENTS =====
+
+    argTickets = await knex("ticket").insert([
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+        { created_by: user.id, assigned_to: moderators[0].id, board_list: 'ACCEPTED' },
+    ], ['id']);
+
+    /*
+        1: PRO
+
+        1 -> { 2, 3, 4 }
+        2 -> { 5, 6 }
+        3 -> { 7 }
+        4 -> { 8, 9 }
+        8 -> { 10, 11, 12 }
+        10 -> { 13 }
+    */
+    const args = await knex("argument").insert([
+        { debate_id: debateIds[1].id, ticket_id: argTickets[0].id, title: 'Pro#1', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[1].id, title: 'Con#1', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[2].id, title: 'Con#2', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[3].id, title: 'Con#3', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[4].id, title: 'Pro#2', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[5].id, title: 'Pro#3', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[6].id, title: 'Pro#4', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[7].id, title: 'Pro#5', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[8].id, title: 'Pro#6', content: longText, created_by: user.id, type: 'PRO' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[9].id, title: 'Con#4', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[10].id, title: 'Con#5', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[11].id, title: 'Con#6', content: longText, created_by: user.id, type: 'CON' },
+        { debate_id: debateIds[1].id, ticket_id: argTickets[12].id, title: 'Pro#7', content: longText, created_by: user.id, type: 'PRO' },
+    ], ['id']);
+
+    await Promise.all([
+        knex("argument")
+            .whereIn('id', [args[1].id, args[2].id, args[3].id])
+            .update({ counterargument_to: args[0].id }),
+
+        knex("argument")
+            .whereIn('id', [args[4].id, args[5].id])
+            .update({ counterargument_to: args[1].id }),
+
+        knex("argument")
+            .whereIn('id', [args[6].id])
+            .update({ counterargument_to: args[2].id }),
+
+        knex("argument")
+            .whereIn('id', [args[7].id, args[8].id])
+            .update({ counterargument_to: args[3].id }),
+
+        knex("argument")
+            .whereIn('id', [args[9].id, args[10].id, args[11].id])
+            .update({ counterargument_to: args[7].id }),
+
+        knex("argument")
+            .whereIn('id', [args[12].id])
+            .update({ counterargument_to: args[9].id }),
+    ]);
 };
 
