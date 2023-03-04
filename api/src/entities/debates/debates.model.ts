@@ -25,6 +25,7 @@ export interface DebateArgument {
   argumentType: ArgumentType;
   createdAt: string;
   username: string;
+  counterargumentTo: number;
 }
 
 export interface DetailedDebateArgument extends DebateArgument {

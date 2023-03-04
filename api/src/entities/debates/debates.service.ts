@@ -124,7 +124,8 @@ export class DebatesService {
         a.created_by "createdById",
         a.type "argumentType",
         a.created_at "createdAt",
-        u.username
+        u.username,
+        a.counterargument_to "counterargumentTo"
       from argument a
       join ticket t
         on a.ticket_id = t.id
@@ -143,7 +144,8 @@ export class DebatesService {
         null "createdById",
         null "argumentType",
         null "createdAt",
-        null "username"
+        null "username",
+        null "counterargumentTo"
     `;
     const values = [debateId, debateId, debateId];
 
@@ -215,7 +217,8 @@ export class DebatesService {
         a.created_by "createdById",
         a.type "argumentType",
         a.created_at "createdAt",
-        u.username
+        u.username,
+        a.counterargument_to "counterargumentTo"
       from argument a
       join ticket t
         on a.ticket_id = t.id
@@ -252,7 +255,8 @@ export class DebatesService {
         a.created_by "createdById",
         a.type "argumentType",
         a.created_at "createdAt",
-        u.username
+        u.username,
+        a.counterargument_to "counterargumentTo"
       from argument a
       join ticket t
         on a.ticket_id = t.id
