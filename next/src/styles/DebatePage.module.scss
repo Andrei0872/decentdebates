@@ -32,7 +32,8 @@
   column-gap: 7rem;
 }
 
-.pros, .cons {
+.pros,
+.cons {
   display: flex;
   flex-direction: column;
   gap: 3rem;
@@ -48,4 +49,45 @@
 
 .backButton {
   margin-inline-start: auto;
+}
+
+.counterargumentsNoticeContainer {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 1rem;
+}
+
+.counterargumentsNotice {
+  width: max-content;
+  border-radius: 6px;
+}
+
+.counterargumentsHeader {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+
+.counterargumentsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.counterargumentsTitle i {
+  font-size: medium;
+}
+
+.counterargumentsTitle h3 {
+  font-size: 1.4rem;
+}
+
+.counterargumentsDisable {
+  display: flex;
+  justify-content: center;
+  margin-block-start: .1rem;
+}
+
+.counterargumentsDisable i {
+  cursor: pointer;
 }

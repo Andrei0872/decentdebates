@@ -3,7 +3,7 @@ import { api } from '@/utils/api';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
-import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { Callout, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { wrapper } from '@/store';
 import { ArgumentType, CurrentDebate, DebateArgument, selectCrtExpandedArgument, selectCurrentDebate, setCrtExpandedArgument, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
@@ -23,6 +23,7 @@ function DebatePage(props: Props) {
 
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
   const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
+  const [counterargumentsOfArgId, setCounterargumentsOfArgId] = useState<number | null>(null);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -64,8 +65,38 @@ function DebatePage(props: Props) {
     return args.map(a => +a.argumentId === +crtExpandedArg.id ? ({ ...a, content: crtExpandedArg.content }) : a);
   }, [crtExpandedArg?.id]);
 
-  const pros = detailedArgs.filter(a => a.argumentType === ArgumentType.PRO);
-  const cons = detailedArgs.filter(a => a.argumentType === ArgumentType.CON);
+  const inspectedCounterargsOfArgument = useMemo(() => {
+    if (!counterargumentsOfArgId) {
+      return null;
+    }
+
+    return detailedArgs.find(a => +a.argumentId === +counterargumentsOfArgId);
+  }, [counterargumentsOfArgId]);
+
+  const pros = useMemo(() => {
+    if (!counterargumentsOfArgId) {
+      return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO);
+    }
+
+    if (inspectedCounterargsOfArgument?.argumentType === ArgumentType.PRO) {
+      return [inspectedCounterargsOfArgument];
+    }
+
+    return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
+  }, [counterargumentsOfArgId]);
+
+  const cons = useMemo(() => {
+    if (!counterargumentsOfArgId) {
+      return detailedArgs.filter(a => a.argumentType === ArgumentType.CON);
+    }
+
+    if (inspectedCounterargsOfArgument?.argumentType === ArgumentType.CON) {
+      return [inspectedCounterargsOfArgument];
+    }
+
+    return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
+  }, [counterargumentsOfArgId]);
+
 
   const onReadArgument = (argId: number | null) => {
     if (!argId) {
@@ -97,17 +128,26 @@ function DebatePage(props: Props) {
     router.push(`${router.asPath}/new-argument?counterargumentId=${arg.argumentId}`);
   }
 
+  const inspectCounterargumentsOf = (arg: DebateArgument) => {
+    setCounterargumentsOfArgId(arg.argumentId);
+  }
+
+  const disableInspectCounterargumentsMode = () => {
+    setCounterargumentsOfArgId(null);
+  }
+
   const renderAdditionalActions = (arg: DebateArgument) => (
     <Menu key="menu">
       <MenuDivider title="Actions" />
       <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
       {/* TODO: disable if there are no counterarguments. */}
-      <MenuItem icon="eye-open" text="See the counterarguments" />
+      <MenuItem onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
       <MenuItem icon="comparison" text="See thread" />
     </Menu>
   );
 
   const isAuthenticatedUser = !!crtUser;
+  const isInspectingCounterargumentsOfArg = !!inspectedCounterargsOfArgument;
 
   return (
     <Layout>
@@ -130,6 +170,27 @@ function DebatePage(props: Props) {
         <section className={styles.title}>
           <h2>{metadata.debateTitle}</h2>
         </section>
+
+        {
+          isInspectingCounterargumentsOfArg ? (
+            <section className={styles.counterargumentsNoticeContainer}>
+              <Callout className={styles.counterargumentsNotice}>
+                <div className={styles.counterargumentsHeader}>
+                  <Icon icon="info-sign" />
+
+                  <div className={styles.counterargumentsTitle}>
+                    <i>You're now seeing the counterarguments of</i>
+                    <h3>{inspectedCounterargsOfArgument.title}</h3>
+                  </div>
+                </div>
+
+                <div className={styles.counterargumentsDisable}>
+                  <i onClick={disableInspectCounterargumentsMode}><u>Click here to disable this mode.</u></i>
+                </div>
+              </Callout>
+            </section>
+          ) : null
+        }
 
         <section className={styles.argumentsContainer}>
           <ul className={styles.pros}>
