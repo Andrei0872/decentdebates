@@ -95,6 +95,7 @@ create table argument (
   ticket_id int not null,
   title varchar(80) not null,
   content text not null,
+  counterargument_to int,
   created_by int not null,
   created_at timestamp default now(),
   type argument_type,
@@ -102,15 +103,6 @@ create table argument (
   constraint fk_debate_id foreign key(debate_id) references debate(id) on delete cascade,
   -- constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
   constraint fk_created_by foreign key(created_by) references "user"(id)
-);
-
-create table assoc_argument_counterargument (
-  argument_id int not null,
-  counter_argument_id int not null,
-
-  constraint fk_argument_id foreign key(argument_id) references argument(id) on delete cascade,
-  constraint fk_counter_argument_id foreign key(counter_argument_id) references argument(id) on delete cascade,
-  check(argument_id <> counter_argument_id)
 );
 
 create table ticket_comment (

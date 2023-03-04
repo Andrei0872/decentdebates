@@ -172,13 +172,8 @@ export class DebatesService {
 
     const createArgumentSql = `
       insert into argument
-      values (default, $1, $2, $3, $4, $5, default, $6)
+      values (default, $1, $2, $3, $4, $5, $6, default, $7)
       returning id;
-    `;
-
-    const createArgCounterargRelationSql = `
-      insert into assoc_argument_counterargument
-      values ($1, $2)
     `;
 
     try {
@@ -186,14 +181,16 @@ export class DebatesService {
 
       const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
 
-      const createArgumentValues = [argumentData.debateId, ticketId, argumentData.argumentDetails.title, argumentData.argumentDetails.content, argumentData.user.id, argumentData.argumentDetails.argumentType];
+      const createArgumentValues = [
+        argumentData.debateId,
+        ticketId,
+        argumentData.argumentDetails.title,
+        argumentData.argumentDetails.content,
+        argumentData.argumentDetails.counterargumentId,
+        argumentData.user.id,
+        argumentData.argumentDetails.argumentType
+      ];
       const { rows: [{ id: argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
-
-      const counterargumentId = argumentData.argumentDetails.counterargumentId;
-      if (!!counterargumentId) {
-        const values = [argumentId, counterargumentId];
-        await client.query(createArgCounterargRelationSql, values);
-      }
 
       await client.query('COMMIT');
     } catch (err) {
