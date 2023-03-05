@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
+import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 
 const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
@@ -140,8 +141,7 @@ function DebatePage(props: Props) {
     <Menu key="menu">
       <MenuDivider title="Actions" />
       <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
-      {/* TODO: disable if there are no counterarguments. */}
-      <MenuItem onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
+      <MenuItem disabled={!arg.counterarguments?.length} onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
       <MenuItem icon="comparison" text="See thread" />
     </Menu>
   );
@@ -265,7 +265,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
     });
     const debateInfo = res.data?.data;
 
-    store.dispatch(setCurrentDebate(debateInfo));
+    store.dispatch(setCurrentDebate(getDebateDTO(debateInfo)));
 
     return {
       props: {}
