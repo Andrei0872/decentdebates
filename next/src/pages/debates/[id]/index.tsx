@@ -3,7 +3,7 @@ import { api } from '@/utils/api';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
-import { Callout, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { Callout, Icon, Menu, MenuDivider, MenuItem, Boundary, BreadcrumbProps } from '@blueprintjs/core';
 import { wrapper } from '@/store';
 import { ArgumentType, CurrentDebate, DebateArgument, selectCrtExpandedArgument, selectCurrentDebate, setCrtExpandedArgument, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
+import { Breadcrumbs2 } from '@blueprintjs/popover2';
 
 const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
@@ -25,6 +26,7 @@ function DebatePage(props: Props) {
   const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
   const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
   const [counterargumentsOfArgId, setCounterargumentsOfArgId] = useState<number | null>(null);
+  const [counterargumentsOfArgHistory, setCounterargumentsOfArgHistory] = useState<number[]>([]);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -98,6 +100,22 @@ function DebatePage(props: Props) {
     return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
   }, [counterargumentsOfArgId, crtExpandedArg?.id]);
 
+  const historyBreadcrumbItems: BreadcrumbProps[] = useMemo(() => {
+    // O(n^2), but it's fine for now.
+    return counterargumentsOfArgHistory.map(id => {
+      const arg = detailedArgs.find(arg => arg.argumentId === id)!;
+
+      return {
+        text: arg.title,
+        icon: "comment",
+        onClick: () => {
+          inspectCounterargumentsOf(arg);
+        },
+
+        id: arg.argumentId,
+      };
+    });
+  }, [counterargumentsOfArgHistory]);
 
   const onReadArgument = (argId: number | null) => {
     if (!argId) {
@@ -130,21 +148,38 @@ function DebatePage(props: Props) {
   }
 
   const inspectCounterargumentsOf = (arg: DebateArgument) => {
+    const isSameArgumentInspected = arg.argumentId === counterargumentsOfArgId;
+    if (isSameArgumentInspected) {
+      return;
+    }
+
     setCounterargumentsOfArgId(arg.argumentId);
+
+    const historyIdx = counterargumentsOfArgHistory.findIndex(id => id === arg.argumentId);
+    const isPartOfHistory = historyIdx !== -1;
+    if (isPartOfHistory) {
+      setCounterargumentsOfArgHistory(counterargumentsOfArgHistory.slice(0, historyIdx + 1));
+    } else {
+      setCounterargumentsOfArgHistory([...counterargumentsOfArgHistory, arg.argumentId]);
+    }
   }
 
   const disableInspectCounterargumentsMode = () => {
     setCounterargumentsOfArgId(null);
+    setCounterargumentsOfArgHistory([]);
   }
 
-  const renderAdditionalActions = (arg: DebateArgument) => (
-    <Menu key="menu">
-      <MenuDivider title="Actions" />
-      <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
-      <MenuItem disabled={!arg.counterarguments?.length} onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
-      <MenuItem icon="comparison" text="See thread" />
-    </Menu>
-  );
+  const renderAdditionalActions = (arg: DebateArgument) => {
+    const shouldDisableCounterargsButton = !arg.counterarguments?.length || arg.argumentId === counterargumentsOfArgId;
+    
+    return (
+      <Menu key="menu">
+        <MenuDivider title="Actions" />
+        <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
+        <MenuItem disabled={shouldDisableCounterargsButton} onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
+      </Menu>
+    )
+  };
 
   const isAuthenticatedUser = !!crtUser;
   const isInspectingCounterargumentsOfArg = !!inspectedCounterargsOfArgument;
@@ -173,22 +208,30 @@ function DebatePage(props: Props) {
 
         {
           isInspectingCounterargumentsOfArg ? (
-            <section className={styles.counterargumentsNoticeContainer}>
-              <Callout className={styles.counterargumentsNotice}>
-                <div className={styles.counterargumentsHeader}>
-                  <Icon icon="info-sign" />
+            <>
+              <section className={styles.counterargumentsNoticeContainer}>
+                <Callout className={styles.counterargumentsNotice}>
+                  <div className={styles.counterargumentsHeader}>
+                    <Icon icon="info-sign" />
 
-                  <div className={styles.counterargumentsTitle}>
-                    <i>You're now seeing the counterarguments of</i>
-                    <h3>{inspectedCounterargsOfArgument.title}</h3>
+                    <div className={styles.counterargumentsTitle}>
+                      <h3>You're now in a thread of arguments and counterarguments.</h3>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.counterargumentsDisable}>
-                  <i onClick={disableInspectCounterargumentsMode}><u>Click here to disable this mode.</u></i>
-                </div>
-              </Callout>
-            </section>
+                  <div className={styles.counterargumentsDisable}>
+                    <i onClick={disableInspectCounterargumentsMode}><u>Click here to disable this mode.</u></i>
+                  </div>
+                </Callout>
+              </section>
+
+              <section className={styles.counterargumentsHistory}>
+                <Breadcrumbs2
+                  items={historyBreadcrumbItems}
+                  overflowListProps={{ alwaysRenderOverflow: false, collapseFrom: Boundary.START }}
+                />
+              </section>
+            </>
           ) : null
         }
 
