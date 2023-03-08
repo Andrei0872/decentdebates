@@ -32,9 +32,8 @@ function DebateArgument(props: Props) {
             <div className={styles.actions}>
               <Popover2
                 interactionKind="click"
-                // popoverClassName={Classes.POPOVER2_CONTENT_SIZING}
                 placement="right"
-                usePortal={true}
+                usePortal={false}
                 content={additionalActions}
                 renderTarget={({ isOpen, ref, ...targetProps }) => (
                   <span {...targetProps} ref={ref}>
