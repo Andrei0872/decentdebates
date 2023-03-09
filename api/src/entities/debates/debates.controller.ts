@@ -106,4 +106,24 @@ export class DebatesController {
         })
       )
   }
+
+  @Post('/:debateId/draft')
+  async saveArgumentAsDraft(@Res() res: Response, @Req() req: Request, @Body() body: CreateArgumentDTO) {
+    const user = (req as any).session.user as UserCookieData;
+    const { debateId } = req.params;
+
+    const argData: CreateArgumentData = {
+      user,
+      debateId: +debateId,
+      argumentDetails: body,
+    };
+
+    return from(this.debatesService.saveArgumentAsDraft(argData))
+      .pipe(
+        map((arg) => res.status(HttpStatus.CREATED).json({ message: 'Draft successfully saved.' })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
 }

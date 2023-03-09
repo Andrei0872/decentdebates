@@ -162,7 +162,7 @@ export class DebatesService {
     }
   }
 
-  async createArgument (argumentData: CreateArgumentData) {
+  async createArgument(argumentData: CreateArgumentData) {
     const client = await this.pool.connect();
 
     const createTicketSqlStr = `
@@ -276,6 +276,36 @@ export class DebatesService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the debate\'s information.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async saveArgumentAsDraft(argumentData: CreateArgumentData) {
+    const sqlStr = `
+      insert into argument
+      values (default, $1, $2, $3, $4, $5, $6, default, $7, $8)
+      returning id;
+    `;
+
+    const values = [
+      argumentData.debateId,
+      null, /* ticketId */
+      argumentData.argumentDetails.title,
+      argumentData.argumentDetails.content,
+      argumentData.argumentDetails.counterargumentId,
+      argumentData.user.id,
+      argumentData.argumentDetails.argumentType,
+      true, /* is_draft */
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      await client.query(sqlStr, values);
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while saving the argument as draft.');
     } finally {
       client.release();
     }

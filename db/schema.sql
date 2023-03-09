@@ -92,7 +92,7 @@ create table assoc_debate_tag (
 create table argument (
   id serial primary key,
   debate_id int not null,
-  ticket_id int not null,
+  ticket_id int,
   title varchar(80) not null,
   content text not null,
   counterargument_to int,
