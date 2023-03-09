@@ -5,14 +5,15 @@ import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
 import { Callout, Collapse, Icon, Intent, Position, Toaster } from '@blueprintjs/core';
-import { useAppSelector } from '@/utils/hooks/store';
-import { selectCurrentDebate, DebateArgument, ArgumentType } from '@/store/slices/debates.slice';
+import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
+import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData, fetchArgument } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
+import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 
 interface CreateArgumentFormData {
   counterargumentId?: number;
@@ -30,12 +31,14 @@ const toasterOptions = {
 
 function NewArgument() {
   const router = useRouter();
-  const { counterargumentId: counterargumentIdParam } = router.query;
+  const { counterargumentId: counterargumentIdParam, id: debateId } = router.query;
 
   const isCounterargumentExplicit = !!counterargumentIdParam;
 
   const crtDebate = useAppSelector(selectCurrentDebate);
   const crtUser = useAppSelector(selectCurrentUser);
+
+  const dispatch = useAppDispatch();
 
   const {
     register,
@@ -61,14 +64,9 @@ function NewArgument() {
   const toasterRef = useRef<Toaster>(null);
 
   useEffect(() => {
-    if (!crtDebate) {
-      router.push('/debates');
-      return () => {};
-    }
-
     if (!crtUser) {
       router.push('/');
-      return () => {};
+      return () => { };
     }
 
     // It appears that setting the `useForm`'s default values is not enough.
@@ -80,6 +78,26 @@ function NewArgument() {
       }, 0)
     }
   }, []);
+
+  useEffect(() => {
+    if (!router.isReady || !!crtDebate) {
+      return () => { };
+    }
+
+    if (!debateId || Number.isNaN(+debateId)) {
+      router.push('/debates');
+      return () => { };
+    }
+
+    fetchDebateById(+debateId)
+      .then(d => {
+        dispatch(setCurrentDebate(getDebateDTO(d)));
+      })
+      .catch(err => {
+        router.push('/debates');
+      });
+
+  }, [router.isReady]);
 
   const onSubmit = (formData: CreateArgumentFormData) => {
     const editor = exportEditorContentRef.current?.getEditor();

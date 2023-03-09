@@ -20,3 +20,8 @@ export const fetchArgument = (debateId: number, argId: number) => {
   return api.get(`debates/${debateId}/argument/${argId}`)
     .then(r => r.data.data);
 }
+
+export const fetchDebateById = (debateId: number) => {
+  return api.get(`/debates/${debateId}`)
+    .then(r => r.data.data);
+}
