@@ -12,14 +12,38 @@ export interface User {
   role: UserRoles;
 }
 
-export interface UserActivity {
+export enum CardTypes {
+  DEBATE = 'debate',
+  ARGUMENT = 'argument',
+};
+
+export enum ActivityTypes {
+  SOLVED = 'SOLVED',
+  ONGOING = 'ONGOING',
+};
+
+export interface UserActivityDebate {
   ticketId: number;
   boardList: string;
-  title: string;
+  debateTitle: string;
   debateId: number;
-  itemType: number;
+  cardType: CardTypes.DEBATE;
   moderatorUsername: string;
+  activityList: ActivityTypes;
 }
+
+export interface UserActivityArgument {
+  argumentTitle: string;
+  argumentType: string;
+  argumentIsDraft: boolean;
+  ticketBoardList: string;
+  debateTitle: string;
+  cardType: CardTypes.ARGUMENT;
+  moderatorUsername: string;
+  activityList: ActivityTypes;
+}
+
+export type UserActivity = UserActivityDebate | UserActivityArgument;
 
 export type PublicUser = Omit<User, 'password'>;
 export type UserCookieData = Pick<User, 'id' | 'role'>;

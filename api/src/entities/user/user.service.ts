@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { RegisterUserDTO } from './dtos/register-user.dto';
-import { User, UserActivity, UserCookieData } from './user.model';
+import { User, UserActivity, UserActivityArgument, UserActivityDebate, UserCookieData } from './user.model';
 
 const TABLE_NAME = `"user"`;
 const TABLE_COLUMNS = `(username, password, email, role)`;
@@ -55,71 +55,76 @@ export class UserService {
     return res.rows[0];
   }
 
-  async getOngoingItems(user: UserCookieData): Promise<UserActivity[]> {
-    const sqlStl = `
+  async getActivityDebates(user: UserCookieData): Promise<UserActivityDebate[]> {
+    const sqlStr = `
       select
         t.id "ticketId",
         t.board_list "boardList",
-        d.title,
+        d.title "debateTitle",
         d.id "debateId",
+        'debate' "cardType",
+        u.username "moderatorUsername",
         case
-          when d.id is not null then 'DEBATE'
-        end "itemType",
-        u.username "moderatorUsername"
+          when t.board_list = 'ACCEPTED' then 'SOLVED'
+          else 'ONGOING'
+        end "activityList"
       from ticket t
-      join debate d
+      right join debate d
         on d.ticket_id = t.id
       left join "user" u
         on u.id = t.assigned_to
       where
         t.created_by = $1
-        and t.board_list <> 'ACCEPTED'
     `;
     const values = [user.id];
 
     const client = await this.pool.connect();
-
     try {
-      const res = await client.query(sqlStl, values);
+      const res = await client.query(sqlStr, values);
+
       return res.rows;
     } catch (err) {
-      console.error(err.message);
-      throw new Error('An error occurred while fetching the ongoing activities');
+      console.error(err);
+      throw new Error('An error occurred while fetching the user\'s activity(debates).');
     } finally {
       client.release();
     }
   }
 
-  async getSolvedItems(user: UserCookieData): Promise<UserActivity[]> {
-    const sqlStl = `
+  async getActivityArguments(user: UserCookieData): Promise<UserActivityArgument[]> {
+    const sqlStr = `
       select
-        t.id "ticketId",
-        t.board_list "boardList",
-        d.title,
-        d.id "debateId",
+        a.title "argumentTitle",
+        a.type "argumentType",
+        a.is_draft "argumentIsDraft",
+        t.board_list "ticketBoardList",
         case
-          when d.id is not null then 'DEBATE'
-        end "itemType",
+          when t.board_list is null then 'ONGOING'
+          when t.board_list = 'ACCEPTED' then 'SOLVED'
+          else 'ONGOING'
+        end "activityList",
+        d.title "debateTitle",
+        'argument' "cardType",
         u.username "moderatorUsername"
-      from ticket t
+      from argument a
+      left join ticket t
+        on t.id = a.ticket_id
       join debate d
-        on d.ticket_id = t.id
-      join "user" u
-        on u.id = t.assigned_to
-      where
-        t.created_by = $1
-        and t.board_list = 'ACCEPTED'
+        on d.id = a.debate_id
+      left join "user" u
+        on t.created_by = u.id
+      where a.created_by = $1
     `;
     const values = [user.id];
 
     const client = await this.pool.connect();
-
     try {
-      const res = await client.query(sqlStl, values);
+      const res = await client.query(sqlStr, values);
+
       return res.rows;
     } catch (err) {
-      console.error(err.message);
-      throw new Error('An error occurred while fetching the solved activities');
+      console.error(err);
+      throw new Error('An error occurred while fetching the user\'s activity(arguments).');
     } finally {
       client.release();
     }

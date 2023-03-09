@@ -1,5 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { catchError, filter, forkJoin, groupBy, map, mergeAll, mergeMap, reduce } from 'rxjs';
 import { UserCookieData } from './user.model';
 import { UserService } from './user.service';
 
@@ -7,35 +8,26 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) { }
 
-  @Get('/ongoing-items')
-  async getOngoingItems(@Req() req: Request, @Res() res: Response) {
+  @Get('/activity')
+  async getActivity(@Res() res: Response, @Req() req: Request) {
     const user = (req as any).session.user as UserCookieData;
 
-    try {
-      const data = await this.userService.getOngoingItems(user);
-      return res
-        .status(HttpStatus.OK)
-        .json({
-          data,
-        });
-    } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get('/solved-items')
-  async getSolvedItems(@Req() req: Request, @Res() res: Response) {
-    const user = (req as any).session.user as UserCookieData;
-
-    try {
-      const data = await this.userService.getSolvedItems(user);
-      return res
-        .status(HttpStatus.OK)
-        .json({
-          data,
-        });
-    } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-    }
+    return forkJoin([this.userService.getActivityArguments(user), this.userService.getActivityDebates(user)])
+      .pipe(
+        mergeAll(),
+        mergeAll(),
+        groupBy(r => r.activityList, { element: ({ activityList, ...cardData }) => cardData }),
+        mergeMap(
+          grp$ => grp$.pipe(
+            reduce((acc, crt) => [...acc, crt], []),
+            map(cards => ({ activityList: grp$.key, cards }))
+          )
+        ),
+        reduce((acc, crt) => ({ ...acc, [crt.activityList]: crt.cards }), {}),
+        map(r => res.status(HttpStatus.OK).json({ data: r })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
   }
 }
