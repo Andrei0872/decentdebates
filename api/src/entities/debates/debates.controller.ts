@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res, SetMetadata } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { from, map, catchError, mergeAll } from 'rxjs';
+import { EntityNotFoundError } from 'src/errors/EntityNotFoundError';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { UserCookieData } from '../user/user.model';
 import { CreateArgumentData } from './debates.model';
@@ -49,6 +50,10 @@ export class DebatesController {
             (acc, crt) => {
               const { debateId, debateTitle, ...argData } = crt;
 
+              if (!debateTitle) {
+                throw new EntityNotFoundError('debate');
+              }
+
               acc.metadata = { debateId, debateTitle };
               if (argData.argumentId) {
                 acc.args.push(argData);
@@ -63,7 +68,7 @@ export class DebatesController {
         }),
         map((data) => res.status(HttpStatus.OK).json({ data: data })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err.message, err.status || HttpStatus.BAD_REQUEST);
         })
       )
   }
