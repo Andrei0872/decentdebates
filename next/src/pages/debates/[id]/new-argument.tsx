@@ -4,7 +4,7 @@ import styles from '@/styles/NewArgument.module.scss';
 import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon, Intent, Position, Toaster } from '@blueprintjs/core';
+import { Callout, Collapse, Icon, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
@@ -204,6 +204,8 @@ function NewArgument() {
     return crtDebate?.args.find(arg => +arg.argumentId === +counterargumentId);
   }, [counterargumentId]);
 
+  const isPageReady = !!crtDebate;
+
   return (
     <Layout>
       <div className={styles.container}>
@@ -217,78 +219,89 @@ function NewArgument() {
           <h2 className={styles.title}>Adding a new argument</h2>
         </section>
 
-        <Callout className={styles.debateInfo}>
-          <div className={styles.debateTitleContainer}>
-            <i className={styles.debateIcon}></i>
-            <h3>{crtDebate?.metadata.debateTitle}</h3>
-          </div>
-        </Callout>
-
-        <section className={styles.argumentContainer}>
-          <form className={styles.argumentForm} onSubmit={handleSubmit(onSubmit)}>
-            <div className={styles.argumentType}>
-              <div className={styles.radioGroup}>
-                <label htmlFor="pro">Pro</label>
-                <input type="radio" id="pro" value="PRO" {...register('argType')} />
-              </div>
-
-              <div className={styles.radioGroup}>
-                <label htmlFor="con">Con</label>
-                <input type="radio" id="con" value="CON" {...register('argType')} />
-              </div>
-            </div>
-
-            <div className={styles.counterargumentCheck}>
-              <input id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
-              <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
-                <label htmlFor='counterargumentCheck'>
-                  is counterargument for
-                </label>
-
-                <select {...register('counterargumentId')} disabled={!isCounterargument}>
-                  <option value="">Select counterargument</option>
-                  {
-                    debateArguments?.map(arg => (
-                      <option key={arg.argumentId} value={arg.argumentId}>{arg.title}</option>
-                    ))
-                  }
-                </select>
-              </div>
-            </div>
-
-            {
-              !!counterargumentId ? (
-                <div>
-                  <button onClick={expandCounterargument} type='button'>{unexpandedArg!.title} <Icon icon="chevron-down" /></button>
-                  <Collapse isOpen={isCounterargumentExpanded}>
-                    <div className={styles.counterArgContainer}>
-                      {
-                        counterargument ? (
-                          <DebateArgumentCard isExpanded={true} debateArgumentData={counterargument} />
-                        ) : <p>Loading..</p>
-                      }
-                    </div>
-                  </Collapse>
-                </div>
-              ) : null
-            }
-
-            <div className={styles.argumentTitle}>
-              <input {...register('argumentTitle')} type="text" placeholder='arg title' />
-            </div>
-
-            {/* TODO: pass `className` as prop? */}
-            <ArgumentEditor
-              additionalPlugins={
-                <ExportContentPlugin ref={exportEditorContentRef} />
-              }
+        {
+          !isPageReady ? (
+            <Spinner
+              className={styles.loadingSpinner}
+              size={SpinnerSize.STANDARD}
             />
+          ) : (
+            <>
+              <Callout className={styles.debateInfo}>
+                <div className={styles.debateTitleContainer}>
+                  <i className={styles.debateIcon}></i>
+                  <h3>{crtDebate?.metadata.debateTitle}</h3>
+                </div>
+              </Callout>
 
-            <div className={styles.argumentButtons}>
-              <button type='submit'>Submit</button>
-            </div>
-          </form>
-        </section>
+              <section className={styles.argumentContainer}>
+                <form className={styles.argumentForm} onSubmit={handleSubmit(onSubmit)}>
+                  <div className={styles.argumentType}>
+                    <div className={styles.radioGroup}>
+                      <label htmlFor="pro">Pro</label>
+                      <input type="radio" id="pro" value="PRO" {...register('argType')} />
+                    </div>
+
+                    <div className={styles.radioGroup}>
+                      <label htmlFor="con">Con</label>
+                      <input type="radio" id="con" value="CON" {...register('argType')} />
+                    </div>
+                  </div>
+
+                  <div className={styles.counterargumentCheck}>
+                    <input id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
+                    <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
+                      <label htmlFor='counterargumentCheck'>
+                        is counterargument for
+                      </label>
+
+                      <select {...register('counterargumentId')} disabled={!isCounterargument}>
+                        <option value="">Select counterargument</option>
+                        {
+                          debateArguments?.map(arg => (
+                            <option key={arg.argumentId} value={arg.argumentId}>{arg.title}</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  {
+                    !!counterargumentId ? (
+                      <div>
+                        <button onClick={expandCounterargument} type='button'>{unexpandedArg!.title} <Icon icon="chevron-down" /></button>
+                        <Collapse isOpen={isCounterargumentExpanded}>
+                          <div className={styles.counterArgContainer}>
+                            {
+                              counterargument ? (
+                                <DebateArgumentCard isExpanded={true} debateArgumentData={counterargument} />
+                              ) : <p>Loading..</p>
+                            }
+                          </div>
+                        </Collapse>
+                      </div>
+                    ) : null
+                  }
+
+                  <div className={styles.argumentTitle}>
+                    <input {...register('argumentTitle')} type="text" placeholder='arg title' />
+                  </div>
+
+                  {/* TODO: pass `className` as prop? */}
+                  <ArgumentEditor
+                    additionalPlugins={
+                      <ExportContentPlugin ref={exportEditorContentRef} />
+                    }
+                  />
+
+                  <div className={styles.argumentButtons}>
+                    <button type='submit'>Submit</button>
+                  </div>
+                </form>
+              </section>
+            </>
+          )
+        }
 
         <Toaster {...toasterOptions} ref={toasterRef} />
       </div>
