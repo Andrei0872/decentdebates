@@ -99,6 +99,7 @@ create table argument (
   created_by int not null,
   created_at timestamp default now(),
   type argument_type,
+  is_draft boolean default false,
 
   constraint fk_debate_id foreign key(debate_id) references debate(id) on delete cascade,
   -- constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
