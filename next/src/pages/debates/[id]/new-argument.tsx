@@ -10,7 +10,7 @@ import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } f
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, saveArgumentAsDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
@@ -99,7 +99,10 @@ function NewArgument() {
 
   }, [router.isReady]);
 
-  const onSubmit = (formData: CreateArgumentFormData) => {
+  const onSubmit = (formData: CreateArgumentFormData, ev?: React.BaseSyntheticEvent) => {
+    const submitter = (ev!.nativeEvent as SubmitEvent).submitter;
+    const isDraft = submitter?.dataset.isDraft === 'true';
+
     const editor = exportEditorContentRef.current?.getEditor();
 
     const createdArgument: CreateArgumentData = {
@@ -108,7 +111,9 @@ function NewArgument() {
       argumentType: formData.argType,
       ...formData.counterargumentId && { counterargumentId: +formData.counterargumentId },
     };
-    createArgument(crtDebate?.metadata.debateId!, createdArgument)
+
+    const action = isDraft ? saveArgumentAsDraft(crtDebate?.metadata.debateId!, createdArgument) : createArgument(crtDebate?.metadata.debateId!, createdArgument);
+    action
       .then(res => {
         toasterRef.current?.show({
           icon: 'tick-circle',
@@ -296,6 +301,7 @@ function NewArgument() {
 
                   <div className={styles.argumentButtons}>
                     <button type='submit'>Submit</button>
+                    <button data-is-draft={true} type='submit'>Save Draft</button>
                   </div>
                 </form>
               </section>

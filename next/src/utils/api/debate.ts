@@ -15,7 +15,6 @@ export const createArgument = (debateId: number, data: CreateArgumentData) => {
     .then(r => r.data);
 }
 
-
 export const fetchArgument = (debateId: number, argId: number) => {
   return api.get(`debates/${debateId}/argument/${argId}`)
     .then(r => r.data.data);
@@ -24,4 +23,9 @@ export const fetchArgument = (debateId: number, argId: number) => {
 export const fetchDebateById = (debateId: number) => {
   return api.get(`/debates/${debateId}`)
     .then(r => r.data.data);
+}
+
+export const saveArgumentAsDraft = (debateId: number, data: CreateArgumentData) => {
+  return api.post(`${ROOT_PATH}/${debateId}/draft`, data)
+    .then(r => r.data);
 }
