@@ -16,14 +16,7 @@ export class UserController {
       .pipe(
         mergeAll(),
         mergeAll(),
-        groupBy(r => r.activityList, { element: ({ activityList, ...cardData }) => cardData }),
-        mergeMap(
-          grp$ => grp$.pipe(
-            reduce((acc, crt) => [...acc, crt], []),
-            map(cards => ({ activityList: grp$.key, cards }))
-          )
-        ),
-        reduce((acc, crt) => ({ ...acc, [crt.activityList]: crt.cards }), {}),
+        reduce((acc, crt) => [...acc, crt], []),
         map(r => res.status(HttpStatus.OK).json({ data: r })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
