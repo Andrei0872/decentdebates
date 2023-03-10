@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { RegisterUserDTO } from './dtos/register-user.dto';
-import { User, UserActivity, UserActivityArgument, UserActivityDebate, UserCookieData } from './user.model';
+import { User, UserCookieData, UserActivityArgument, UserActivityDebate } from './user.model';
 
 const TABLE_NAME = `"user"`;
 const TABLE_COLUMNS = `(username, password, email, role)`;
@@ -94,6 +94,7 @@ export class UserService {
   async getActivityArguments(user: UserCookieData): Promise<UserActivityArgument[]> {
     const sqlStr = `
       select
+        a.id "argumentId",
         a.title "argumentTitle",
         a.type "argumentType",
         a.is_draft "argumentIsDraft",

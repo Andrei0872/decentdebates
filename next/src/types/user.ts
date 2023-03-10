@@ -1,8 +1,33 @@
-export interface UserActivity {
+export enum CardTypes {
+  DEBATE = 'debate',
+  ARGUMENT = 'argument',
+};
+
+export enum ActivityTypes {
+  SOLVED = 'SOLVED',
+  ONGOING = 'ONGOING',
+};
+
+export interface UserActivityDebate {
   ticketId: number;
   boardList: string;
-  title: string;
+  debateTitle: string;
   debateId: number;
-  itemType: number;
+  cardType: CardTypes.DEBATE;
   moderatorUsername: string;
+  activityList: ActivityTypes;
 }
+
+export interface UserActivityArgument {
+  argumentId: number;
+  argumentTitle: string;
+  argumentType: string;
+  argumentIsDraft: boolean;
+  ticketBoardList: string;
+  debateTitle: string;
+  cardType: CardTypes.ARGUMENT;
+  moderatorUsername: string;
+  activityList: ActivityTypes;
+}
+
+export type UserActivity = UserActivityDebate | UserActivityArgument;

@@ -33,6 +33,7 @@ export interface UserActivityDebate {
 }
 
 export interface UserActivityArgument {
+  argumentId: number;
   argumentTitle: string;
   argumentType: string;
   argumentIsDraft: boolean;

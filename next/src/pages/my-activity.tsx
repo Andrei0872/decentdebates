@@ -1,26 +1,25 @@
 import ActivityCard from '@/components/ActivityCard/ActivityCard';
 import Layout from '@/components/Layout/Layout';
 import styles from '@/styles/MyActivity.module.scss';
-import { UserActivity } from '@/types/user';
-import { api } from '@/utils/api';
-import { useEffect, useState } from 'react';
+import { ActivityTypes, CardTypes, UserActivity } from '@/types/user';
+import { fetchUserActivity } from '@/utils/api/user';
+import { useEffect, useMemo, useState } from 'react';
 
 function MyActivity() {
-  const [ongoingItems, setOngoingItems] = useState<UserActivity[]>([]);
-  const [solvedItems, setSolvedItems] = useState<UserActivity[]>([]);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
 
   useEffect(() => {
-    const fetchOngoingItems = () => api.get('user/ongoing-items');
-    const fetchSolvedItems = () => api.get('user/solved-items');
-
-    Promise.all([fetchOngoingItems(), fetchSolvedItems()])
-      .then(resp => {
-        const [{ data: { data: ongoingItems } }, { data: { data: solvedItems } }] = resp;
-
-        setOngoingItems(ongoingItems);
-        setSolvedItems(solvedItems);
-      })
+    fetchUserActivity()
+      .then(activities => setActivities(activities));
   }, []);
+
+  const ongoingItems = useMemo(() => {
+    return activities.filter(a => a.activityList === ActivityTypes.ONGOING);
+  }, [activities]);
+
+  const solvedItems = useMemo(() => {
+    return activities.filter(a => a.activityList === ActivityTypes.SOLVED);
+  }, [activities]);
 
   return (
     <Layout>
@@ -35,7 +34,7 @@ function MyActivity() {
               {
                 ongoingItems.length ? (
                   ongoingItems.map(oi => (
-                    <li key={oi.ticketId}>
+                    <li key={oi.cardType === CardTypes.ARGUMENT ? oi.argumentId : oi.debateId}>
                       <ActivityCard activity={oi} />
                     </li>
                   ))
@@ -51,7 +50,7 @@ function MyActivity() {
               {
                 solvedItems.length ? (
                   solvedItems.map(si => (
-                    <li key={si.ticketId}>
+                    <li key={si.cardType === CardTypes.ARGUMENT ? si.argumentId : si.debateId}>
                       <ActivityCard activity={si} />
                     </li>
                   ))
