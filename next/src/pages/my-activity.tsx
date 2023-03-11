@@ -1,5 +1,6 @@
 import ActivityCard from '@/components/ActivityCard/ActivityCard';
 import Layout from '@/components/Layout/Layout';
+import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
 import styles from '@/styles/MyActivity.module.scss';
 import { ActivityTypes, CardTypes, UserActivity } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
@@ -35,7 +36,13 @@ function MyActivity() {
                 ongoingItems.length ? (
                   ongoingItems.map(oi => (
                     <li key={oi.cardType === CardTypes.ARGUMENT ? oi.argumentId : oi.debateId}>
-                      <ActivityCard activity={oi} />
+                      {
+                        oi.cardType === CardTypes.DEBATE ? (
+                          <DebateCard cardData={oi} />
+                        ) : (
+                          <p>Arg</p>
+                        )
+                      }
                     </li>
                   ))
                 ) : <p>Nothing here yet.</p>
@@ -51,7 +58,13 @@ function MyActivity() {
                 solvedItems.length ? (
                   solvedItems.map(si => (
                     <li key={si.cardType === CardTypes.ARGUMENT ? si.argumentId : si.debateId}>
-                      <ActivityCard activity={si} />
+                      {
+                        si.cardType === CardTypes.DEBATE ? (
+                          <DebateCard cardData={si} />
+                        ) : (
+                          <p>Arg</p>
+                        )
+                      }
                     </li>
                   ))
                 ) : <p>Nothing here yet.</p>

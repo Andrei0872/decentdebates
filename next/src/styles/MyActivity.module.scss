@@ -33,3 +33,9 @@
   padding-inline-end: 4rem;
   width: 100vw;
 }
+
+.list > li {
+  height: calc(5rem + 5vh);
+  border: 1px solid black;
+  min-width: calc(7rem + 10vw);
+}
