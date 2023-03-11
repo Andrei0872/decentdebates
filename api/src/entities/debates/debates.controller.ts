@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Req, Res, SetMetadata, UsePipes } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { from, map, catchError, mergeAll, defer, of, forkJoin } from 'rxjs';
+import { from, map, catchError, mergeAll, defer, of, forkJoin, tap } from 'rxjs';
 import { EntityNotFoundError } from 'src/errors/EntityNotFoundError';
 import { DebateDraftPipe } from 'src/pipes/debate-draft.pipe';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
@@ -133,15 +133,20 @@ export class DebatesController {
 
     return forkJoin({ draft: getDraft$, debate: getDebate$ })
       .pipe(
-        map(data => res.status(HttpStatus.CREATED).json({ data })),
+        tap(data => {
+          if (!data.draft) {
+            throw new EntityNotFoundError('argument');
+          }
+        }),
+        map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err.message, err.status ?? HttpStatus.BAD_REQUEST);
         })
       )
   }
 
   @Patch('/:debateId/draft/:draftId')
-  async updateDraft(@Res() res: Response, @Req() req: Request,@Param(new DebateDraftPipe()) params, @Body() updatedDraftData: UpdateDraftDTO) {
+  async updateDraft(@Res() res: Response, @Req() req: Request, @Param(new DebateDraftPipe()) params, @Body() updatedDraftData: UpdateDraftDTO) {
     const user = (req as any).session.user as UserCookieData;
     const { debateId, draftId } = params;
 
@@ -149,7 +154,7 @@ export class DebatesController {
       user,
       debateId: +debateId,
       draftId: +draftId,
-      draftData:  updatedDraftData,
+      draftData: updatedDraftData,
     };
     return from(this.debatesService.updateDraft(draftInfo))
       .pipe(
