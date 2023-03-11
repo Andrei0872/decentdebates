@@ -5,6 +5,9 @@
     - [The root `.env` file](#the-root-env-file)
     - [The `api` `.env` file](#the-api-env-file)
   - [Spinning up the application](#spinning-up-the-application)
+  - [Working on the application](#working-on-the-application)
+    - [Dealing with DB schema changes](#dealing-with-db-schema-changes)
+    - [Seeding the database](#seeding-the-database)
   - [My Research](#my-research)
 
 
@@ -59,6 +62,26 @@ cp .env.example .env
 
     You can also run in debug mode by selecting the Nest.js configuration before starting up the debugging process.
 
+---
+
+## Working on the application
+
+### Dealing with DB schema changes
+
+Quickly _reload_ the Postgres instance with the new changes:
+
+```bash
+docker compose down -v && docker compose up
+```
+
+### Seeding the database
+
+```bash
+# Ensure you're in the `api` folder.
+npx knex seed:run
+```
+
+---
 
 ## My Research
 
