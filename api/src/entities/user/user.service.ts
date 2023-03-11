@@ -105,6 +105,7 @@ export class UserService {
           else 'ONGOING'
         end "activityList",
         d.title "debateTitle",
+        d.id "debateId",
         'argument' "cardType",
         u.username "moderatorUsername"
       from argument a

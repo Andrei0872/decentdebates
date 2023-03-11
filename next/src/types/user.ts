@@ -25,6 +25,7 @@ export interface UserActivityArgument {
   argumentIsDraft: boolean;
   boardList: string;
   debateTitle: string;
+  debateId: number;
   cardType: CardTypes.ARGUMENT;
   moderatorUsername: string;
   activityList: ActivityTypes;
