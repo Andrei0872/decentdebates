@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { CreateArgumentData, Debate, DebateArgument } from './debates.model';
+import { CreateArgumentData, Debate, DebateArgument, GetDraftData } from './debates.model';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -303,6 +303,47 @@ export class DebatesService {
 
     try {
       await client.query(sqlStr, values);
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while saving the argument as draft.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async getDraft (draftData: GetDraftData): Promise<DebateArgument> {
+    const sqlStr = `
+      select
+        a.debate_id "debateId",
+        a.id "argumentId",
+        d.title "debateTitle",
+        a.ticket_id "ticketId",
+        a.title,
+        a.content,
+        a.created_by "createdById",
+        a.type "argumentType",
+        a.created_at "createdAt",
+        u.username,
+        a.counterargument_to "counterargumentTo"
+      from argument a
+      join debate d
+        on a.debate_id = d.id
+      join "user" u
+        on a.created_by = u.id
+      where debate_id = $1 and a.id = $2 and a.created_by = $3
+    `;
+    const values = [
+      draftData.debateId,
+      draftData.argumentId,
+      draftData.user.id,
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+
+      return res.rows[0];
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while saving the argument as draft.');

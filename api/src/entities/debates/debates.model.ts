@@ -37,3 +37,9 @@ export interface CreateArgumentData {
   debateId: number;
   argumentDetails: CreateArgumentDTO;
 }
+
+export interface GetDraftData {
+  user: UserCookieData;
+  debateId: number;
+  argumentId: number;
+}
