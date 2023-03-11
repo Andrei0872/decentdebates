@@ -51,3 +51,10 @@ export interface UpdateDraftData {
   draftId: number;
   draftData: UpdateDraftDTO;
 }
+
+export interface SubmitDraftData {
+  user: UserCookieData;
+  debateId: number;
+  draftId: number;
+  draftData: UpdateDraftDTO;
+}

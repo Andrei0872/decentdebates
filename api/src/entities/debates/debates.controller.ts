@@ -7,7 +7,7 @@ import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { isNumber } from 'src/utils';
 import { getDebates } from 'src/utils/debates';
 import { UserCookieData } from '../user/user.model';
-import { CreateArgumentData, GetDraftData, UpdateDraftData } from './debates.model';
+import { CreateArgumentData, GetDraftData, SubmitDraftData, UpdateDraftData } from './debates.model';
 import { DebatesService, Filters } from './debates.service';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
@@ -159,6 +159,26 @@ export class DebatesController {
     return from(this.debatesService.updateDraft(draftInfo))
       .pipe(
         map(data => res.status(HttpStatus.OK).json({ message: 'Draft successfully updated.' })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @Post('/:debateId/draft/:draftId/save')
+  async submitDraft(@Res() res: Response, @Req() req: Request, @Param(new DebateDraftPipe()) params, @Body() updatedDraftData: UpdateDraftDTO) {
+    const user = (req as any).session.user as UserCookieData;
+    const { debateId, draftId } = params;
+
+    const draftInfo: SubmitDraftData = {
+      user,
+      debateId: +debateId,
+      draftId: +draftId,
+      draftData: updatedDraftData,
+    };
+    return from(this.debatesService.submitDraft(draftInfo))
+      .pipe(
+        map(data => res.status(HttpStatus.CREATED).json({ message: 'The draft has been submitted successfully.' })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

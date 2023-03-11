@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { CreateArgumentData, Debate, DebateArgument, GetDraftData, UpdateDraftData } from './debates.model';
+import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateDraftData } from './debates.model';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -384,6 +384,57 @@ export class DebatesService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while updating the draft.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async submitDraft(draftInfo: SubmitDraftData) {
+    const { draftData } = draftInfo;
+
+    const createTicketSqlStr = `
+      insert into ticket
+      values (default, $1, null, $2)
+      returning id;
+    `;
+    const createTicketValues = [draftInfo.user.id, PENDING_BOARD_LIST];
+
+    const updateArgumentSql = `
+      update argument
+      set
+        is_draft = false,
+        title = $1,
+        content = $2,
+        counterargument_to = $3,
+        type = $4,
+        ticket_id = $5
+      where id = $6 and debate_id = $7 and created_by = $8
+    `;
+
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+
+      const updateArgumentValues = [
+        draftData.title,
+        draftData.content,
+        draftData.counterargumentId,
+        draftData.argumentType,
+        ticketId,
+        draftInfo.draftId,
+        draftInfo.debateId,
+        draftInfo.user.id,
+      ];
+      client.query(updateArgumentSql, updateArgumentValues),
+
+      await client.query('COMMIT');
+    } catch (err) {
+      console.log(err.message);
+      await client.query('ROLLBACK');
+      throw new Error('An error occurred while submitting the draft.');
     } finally {
       client.release();
     }
