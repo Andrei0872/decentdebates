@@ -10,7 +10,7 @@ import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } f
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, updateDraft } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, submitDraft, updateDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
@@ -132,7 +132,7 @@ function NewArgument() {
 
   const onSubmit = (formData: CreateArgumentFormData, ev?: React.BaseSyntheticEvent) => {
     const submitter = (ev!.nativeEvent as SubmitEvent).submitter;
-    const isDraft = submitter?.dataset.isDraft === 'true';
+    const isDraftSubmit = submitter?.dataset.isDraft === 'true';
 
     const editor = exportEditorContentRef.current?.getEditor();
 
@@ -143,13 +143,17 @@ function NewArgument() {
       ...formData.counterargumentId && { counterargumentId: +formData.counterargumentId },
     };
 
-    const action = isDraft
+    const action = isDraftSubmit
       ? (
         isUpdatingDraft
           ? updateDraft({ debateId: +debateId!, draftId: +draftId!, draftData: createdArgument })
           : saveArgumentAsDraft(crtDebate?.metadata.debateId!, createdArgument)
       )
-      : createArgument(crtDebate?.metadata.debateId!, createdArgument);
+      : (
+        isUpdatingDraft
+          ? submitDraft({ debateId: +debateId!, draftId: +draftId!, draftData: createdArgument })
+          : createArgument(crtDebate?.metadata.debateId!, createdArgument)
+      );
     action
       .then(res => {
         toasterRef.current?.show({
@@ -159,7 +163,11 @@ function NewArgument() {
           timeout: 3000,
         });
 
-        if (isUpdatingDraft) {
+        const isFirstTimeDraft = isDraftSubmit && !isUpdatingDraft;
+        const isDraftSubmitted = !isDraftSubmit && isUpdatingDraft;
+        const isDirectlySubmitted = !isDraftSubmit && !isUpdatingDraft;
+        const shouldRedirect = isFirstTimeDraft || isDraftSubmitted || isDirectlySubmitted;
+        if (!shouldRedirect) {
           return;
         }
 

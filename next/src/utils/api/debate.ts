@@ -51,3 +51,8 @@ export const updateDraft = (params: UpdateDraftParams) => {
   return api.patch(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}`, params.draftData)
     .then(r => r.data);
 }
+
+export const submitDraft = (params: UpdateDraftParams) => {
+  return api.post(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}/save`, params.draftData)
+    .then(r => r.data);
+}
