@@ -1,5 +1,6 @@
-import { ArgumentType } from "@/store/slices/debates.slice";
+import { ArgumentType, DebateArgument } from "@/store/slices/debates.slice";
 import { api } from ".";
+import { CurrentDebate } from '@/store/slices/debates.slice';
 
 const ROOT_PATH = '/debates';
 
@@ -8,6 +9,11 @@ export interface CreateArgumentData {
   content: string;
   argumentType: ArgumentType;
   counterargumentId?: number;
+}
+
+export interface GetDraftResponse {
+  debate: Pick<CurrentDebate, 'metadata' | 'args'>;
+  draft: DebateArgument;
 }
 
 export const createArgument = (debateId: number, data: CreateArgumentData) => {
@@ -28,4 +34,9 @@ export const fetchDebateById = (debateId: number) => {
 export const saveArgumentAsDraft = (debateId: number, data: CreateArgumentData) => {
   return api.post(`${ROOT_PATH}/${debateId}/draft`, data)
     .then(r => r.data);
+}
+
+export const fetchDraft = (debateId: number, argId: number): Promise<GetDraftResponse> => {
+  return api.get(`${ROOT_PATH}/${debateId}/draft/${argId}?includeDebate=true`)
+    .then(r => r.data.data);
 }

@@ -1,14 +1,22 @@
 import ActivityCard from '@/components/ActivityCard/ActivityCard';
+import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import Layout from '@/components/Layout/Layout';
 import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
+import { CardLabels } from '@/dtos/moderator/get-activity.dto';
 import styles from '@/styles/MyActivity.module.scss';
-import { ActivityTypes, CardTypes, UserActivity } from '@/types/user';
+import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
+import { Dialog, DialogBody, Icon } from '@blueprintjs/core';
+import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 
 function MyActivity() {
   const [activities, setActivities] = useState<UserActivity[]>([]);
+
+  const router = useRouter();
+
+  const [previewedCard, setPreviewedCard] = useState<UserActivity | null>(null);
 
   useEffect(() => {
     fetchUserActivity()
@@ -22,6 +30,26 @@ function MyActivity() {
   const solvedItems = useMemo(() => {
     return activities.filter(a => a.activityList === ActivityTypes.SOLVED);
   }, [activities]);
+
+  const onArgumentClick = (arg: UserActivityArgument) => {
+    if (!arg.argumentIsDraft) {
+      return;
+    }
+
+    setPreviewedCard(arg);
+  }
+
+  const onDialogClose = () => {
+    setPreviewedCard(null);
+  }
+
+  const expandDialog = () => {
+    if (previewedCard?.cardType === CardTypes.ARGUMENT) {
+      router.push(`/debates/${previewedCard.debateId}/new-argument?draftId=${previewedCard.argumentId}`);
+    }
+  }
+
+  const shouldDisplayPreviewDialog = !!previewedCard;
 
   return (
     <Layout>
@@ -41,7 +69,7 @@ function MyActivity() {
                         oi.cardType === CardTypes.DEBATE ? (
                           <DebateCard cardData={oi} />
                         ) : (
-                          <ArgumentCard cardData={oi} />
+                          <ArgumentCard click={onArgumentClick} cardData={oi} />
                         )
                       }
                     </li>
@@ -74,6 +102,47 @@ function MyActivity() {
           </section>
         </div>
       </div>
+
+      <Dialog isOpen={shouldDisplayPreviewDialog} onClose={onDialogClose}>
+        <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
+          <div className={styles.cardDialogHeader}>
+            <div className={styles.cardTitle}>
+              <div>
+                {previewedCard?.debateTitle}
+              </div>
+              {
+                previewedCard?.cardType === CardTypes.ARGUMENT ? (
+                  <div>
+                    <div>{previewedCard.argumentTitle}</div>
+                    {
+                      previewedCard.argumentIsDraft ? (
+                        <div>#draft</div>
+                      ) : null
+                    }
+                  </div>
+                ) : null
+              }
+            </div>
+            <div className={styles.cardActions}>
+              <Icon onClick={expandDialog} className={styles.cardIcon} icon="maximize" size={14} />
+              <Icon onClick={onDialogClose} className={styles.cardIcon} icon="cross" />
+            </div>
+          </div>
+
+          <div className={styles.cardDialogBody}>
+            {/* TODO: preview arg content here */}
+            {/* {
+              previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
+                isArgumentLoading ? <p>Loading...</p> : (
+                  <ArgumentEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
+                )
+              ) : (
+                <div>some debate info</div>
+              )
+            } */}
+          </div>
+        </DialogBody>
+      </Dialog>
     </Layout>
   )
 }

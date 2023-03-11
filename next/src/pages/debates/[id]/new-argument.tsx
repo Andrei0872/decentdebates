@@ -10,7 +10,7 @@ import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } f
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, saveArgumentAsDraft } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
@@ -31,7 +31,7 @@ const toasterOptions = {
 
 function NewArgument() {
   const router = useRouter();
-  const { counterargumentId: counterargumentIdParam, id: debateId } = router.query;
+  const { counterargumentId: counterargumentIdParam, id: debateId, draftId } = router.query;
 
   const isCounterargumentExplicit = !!counterargumentIdParam;
 
@@ -58,6 +58,8 @@ function NewArgument() {
 
   const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(() => isCounterargumentExplicit);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
+  const [prefilledEditorContent, setPrefilledEditorContent] = useState<null | string>(null);
+  const [isArgumentEditorReady, setIsArgumentEditorReady] = useState(true);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
@@ -86,6 +88,32 @@ function NewArgument() {
 
     if (!debateId || Number.isNaN(+debateId)) {
       router.push('/debates');
+      return () => { };
+    }
+
+    const isDraft = !!draftId && !Number.isNaN(+draftId);
+    if (isDraft) {
+      setIsArgumentEditorReady(false);
+
+      fetchDraft(+debateId, +draftId)
+        .then(r => {
+          const { debate, draft } = r;
+          dispatch(setCurrentDebate(getDebateDTO(debate)));
+
+          if (draft.counterargumentTo) {
+            setTimeout(() => {
+              setValue('counterargumentId', draft.counterargumentTo!);
+            }, 0);
+
+            setValue('isCounterargument', true);
+          }
+
+          setValue('argumentTitle', draft.title);
+          setValue('argType', draft.argumentType);
+
+          setPrefilledEditorContent(draft.content ?? null);
+          setIsArgumentEditorReady(true);
+        })
       return () => { };
     }
 
@@ -292,12 +320,16 @@ function NewArgument() {
                     <input {...register('argumentTitle')} type="text" placeholder='arg title' />
                   </div>
 
-                  {/* TODO: pass `className` as prop? */}
-                  <ArgumentEditor
-                    additionalPlugins={
-                      <ExportContentPlugin ref={exportEditorContentRef} />
-                    }
-                  />
+                  {
+                    isArgumentEditorReady ? (
+                      <ArgumentEditor
+                        additionalPlugins={
+                          <ExportContentPlugin ref={exportEditorContentRef} />
+                        }
+                        configOptions={prefilledEditorContent ? { editorState: prefilledEditorContent } : undefined}
+                      />
+                    ) : null
+                  }
 
                   <div className={styles.argumentButtons}>
                     <button type='submit'>Submit</button>
