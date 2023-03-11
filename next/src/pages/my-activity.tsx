@@ -1,5 +1,6 @@
 import ActivityCard from '@/components/ActivityCard/ActivityCard';
 import Layout from '@/components/Layout/Layout';
+import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
 import styles from '@/styles/MyActivity.module.scss';
 import { ActivityTypes, CardTypes, UserActivity } from '@/types/user';
@@ -40,7 +41,7 @@ function MyActivity() {
                         oi.cardType === CardTypes.DEBATE ? (
                           <DebateCard cardData={oi} />
                         ) : (
-                          <p>Arg</p>
+                          <ArgumentCard cardData={oi} />
                         )
                       }
                     </li>
@@ -62,7 +63,7 @@ function MyActivity() {
                         si.cardType === CardTypes.DEBATE ? (
                           <DebateCard cardData={si} />
                         ) : (
-                          <p>Arg</p>
+                          <ArgumentCard cardData={si} />
                         )
                       }
                     </li>

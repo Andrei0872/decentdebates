@@ -37,7 +37,7 @@ export interface UserActivityArgument {
   argumentTitle: string;
   argumentType: string;
   argumentIsDraft: boolean;
-  ticketBoardList: string;
+  boardList: string;
   debateTitle: string;
   cardType: CardTypes.ARGUMENT;
   moderatorUsername: string;

@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.header {
+  border-bottom: 1px solid black;
+}
+
+.body {
+  flex-grow: 1;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid black;
+}
+
+.moderator {
+  display: flex;
+  align-items: center;
+}
