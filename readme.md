@@ -1,5 +1,13 @@
 # Decent Debates
 
+- [Decent Debates](#decent-debates)
+  - [Setting up](#setting-up)
+    - [The root `.env` file](#the-root-env-file)
+    - [The `api` `.env` file](#the-api-env-file)
+  - [Spinning up the application](#spinning-up-the-application)
+  - [My Research](#my-research)
+
+
 ## Setting up
 
 ### The root `.env` file
@@ -27,8 +35,30 @@ cp .env.example .env
 1. Start the containers
 
     ```bash
+    # Ensure you're in the root folder.
     docker-compose up
     ```
+
+2. Start the Next.js application
+
+    ```bash
+    cd next
+    npm run dev
+    ```
+
+    You can also run in debug mode by selecting the Next.js configuration before starting up the debugging process.
+
+3. Start the Nest.js application
+
+    ```bash
+    # From the root folder.
+    cd api
+
+    npm run start:dev
+    ```
+
+    You can also run in debug mode by selecting the Nest.js configuration before starting up the debugging process.
+
 
 ## My Research
 

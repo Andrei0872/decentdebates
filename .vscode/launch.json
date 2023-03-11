@@ -2,13 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
-      "request": "attach",
-      "name": "NestJS debugging",
-      "port": 9229,
-      "restart": true,
-    },
-    {
       "cwd": "${workspaceFolder}/api",
       "name": "NestJS debugging + set-up process",
       "type": "node",
