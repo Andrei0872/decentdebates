@@ -2,15 +2,23 @@
 
 ## Setting up
 
-### `.env` file
+### The root `.env` file
 
-Create an `.env` file from the example file:
+These variables are going to be used to configure the local Postgres instance.
 
 ```bash
+# Ensure you're in the root folder.
 cp .env.example .env
 ```
 
-and then fill in with your data.
+### The `api` `.env` file
+
+Here the cookie secret should be provided.
+
+```bash
+# Ensure you're in the `api` directory.
+cp .env.example .env
+```
 
 ---
 
