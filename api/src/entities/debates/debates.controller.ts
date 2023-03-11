@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res, SetMetadata } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Req, Res, SetMetadata, UsePipes } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { from, map, catchError, mergeAll, defer, of, forkJoin } from 'rxjs';
 import { EntityNotFoundError } from 'src/errors/EntityNotFoundError';
+import { DebateDraftPipe } from 'src/pipes/debate-draft.pipe';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
 import { isNumber } from 'src/utils';
 import { getDebates } from 'src/utils/debates';
@@ -113,19 +114,11 @@ export class DebatesController {
   }
 
   @Get('/:debateId/draft/:draftId')
-  async getDraft(@Res() res: Response, @Req() req: Request) {
+  @UsePipes(new DebateDraftPipe())
+  async getDraft(@Res() res: Response, @Req() req: Request, @Param() params) {
     const user = (req as any).session.user as UserCookieData;
-    const { debateId, draftId } = req.params;
+    const { debateId, draftId } = params;
     const { includeDebate } = req.query;
-
-    // TODO: use filters for such cases.
-    if (!isNumber(debateId)) {
-      throw new HttpException(`'debateId' is expected to be a number.`, HttpStatus.BAD_REQUEST);
-    }
-
-    if (!isNumber(draftId)) {
-      throw new HttpException(`'draftId' is expected to be a number.`, HttpStatus.BAD_REQUEST);
-    }
 
     const draftData: GetDraftData = {
       user,
