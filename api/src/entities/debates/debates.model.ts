@@ -1,5 +1,6 @@
 import { UserCookieData } from "../user/user.model";
 import { CreateArgumentDTO } from "./dtos/create-argument.dto";
+import { UpdateDraftDTO } from "./dtos/update-draft.dto";
 
 export interface Debate {
   id: number;
@@ -42,4 +43,11 @@ export interface GetDraftData {
   user: UserCookieData;
   debateId: number;
   argumentId: number;
+}
+
+export interface UpdateDraftData {
+  user: UserCookieData;
+  debateId: number;
+  draftId: number;
+  draftData: UpdateDraftDTO;
 }

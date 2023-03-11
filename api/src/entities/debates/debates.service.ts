@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { CreateArgumentData, Debate, DebateArgument, GetDraftData } from './debates.model';
+import { CreateArgumentData, Debate, DebateArgument, GetDraftData, UpdateDraftData } from './debates.model';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -311,7 +311,7 @@ export class DebatesService {
     }
   }
 
-  async getDraft (draftData: GetDraftData): Promise<DebateArgument> {
+  async getDraft(draftData: GetDraftData): Promise<DebateArgument> {
     const sqlStr = `
       select
         a.debate_id "debateId",
@@ -347,6 +347,43 @@ export class DebatesService {
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while saving the argument as draft.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateDraft(draftInfo: UpdateDraftData) {
+    const { draftData } = draftInfo;
+    const sqlStr = `
+      update argument
+      set
+        title = $1,
+        content = $2,
+        counterargument_to = $3,
+        type = $4
+      where debate_id = $5 and created_by = $6 and id = $7 and is_draft = true
+    `;
+    const values = [
+      draftData.title,
+      draftData.content,
+      draftData.counterargumentId,
+      draftData.argumentType,
+      draftInfo.debateId,
+      draftInfo.user.id,
+      draftInfo.draftId,
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      if (!res.rowCount) {
+        throw new Error('An error occurred while updating the draft.');
+      }
+
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while updating the draft.');
     } finally {
       client.release();
     }
