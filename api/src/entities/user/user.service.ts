@@ -98,7 +98,7 @@ export class UserService {
         a.title "argumentTitle",
         a.type "argumentType",
         a.is_draft "argumentIsDraft",
-        t.board_list "ticketBoardList",
+        t.board_list "boardList",
         case
           when t.board_list is null then 'ONGOING'
           when t.board_list = 'ACCEPTED' then 'SOLVED'
