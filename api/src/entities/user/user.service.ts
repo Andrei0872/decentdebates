@@ -75,6 +75,7 @@ export class UserService {
         on u.id = t.assigned_to
       where
         t.created_by = $1
+      order by d.created_at desc
     `;
     const values = [user.id];
 
@@ -116,6 +117,7 @@ export class UserService {
       left join "user" u
         on t.created_by = u.id
       where a.created_by = $1
+      order by a.created_at desc
     `;
     const values = [user.id];
 
