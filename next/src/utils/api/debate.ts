@@ -11,6 +11,12 @@ export interface CreateArgumentData {
   counterargumentId?: number;
 }
 
+export interface UpdateDraftParams {
+  debateId: number;
+  draftId: number;
+  draftData: CreateArgumentData;
+}
+
 export interface GetDraftResponse {
   debate: Pick<CurrentDebate, 'metadata' | 'args'>;
   draft: DebateArgument;
@@ -39,4 +45,9 @@ export const saveArgumentAsDraft = (debateId: number, data: CreateArgumentData) 
 export const fetchDraft = (debateId: number, argId: number): Promise<GetDraftResponse> => {
   return api.get(`${ROOT_PATH}/${debateId}/draft/${argId}?includeDebate=true`)
     .then(r => r.data.data);
+}
+
+export const updateDraft = (params: UpdateDraftParams) => {
+  return api.patch(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}`, params.draftData)
+    .then(r => r.data);
 }

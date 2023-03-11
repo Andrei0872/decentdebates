@@ -10,7 +10,7 @@ import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } f
 import { useRouter } from 'next/router';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
-import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft } from '@/utils/api/debate';
+import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, updateDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
@@ -114,6 +114,9 @@ function NewArgument() {
           setPrefilledEditorContent(draft.content ?? null);
           setIsArgumentEditorReady(true);
         })
+        .catch(err => {
+          router.push('/debates');
+        });
       return () => { };
     }
 
@@ -140,7 +143,13 @@ function NewArgument() {
       ...formData.counterargumentId && { counterargumentId: +formData.counterargumentId },
     };
 
-    const action = isDraft ? saveArgumentAsDraft(crtDebate?.metadata.debateId!, createdArgument) : createArgument(crtDebate?.metadata.debateId!, createdArgument);
+    const action = isDraft
+      ? (
+        isUpdatingDraft
+          ? updateDraft({ debateId: +debateId!, draftId: +draftId!, draftData: createdArgument })
+          : saveArgumentAsDraft(crtDebate?.metadata.debateId!, createdArgument)
+      )
+      : createArgument(crtDebate?.metadata.debateId!, createdArgument);
     action
       .then(res => {
         toasterRef.current?.show({
@@ -149,6 +158,10 @@ function NewArgument() {
           message: res.message,
           timeout: 3000,
         });
+
+        if (isUpdatingDraft) {
+          return;
+        }
 
         setTimeout(() => {
           router.push(`/debates/${crtDebate?.metadata.debateId!}`);
@@ -184,10 +197,11 @@ function NewArgument() {
   const isCounterargument = watch('isCounterargument') === true;
   const counterargumentId = isCounterargument ? watch('counterargumentId') : false;
   const argType = watch('argType');
+  const isPageReady = !!crtDebate;
 
   const debateArguments = useMemo(() => {
     return crtDebate?.args.filter(arg => arg.argumentType !== argType);
-  }, [argType]);
+  }, [argType, isPageReady]);
 
 
   useEffect(() => {
@@ -237,7 +251,7 @@ function NewArgument() {
     return crtDebate?.args.find(arg => +arg.argumentId === +counterargumentId);
   }, [counterargumentId]);
 
-  const isPageReady = !!crtDebate;
+  const isUpdatingDraft = !!prefilledEditorContent;
 
   return (
     <Layout>
@@ -333,7 +347,7 @@ function NewArgument() {
 
                   <div className={styles.argumentButtons}>
                     <button type='submit'>Submit</button>
-                    <button data-is-draft={true} type='submit'>Save Draft</button>
+                    <button data-is-draft={true} type='submit'>{isUpdatingDraft ? 'Update' : 'Save'} Draft</button>
                   </div>
                 </form>
               </section>
