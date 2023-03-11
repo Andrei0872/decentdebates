@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { from, map, catchError, mergeAll } from 'rxjs';
 import { EntityNotFoundError } from 'src/errors/EntityNotFoundError';
 import { DebatesQueryPipe } from 'src/pipes/debates-query.pipe';
+import { isNumber } from 'src/utils';
 import { getDebates } from 'src/utils/debates';
 import { UserCookieData } from '../user/user.model';
 import { CreateArgumentData } from './debates.model';
@@ -91,6 +92,10 @@ export class DebatesController {
   async saveArgumentAsDraft(@Res() res: Response, @Req() req: Request, @Body() body: CreateArgumentDTO) {
     const user = (req as any).session.user as UserCookieData;
     const { debateId } = req.params;
+
+    if (!isNumber(debateId)) {
+      throw new HttpException(`'debateId' is expected to be a number.`, HttpStatus.BAD_REQUEST);
+    }
 
     const argData: CreateArgumentData = {
       user,
