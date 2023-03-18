@@ -1,5 +1,3 @@
-import ActivityCard from '@/components/ActivityCard/ActivityCard';
-import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
 import Layout from '@/components/Layout/Layout';
 import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
