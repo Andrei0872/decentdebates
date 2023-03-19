@@ -3,7 +3,7 @@ import { Classes, Popover2 } from '@blueprintjs/popover2';
 import styles from './DebateArgument.module.scss';
 import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 import { DebateArgument } from '@/store/slices/debates.slice';
-import ArgumentEditor from '../ArgumentEditor/ArgumentEditor';
+import RichEditor from '../RichEditor/RichEditor';
 
 interface Props {
   debateArgumentData: DebateArgument;
@@ -49,7 +49,7 @@ function DebateArgument(props: Props) {
       {
         isExpanded ? (
           <div className={styles.body}>
-            <ArgumentEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: debateArgumentData.content }} />
+            <RichEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: debateArgumentData.content }} />
           </div>
         ) : null
       }

@@ -1,9 +1,9 @@
 import Layout from '@/components/Layout/Layout'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from '@/styles/NewArgument.module.scss';
-import ArgumentEditor from '@/components/ArgumentEditor/ArgumentEditor';
+import RichEditor from '@/components/RichEditor/RichEditor';
 import { useForm } from 'react-hook-form';
-import ExportContentPlugin, { ExportContentRefData } from '@/components/ArgumentEditor/plugins/ExportContentPlugin';
+import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
 import { Callout, Collapse, Icon, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
@@ -342,7 +342,7 @@ function NewArgument() {
 
                   {
                     isArgumentEditorReady ? (
-                      <ArgumentEditor
+                      <RichEditor
                         additionalPlugins={
                           <ExportContentPlugin ref={exportEditorContentRef} />
                         }

@@ -1,5 +1,5 @@
 import { InitialConfigType } from "@lexical/react/LexicalComposer";
-import styles from './ArgumentEditor.module.scss';
+import styles from './RichEditor.module.scss';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { LinkNode } from "@lexical/link";

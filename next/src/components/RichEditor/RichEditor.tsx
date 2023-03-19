@@ -1,4 +1,4 @@
-import styles from './ArgumentEditor.module.scss';
+import styles from './RichEditor.module.scss';
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer';
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { editorConfig } from './config';
@@ -22,7 +22,7 @@ interface Props {
   configOptions?: Partial<InitialConfigType>;
   containerClassName?: string;
 }
-function ArgumentEditor(props: Props) {
+function RichEditor(props: Props) {
   const shouldDisplayToolbar = (props.configOptions?.editable ?? true) === true;
   
   return (
@@ -51,4 +51,4 @@ function ArgumentEditor(props: Props) {
   )
 }
 
-export default ArgumentEditor
+export default RichEditor

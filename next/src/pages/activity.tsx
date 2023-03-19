@@ -10,7 +10,7 @@ import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.sli
 import { useRouter } from "next/router";
 import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument } from "@/store/slices/moderator.slice";
-import ArgumentEditor from "@/components/ArgumentEditor/ArgumentEditor";
+import RichEditor from "@/components/RichEditor/RichEditor";
 import { fetchArgument } from "@/utils/api/moderator";
 
 enum DNDItemTypes {
@@ -224,7 +224,7 @@ function Activity() {
             {
               previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
                 isArgumentLoading ? <p>Loading...</p> : (
-                  <ArgumentEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
+                  <RichEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
                 )
               ) : (
                 <div>some debate info</div>
