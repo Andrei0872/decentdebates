@@ -1,0 +1,30 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 3rem;
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.commentsList {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-inline: auto;
+
+  // TODO: properly set this.
+  width: 50vw;
+}
+
+.commentsHeader {
+  display: flex;
+  gap: 1.5rem;
+  padding-inline-start: 2rem;
+}

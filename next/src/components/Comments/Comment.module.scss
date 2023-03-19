@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+}
+
+.header {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.body {
+  flex-grow: 1;
+}
