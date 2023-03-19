@@ -61,6 +61,9 @@ function Argument() {
     router.back();
   }
 
+  const addComment = () => {
+    console.log('Adding comment.');
+  }
 
   return (
     <Layout>
@@ -69,11 +72,19 @@ function Argument() {
       </section>
 
       <CommentsLayout mainContent={<ArgumentContent />}>
-        {
-          comments.map(c => (
-            <Comment />
-          ))
-        }
+        <CommentsLayout.CommentsList>
+          {
+            comments.map(c => (
+              <Comment isEditable={false} />
+            ))
+          }
+          <Comment isEditable={true} />
+        </CommentsLayout.CommentsList>
+
+        <div className={styles.commentButtons}>
+          <button type='button' onClick={addComment}>Add Comment</button>
+        </div>
+
       </CommentsLayout>
     </Layout>
   )

@@ -1,3 +1,4 @@
+import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
 
 interface Props {
@@ -8,23 +9,31 @@ interface Props {
     createdAt: string;
     rawContent: string;
   }
+
+  isEditable?: boolean;
 }
 
 function Comment(props: Props) {
   const { commentData } = props;
 
+  const isEditable = !!props.isEditable;
+
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>andrei.gatej</div>
-        <div>19.04.2022</div>
-        <div>Edited</div>
-
-        <div>...</div>
-      </div>
+      {
+        !isEditable ? (
+          <div className={styles.header}>
+            <div>andrei.gatej</div>
+            <div>19.04.2022</div>
+            <div>Edited</div>
+            
+            <div>...</div>
+          </div>
+        ) : null
+      }
 
       <div className={styles.body}>
-        some content here.
+        <RichEditor containerClassName={styles.commentEditorContainer} configOptions={{ editable: isEditable }} />
       </div>
     </div>
   )

@@ -40,6 +40,10 @@ function Debate() {
     router.back();
   }
 
+  const addComment = () => {
+    console.log('Adding comment.');
+  }
+
   return (
     <Layout>
       <section className={styles.buttons}>
@@ -47,11 +51,18 @@ function Debate() {
       </section>
 
       <CommentsLayout mainContent={<DebateContent />}>
-        {
-          comments.map(c => (
-            <Comment />
-          ))
-        }
+        <CommentsLayout.CommentsList>
+          {
+            comments.map(c => (
+              <Comment isEditable={false} />
+            ))
+          }
+          <Comment isEditable={true} />
+        </CommentsLayout.CommentsList>
+
+        <div className={styles.commentButtons}>
+          <button type='button' onClick={addComment}>Add Comment</button>
+        </div>
       </CommentsLayout>
     </Layout>
   )

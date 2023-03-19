@@ -6,6 +6,17 @@ interface Props {
   children: ReactNode;
 }
 
+interface CommentsListProps {
+  children: ReactNode;
+}
+function CommentsList(props: CommentsListProps) {
+  return (
+    <ul className={styles.commentsList}>
+      {props.children}
+    </ul>
+  )
+}
+
 function CommentsLayout(props: Props) {
   const { mainContent, children } = props;
 
@@ -20,12 +31,12 @@ function CommentsLayout(props: Props) {
           <h2>Comments</h2>
         </div>
 
-        <ul className={styles.commentsList}>
-          {children}
-        </ul>
+        {children}
       </section>
     </div>
   )
 }
+
+CommentsLayout.CommentsList = CommentsList;
 
 export default CommentsLayout
