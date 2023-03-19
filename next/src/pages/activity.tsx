@@ -179,8 +179,11 @@ function Activity() {
   }
 
   const expandCardModal = () => {
-    console.log(previewedCard);
-    router.push(`/item/debate/${previewedCard?.ticketId}`);
+    if (previewedCard?.ticketLabel === CardLabels.DEBATE) {
+      router.push(`/review/debate/${previewedCard?.ticketId}`);
+    } else if (previewedCard?.ticketLabel === CardLabels.ARGUMENT) {
+      router.push(`/review/argument/${previewedCard?.ticketId}`);
+    }
   }
 
   return (
