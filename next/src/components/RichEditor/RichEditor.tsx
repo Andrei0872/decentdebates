@@ -21,6 +21,7 @@ interface Props {
   additionalPlugins?: ReactNode;
   configOptions?: Partial<InitialConfigType>;
   containerClassName?: string;
+  placeholder?: JSX.Element;
 }
 function RichEditor(props: Props) {
   const shouldDisplayToolbar = (props.configOptions?.editable ?? true) === true;
@@ -36,7 +37,7 @@ function RichEditor(props: Props) {
         <div className={styles.inner}>
           <RichTextPlugin
             contentEditable={<ContentEditable className={styles.input} />}
-            placeholder={<Placeholder />}
+            placeholder={props.placeholder ?? <Placeholder />}
             ErrorBoundary={LexicalErrorBoundary}
           />
           <AutoFocusPlugin />

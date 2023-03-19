@@ -13,6 +13,10 @@ interface Props {
   isEditable?: boolean;
 }
 
+function CommentPlaceholder() {
+  return <div className={styles.placeholder}>Add your comment here...</div>;
+}
+
 function Comment(props: Props) {
   const { commentData } = props;
 
@@ -33,7 +37,7 @@ function Comment(props: Props) {
       }
 
       <div className={styles.body}>
-        <RichEditor containerClassName={styles.commentEditorContainer} configOptions={{ editable: isEditable }} />
+        <RichEditor placeholder={<CommentPlaceholder />} containerClassName={styles.commentEditorContainer} configOptions={{ editable: isEditable }} />
       </div>
     </div>
   )
