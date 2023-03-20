@@ -1,8 +1,9 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
 import { SocketIOServer } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
+import { UserCookieData } from '../user/user.model';
 
 const PORT = 3002;
 
@@ -19,7 +20,11 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async handleConnection(socket: Socket, ...args: any[]) {
     try {
-      await this.reviewService.checkUserExistsFromSocket(socket);
+      const user = await this.reviewService.getUserFromSocket(socket);
+
+      // TODO: attach `user` to `socket`. E.g. by using a `Map`.
+
+      this.addUserToRoom(socket, user);
     } catch (err) {
       console.error(err.message);
 
@@ -28,12 +33,38 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  handleDisconnect(client: any) {
-    console.log('disc');
+  handleDisconnect(socket: Socket) {
+    try {
+      this.removeUserFromRoom(socket);
+    } catch (err) {
+      console.error(err.message);
+    }
   }
 
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  @SubscribeMessage('comment:create')
+  handleMessage(socket: Socket, payload: any): string {
+    const roomIdentifier = this.getRoomIdentifier(socket);
+    socket.to(roomIdentifier).emit('comment:create', payload);
+    
+    return null;
+  }
+
+  private addUserToRoom(socket: Socket, user: UserCookieData) {
+    const roomIdentifier = this.getRoomIdentifier(socket);
+    socket.join(roomIdentifier);
+  }
+
+  private removeUserFromRoom(socket: Socket) {
+    const roomIdentifier = this.getRoomIdentifier(socket);
+    socket.leave(roomIdentifier);
+  }
+
+  private getRoomIdentifier(socket: Socket) {
+    const { ticketId } = socket.handshake.query;
+    if (!ticketId) {
+      throw new WsException(`'ticketId' is missing.`);
+    }
+
+    return `review:${ticketId}`;
   }
 }

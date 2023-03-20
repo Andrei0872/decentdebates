@@ -5,6 +5,7 @@ import { parse } from 'cookie'
 import * as cookieSignature from 'cookie-signature'
 import { ConfigService } from '@nestjs/config';
 import { redisStore } from 'src/middlewares/session.middleware';
+import { UserCookieData } from '../user/user.model';
 
 const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');
 
@@ -12,7 +13,7 @@ const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');
 export class ReviewService {
   constructor(private configService: ConfigService) {}
   
-  checkUserExistsFromSocket(socket: Socket) {
+  getUserFromSocket(socket: Socket): Promise<UserCookieData> {
     const { cookie: cookieHeaderValue, connection } = socket.handshake.headers;
     if (connection === 'close') {
       socket.disconnect(true);
@@ -40,7 +41,7 @@ export class ReviewService {
           rej(UNAUTHENTICATED_ERR);
           return;
         }
-        res(null);
+        res(sess.user);
       })
     });
   }

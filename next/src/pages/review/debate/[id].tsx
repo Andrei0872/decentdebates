@@ -5,10 +5,10 @@ import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 const comments = [...new Array(3)];
 
@@ -21,19 +21,24 @@ function DebateContent() {
   )
 }
 
-const socket = io('ws://localhost:3002/comments', { autoConnect: false, withCredentials: true });
-
+let socket: Socket | undefined;
 function Debate() {
   const router = useRouter()
-  const { id } = router.query
+  const { id: ticketId } = router.query
 
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    if (!router.isReady) {
+      return () => {};
+    }
+
+    socket = io('ws://localhost:3002/comments', { autoConnect: false, withCredentials: true, query: { ticketId } });
+
     socket.on('connect', () => {
       console.log('connect');
-      socket.emit('message', 'foo')
+      socket?.emit('message', 'foo')
     });
 
     socket.on('error', err => {
@@ -43,20 +48,26 @@ function Debate() {
     });
 
     socket.on('disconnect', () => {
-      console.log('disc'); 
+      console.log('disc');
+    })
+
+    socket.on('comment:create', (data: any) => {
+      console.log({ data });
     })
 
     socket.connect();
     return () => {
-      socket.disconnect();
+      socket?.disconnect();
+      socket = undefined;
     }
-  }, []);
+  }, [router.isReady]);
 
   useEffect(() => {
-    if (!previewedCard) {
-      router.push('/');
-      dispatch(setCurrentUser(null));
-    }
+    // TODO: fetch on the fly so that auth(user & moderator) can be done at the same time.
+    // if (!previewedCard) {
+    //   router.push('/');
+    //   dispatch(setCurrentUser(null));
+    // }
   }, []);
 
   const redirectBack = () => {
@@ -65,6 +76,10 @@ function Debate() {
 
   const addComment = () => {
     console.log('Adding comment.');
+
+    socket?.emit('comment:create', { comment: 'no comment' }, (data: any) => {
+      console.warn(data);
+    });
   }
 
   return (
