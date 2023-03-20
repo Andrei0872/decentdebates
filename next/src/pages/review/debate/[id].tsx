@@ -21,21 +21,36 @@ function DebateContent() {
   )
 }
 
-const socket = io('ws://localhost:3002/comments');
+const socket = io('ws://localhost:3002/comments', { autoConnect: false, withCredentials: true });
 
 function Debate() {
   const router = useRouter()
   const { id } = router.query
 
-  // console.log(id, router.isReady);
-
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
-  socket.on('connect', () => {
-    console.log('connect');
-    socket.emit('message', 'foo')
-  });
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('connect');
+      socket.emit('message', 'foo')
+    });
+
+    socket.on('error', err => {
+      if (err.reason === 'Unauthenticated') {
+        router.push('/');
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('disc'); 
+    })
+
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    }
+  }, []);
 
   useEffect(() => {
     if (!previewedCard) {
