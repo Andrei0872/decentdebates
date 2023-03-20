@@ -8,12 +8,14 @@ const RedisStore = connectRedis(session);
 
 export const SESSION_MIDDLEWARE_TOKEN = '@SESSION_MIDDLEWARE_TOKEN';
 
+export const redisStore = new RedisStore({ client: redisClient });
+
 // TODO: use secrets properly.
 export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
   provide: SESSION_MIDDLEWARE_TOKEN,
   useFactory: (cs: ConfigService) => {
     const sessionMiddleware = session({
-      store: new RedisStore({ client: redisClient }),
+      store: redisStore,
       secret: cs.get('COOKIE_SECRET'),
       saveUninitialized: false,
       resave: false,
