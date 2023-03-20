@@ -11,6 +11,7 @@ import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { AuthenticateGuard } from './guards/authenticate.guard';
 import { DebatesModule } from './entities/debates/debates.module';
 import { ModeratorModule } from './entities/moderator/moderator.module';
+import { ReviewModule } from './entities/review/review.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ModeratorModule } from './entities/moderator/moderator.module';
     }),
     DebatesModule,
     ModeratorModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [

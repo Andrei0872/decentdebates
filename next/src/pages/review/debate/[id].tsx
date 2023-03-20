@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
+import { io } from 'socket.io-client';
 
 const comments = [...new Array(3)];
 
@@ -20,6 +21,8 @@ function DebateContent() {
   )
 }
 
+const socket = io('ws://localhost:3002/comments');
+
 function Debate() {
   const router = useRouter()
   const { id } = router.query
@@ -28,6 +31,11 @@ function Debate() {
 
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
+
+  socket.on('connect', () => {
+    console.log('connect');
+    socket.emit('message', 'foo')
+  });
 
   useEffect(() => {
     if (!previewedCard) {
