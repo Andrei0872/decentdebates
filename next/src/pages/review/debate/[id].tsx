@@ -1,11 +1,11 @@
-import Comment from '@/components/Comments/Comment';
+import Comment, { CommentRef } from '@/components/Comments/Comment';
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
 import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
@@ -29,9 +29,11 @@ function Debate() {
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
+  const editableCommentRef = useRef<CommentRef | null>(null);
+
   useEffect(() => {
     if (!router.isReady) {
-      return () => {};
+      return () => { };
     }
 
     socket = io('ws://localhost:3002/comments', { autoConnect: false, withCredentials: true, query: { ticketId } });
@@ -77,9 +79,17 @@ function Debate() {
   const addComment = () => {
     console.log('Adding comment.');
 
-    socket?.emit('comment:create', { comment: 'no comment' }, (data: any) => {
-      console.warn(data);
-    });
+    const comment = editableCommentRef.current?.getContent();
+    if (!comment) {
+      // TODO: some validation + informational message.
+      return;
+    }
+
+    console.log(comment);
+    
+    // socket?.emit('comment:create', { comment: 'no comment' }, (data: any) => {
+    //   console.warn(data);
+    // });
   }
 
   return (
@@ -95,7 +105,7 @@ function Debate() {
               <Comment isEditable={false} />
             ))
           }
-          <Comment isEditable={true} />
+          <Comment ref={editableCommentRef} isEditable={true} />
         </CommentsLayout.CommentsList>
 
         <div className={styles.commentButtons}>
