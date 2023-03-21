@@ -114,6 +114,6 @@ create table ticket_comment (
   created_at timestamp default now(),
   modified_at timestamp default now(),
 
-  constraint fk_ticket_id foreign key(ticket_id) references ticket(id),
+  constraint fk_ticket_id foreign key(ticket_id) references ticket(id) on delete cascade,
   constraint fk_commenter_id foreign key(commenter_id) references "user"(id)
 );

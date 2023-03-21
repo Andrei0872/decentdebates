@@ -9,6 +9,7 @@ export async function seed(knex: Knex): Promise<void> {
     await knex("user").del();
     await knex("debate_tag").del();
     await knex("argument").del();
+    await knex("ticket_comment").del();
 
     const [user, ...moderators] = await knex("user").insert([
         {
@@ -166,6 +167,14 @@ export async function seed(knex: Knex): Promise<void> {
         knex("argument")
             .whereIn('id', [args[12].id])
             .update({ counterargument_to: args[9].id }),
+    ]);
+
+    // ===== DEBATE COMMENTS =====
+    await knex("ticket_comment").insert([
+        { ticket_id: ticketsIds[7].id, content: longText, commenter_id: user.id },
+        { ticket_id: ticketsIds[7].id, content: longText, commenter_id: user.id },
+        { ticket_id: ticketsIds[7].id, content: longText, commenter_id: moderators[0].id },
+        { ticket_id: ticketsIds[7].id, content: longText, commenter_id: moderators[0].id },
     ]);
 };
 
