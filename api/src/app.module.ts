@@ -12,6 +12,7 @@ import { AuthenticateGuard } from './guards/authenticate.guard';
 import { DebatesModule } from './entities/debates/debates.module';
 import { ModeratorModule } from './entities/moderator/moderator.module';
 import { ReviewModule } from './entities/review/review.module';
+import { CommentModule } from './entities/comment/comment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ReviewModule } from './entities/review/review.module';
     DebatesModule,
     ModeratorModule,
     ReviewModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [

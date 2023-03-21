@@ -53,7 +53,7 @@ function Debate() {
       console.log('disc');
     })
 
-    socket.on('comment:create', (data: any) => {
+    socket.on('comment/debate:create', (data: any) => {
       console.log({ data });
     })
 
@@ -85,11 +85,7 @@ function Debate() {
       return;
     }
 
-    console.log(comment);
-    
-    // socket?.emit('comment:create', { comment: 'no comment' }, (data: any) => {
-    //   console.warn(data);
-    // });
+    socket?.emit('comment/debate:create', { comment });
   }
 
   return (

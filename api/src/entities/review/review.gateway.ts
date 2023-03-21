@@ -4,6 +4,8 @@ import { SocketIOServer } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData } from '../user/user.model';
+import { CommentService } from '../comment/comment.service';
+import { AddCommentData } from '../comment/comment.model';
 
 const PORT = 3002;
 
@@ -12,7 +14,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @WebSocketServer()
   server: SocketIOServer;
 
-  constructor(private reviewService: ReviewService) { }
+  userSockets: Map<string, UserCookieData> = new Map();
+
+  constructor(private reviewService: ReviewService, private commentService: CommentService) { }
 
   afterInit(server: any) {
     console.log(`Websocket server up & running on port ${PORT}.`);
@@ -21,9 +25,6 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async handleConnection(socket: Socket, ...args: any[]) {
     try {
       const user = await this.reviewService.getUserFromSocket(socket);
-
-      // TODO: attach `user` to `socket`. E.g. by using a `Map`.
-
       this.addUserToRoom(socket, user);
     } catch (err) {
       console.error(err.message);
@@ -41,30 +42,61 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  @SubscribeMessage('comment:create')
-  handleMessage(socket: Socket, payload: any): string {
-    const roomIdentifier = this.getRoomIdentifier(socket);
-    socket.to(roomIdentifier).emit('comment:create', payload);
-    
-    return null;
+  @SubscribeMessage('comment/debate:create')
+  async handleDebateCommentCreate(socket: Socket, payload: any): Promise<WsResponse> {
+    const content = payload.comment;
+    if (!content) {
+      throw new WsException(`Comment's content can't be empty.`);
+    }
+    const user = this.userSockets.get(socket.id);
+    const ticketId = +this.getTicketIdFromSocket(socket);
+
+    const commentData: AddCommentData = {
+      ticketId,
+      content,
+      commenterId: user.id,
+    };
+
+    try {
+      const insertedComment = await this.commentService.addCommentToDebate(commentData);
+
+      const roomIdentifier = this.getRoomIdentifier(socket);
+      socket.to(roomIdentifier).emit('comment/debate:create', { insertedComment });
+  
+      return {
+        event: 'comment/debate:create',
+        data: { insertedComment },
+      };
+    } catch (err) {
+      this.removeUserFromRoom(socket);
+    }
   }
 
   private addUserToRoom(socket: Socket, user: UserCookieData) {
+    this.userSockets.set(socket.id, user);
+
     const roomIdentifier = this.getRoomIdentifier(socket);
     socket.join(roomIdentifier);
   }
 
   private removeUserFromRoom(socket: Socket) {
+    this.userSockets.delete(socket.id);
+
     const roomIdentifier = this.getRoomIdentifier(socket);
     socket.leave(roomIdentifier);
   }
 
   private getRoomIdentifier(socket: Socket) {
+    const ticketId = this.getTicketIdFromSocket(socket);
+    return `review:${ticketId}`;
+  }
+
+  private getTicketIdFromSocket(socket: Socket) {
     const { ticketId } = socket.handshake.query;
-    if (!ticketId) {
+    if (!ticketId || ticketId === 'undefined') {
       throw new WsException(`'ticketId' is missing.`);
     }
 
-    return `review:${ticketId}`;
+    return ticketId;
   }
 }
