@@ -1,3 +1,5 @@
+import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
+import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
 
@@ -17,8 +19,31 @@ function CommentPlaceholder() {
   return <div className={styles.placeholder}>Add your comment here...</div>;
 }
 
-function Comment(props: Props) {
+export interface CommentRef {
+  getContent: () => string;
+}
+
+function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
   const { commentData } = props;
+
+  const exportEditorContentRef = useRef<ExportContentRefData>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getContent
+    }),
+    []
+  );
+
+  const getContent = () => {
+    const editor = exportEditorContentRef.current?.getEditor();
+    if (!editor) {
+      return '';
+    }
+
+    return JSON.stringify(editor.getEditorState());
+  }
 
   const isEditable = !!props.isEditable;
 
@@ -30,17 +55,22 @@ function Comment(props: Props) {
             <div>andrei.gatej</div>
             <div>19.04.2022</div>
             <div>Edited</div>
-            
+
             <div>...</div>
           </div>
         ) : null
       }
 
       <div className={styles.body}>
-        <RichEditor placeholder={<CommentPlaceholder />} containerClassName={styles.commentEditorContainer} configOptions={{ editable: isEditable }} />
+        <RichEditor
+          placeholder={<CommentPlaceholder />}
+          containerClassName={styles.commentEditorContainer}
+          configOptions={{ editable: isEditable }}
+          {...isEditable && { additionalPlugins: <ExportContentPlugin ref={exportEditorContentRef} /> } }
+        />
       </div>
     </div>
   )
 }
 
-export default Comment
+export default forwardRef(Comment);
