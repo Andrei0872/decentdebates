@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
-import { AddCommentData } from './comment.model';
+import { UserCookieData } from '../user/user.model';
+import { AddCommentData, Comment } from './comment.model';
 
 @Injectable()
 export class CommentService {
   constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
 
-  async addCommentToDebate(commentData: AddCommentData) {
+  async addCommentToDebate(commentData: AddCommentData): Promise<Comment> {
     // Performing a conditional insert because we want to ensure
     // that only the user & moderator _connected_ to the ticket
     // are allowed to add comments.
@@ -44,6 +45,39 @@ export class CommentService {
     } catch (err) {
       console.error(err.message);
       throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getTicketComments(ticketId: string, user: UserCookieData): Promise<Comment[]> {
+    const sqlStr = `
+      select
+        tc.id "commentId",
+        tc.content,
+        tc.commenter_id "commenterId",
+        tc.created_at "createdAt",
+        tc.modified_at "modifiedAt"
+      from ticket_comment tc
+      join ticket t
+        on t.id = tc.ticket_id
+      where t.id = $1 and (t.created_by = $2 or t.assigned_to = $3)
+    `;
+    const values = [
+      ticketId,
+      user.id,
+      user.id,
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+
+      return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the comments.');
     } finally {
       client.release();
     }
