@@ -58,7 +58,12 @@ function Debate() {
     })
 
     socket.on('comment/debate:create', (data: any) => {
-      console.log({ data });
+      const { insertedComment } = data;
+      if (!insertedComment) {
+        return;
+      }
+
+      setComments(comments => [...comments, insertedComment]);
     })
 
     socket.connect();

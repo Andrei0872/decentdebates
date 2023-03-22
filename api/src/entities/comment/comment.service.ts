@@ -13,16 +13,28 @@ export class CommentService {
     // that only the user & moderator _connected_ to the ticket
     // are allowed to add comments.
     const sqlStr = `
-      insert into ticket_comment(ticket_id, content, commenter_id)
-      select $1, $2, $3
-      where exists (
-        select 1 from debate d where d.ticket_id = $4
-      ) and exists (
-        select 1
-        from ticket
-        where id = $5 and (created_by = $6 or assigned_to = $7)
+      with insertedComment as (
+        insert into ticket_comment(ticket_id, content, commenter_id)
+        select $1, $2, $3
+        where exists (
+          select 1 from debate d where d.ticket_id = $4
+        ) and exists (
+          select 1
+          from ticket
+          where id = $5 and (created_by = $6 or assigned_to = $7)
+        )
+        returning *
       )
-      returning *;
+      select
+        ic.id "commentId",
+        ic.content,
+        ic.commenter_id "commenterId",
+        ic.created_at "createdAt",
+        ic.modified_at "modifiedAt",
+        u.username "commenterUsername"
+      from insertedComment ic
+      join "user" u
+        on u.id = ic.commenter_id
     `;
     const values = [
       commentData.ticketId,
