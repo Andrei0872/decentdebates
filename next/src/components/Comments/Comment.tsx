@@ -1,4 +1,4 @@
-import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
+import { ForwardedRef, forwardRef, ReactNode, useImperativeHandle, useRef } from 'react';
 import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
@@ -13,6 +13,8 @@ interface Props {
   }
 
   isEditable?: boolean;
+
+  renderHeader?: () => ReactNode;
 }
 
 function CommentPlaceholder() {
@@ -46,17 +48,14 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
   }
 
   const isEditable = !!props.isEditable;
+  const shouldDisplayHeader = !!props.renderHeader;
 
   return (
     <div className={styles.container}>
       {
-        !isEditable ? (
+        shouldDisplayHeader ? (
           <div className={styles.header}>
-            <div>andrei.gatej</div>
-            <div>19.04.2022</div>
-            <div>Edited</div>
-
-            <div>...</div>
+            {props.renderHeader?.()}
           </div>
         ) : null
       }
