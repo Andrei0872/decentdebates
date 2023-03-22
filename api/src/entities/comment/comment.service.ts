@@ -77,6 +77,7 @@ export class CommentService {
       join "user" u
         on u.id = tc.commenter_id
       where t.id = $1 and (t.created_by = $2 or t.assigned_to = $3)
+      order by tc.created_at asc
     `;
     const values = [
       ticketId,
