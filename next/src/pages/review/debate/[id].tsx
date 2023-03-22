@@ -2,15 +2,15 @@ import Comment, { CommentRef } from '@/components/Comments/Comment';
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
 import { selectPreviewedCard } from '@/store/slices/moderator.slice';
-import { setCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
-
-const comments = [...new Array(3)];
+import { fetchTicketComments } from '@/utils/api/comment';
+import { Comment as IComment } from '@/types/comment';
 
 function DebateContent() {
   return (
@@ -28,6 +28,10 @@ function Debate() {
 
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
+
+  const user = useAppSelector(selectCurrentUser);
+
+  const [comments, setComments] = useState<IComment[]>([]);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
 
@@ -72,6 +76,17 @@ function Debate() {
     // }
   }, []);
 
+  useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+
+    fetchTicketComments((ticketId as string))
+      .then(comments => {
+        setComments(comments);
+      })
+  }, [router.isReady]);
+
   const redirectBack = () => {
     router.back();
   }
@@ -98,7 +113,21 @@ function Debate() {
         <CommentsLayout.CommentsList>
           {
             comments.map(c => (
-              <Comment isEditable={false} />
+              <Comment
+                commentData={c}
+                isEditable={false}
+                renderHeader={() => {
+                  return (
+                    <>
+                      <div className={user?.id === c.commenterId ? styles.isOwnComment : undefined}>{c.commenterUsername}</div>
+                      <div>{c.createdAt}</div>
+                      <div>Edited</div>
+
+                      <div>...</div>
+                    </>
+                  )
+                }}
+              />
             ))
           }
           <Comment ref={editableCommentRef} isEditable={true} />

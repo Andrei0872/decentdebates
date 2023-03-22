@@ -1,17 +1,11 @@
+import { Comment as IComment } from '@/types/comment';
 import { ForwardedRef, forwardRef, ReactNode, useImperativeHandle, useRef } from 'react';
 import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
 
 interface Props {
-  commentData?: {
-    authorUsername: string;
-    replyToCommentTitle?: string;
-    modifiedAt: string;
-    createdAt: string;
-    rawContent: string;
-  }
-
+  commentData?: IComment;
   isEditable?: boolean;
 
   renderHeader?: () => ReactNode;
@@ -64,7 +58,7 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
         <RichEditor
           placeholder={<CommentPlaceholder />}
           containerClassName={styles.commentEditorContainer}
-          configOptions={{ editable: isEditable }}
+          configOptions={{ editable: isEditable, editorState: commentData?.content }}
           {...isEditable && { additionalPlugins: <ExportContentPlugin ref={exportEditorContentRef} /> } }
         />
       </div>

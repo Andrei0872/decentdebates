@@ -57,10 +57,13 @@ export class CommentService {
         tc.content,
         tc.commenter_id "commenterId",
         tc.created_at "createdAt",
-        tc.modified_at "modifiedAt"
+        tc.modified_at "modifiedAt",
+        u.username "commenterUsername"
       from ticket_comment tc
       join ticket t
         on t.id = tc.ticket_id
+      join "user" u
+        on u.id = tc.commenter_id
       where t.id = $1 and (t.created_by = $2 or t.assigned_to = $3)
     `;
     const values = [
