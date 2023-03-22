@@ -3,6 +3,7 @@ import { ForwardedRef, forwardRef, ReactNode, useImperativeHandle, useRef } from
 import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
+import { $getRoot } from 'lexical'
 
 interface Props {
   commentData?: IComment;
@@ -17,6 +18,7 @@ function CommentPlaceholder() {
 
 export interface CommentRef {
   getContent: () => string;
+  clearContent: () => void;
 }
 
 function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
@@ -27,7 +29,8 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
   useImperativeHandle(
     ref,
     () => ({
-      getContent
+      getContent,
+      clearContent,
     }),
     []
   );
@@ -39,6 +42,17 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
     }
 
     return JSON.stringify(editor.getEditorState());
+  }
+
+  const clearContent = () => {
+    const editor = exportEditorContentRef.current?.getEditor();
+    if (!editor) {
+      return;
+    }
+
+    editor.update(() => {
+      $getRoot().clear();
+    });
   }
 
   const isEditable = !!props.isEditable;

@@ -63,6 +63,7 @@ function Debate() {
         return;
       }
 
+      editableCommentRef.current?.clearContent();
       setComments(comments => [...comments, insertedComment]);
     })
 
