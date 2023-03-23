@@ -176,23 +176,27 @@ function Debate() {
                         <div>{c.createdAt}</div>
                         <div>Edited</div>
 
-                        <div className={styles.commentActionsContainer}>
-                          <Popover2
-                            interactionKind="click"
-                            placement="right"
-                            usePortal={false}
-                            content={
-                              <Menu className={styles.commentActions} key="menu">
-                                <MenuItem onClick={() => startEditingComment(c)} icon="edit" text="Edit comment" />
-                              </Menu>
-                            }
-                            renderTarget={({ isOpen, ref, ...targetProps }) => (
-                              <span {...targetProps} ref={ref}>
-                                <Icon className={styles.commentActionsIcon} icon="more" />
-                              </span>
-                            )}
-                          />
-                        </div>
+                        {
+                          c.commenterId === user?.id ? (
+                            <div className={styles.commentActionsContainer}>
+                              <Popover2
+                                interactionKind="click"
+                                placement="right"
+                                usePortal={false}
+                                content={
+                                  <Menu className={styles.commentActions} key="menu">
+                                    <MenuItem onClick={() => startEditingComment(c)} icon="edit" text="Edit comment" />
+                                  </Menu>
+                                }
+                                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                                  <span {...targetProps} ref={ref}>
+                                    <Icon className={styles.commentActionsIcon} icon="more" />
+                                  </span>
+                                )}
+                              />
+                            </div>
+                          ) : null
+                        }
                       </>
                     )
                   }}
