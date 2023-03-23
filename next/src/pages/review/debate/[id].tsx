@@ -9,11 +9,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
-import { fetchTicketComments } from '@/utils/api/comment';
+import { fetchTicketComments, updateComment } from '@/utils/api/comment';
 import { Comment as IComment } from '@/types/comment';
 import { DebateMetadata, fetchDebateMetadata } from '@/utils/api/debate';
 import { Popover2 } from '@blueprintjs/popover2';
-import { EditableText, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { EditorState } from 'lexical';
 
 interface DebateContentProps {
@@ -31,6 +31,13 @@ function DebateContent(props: DebateContentProps) {
   )
 }
 
+const toasterOptions = {
+  autoFocus: false,
+  canEscapeKeyClear: true,
+  position: Position.TOP,
+  usePortal: true,
+};
+
 let socket: Socket | undefined;
 function Debate() {
   const router = useRouter()
@@ -45,6 +52,7 @@ function Debate() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
+  const toasterRef = useRef<Toaster>(null);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -145,6 +153,33 @@ function Debate() {
     setEditingCommentId(null);
   }
 
+  const saveCommentEdits = (comment: IComment) => {
+    const commentContent = editableCommentRef.current?.getContent()!;
+
+    console.log(commentContent);
+    updateComment(comment.commentId.toString(), commentContent)
+      .then(r => {
+        setComments(comments => comments.map(
+          c => c.commentId === comment.commentId
+            ? ({ ...c, content: commentContent })
+            : c
+        ));
+
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.SUCCESS,
+          message: r.message,
+          timeout: 3000,
+        });
+      })
+      .finally(() => {
+        const editor = editableCommentRef.current?.getEditor()!;
+        editor.setEditable(false);
+
+        setEditingCommentId(null);
+      });
+  }
+
   return (
     <Layout>
       <section className={styles.buttons}>
@@ -206,7 +241,7 @@ function Debate() {
                   c.commentId === editingCommentId ? (
                     <div className={styles.commentButtons}>
                       <button onClick={() => cancelEditing(c)}>Cancel Edits</button>
-                      <button>Save Edits</button>
+                      <button onClick={() => saveCommentEdits(c)}>Save Edits</button>
                     </div>
                   ) : null
                 }
@@ -227,6 +262,8 @@ function Debate() {
           <button disabled={!!editingCommentId} type='button' onClick={addComment}>Add Comment</button>
         </div>
       </CommentsLayout>
+
+      <Toaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }
