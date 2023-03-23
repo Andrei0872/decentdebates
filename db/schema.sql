@@ -48,7 +48,8 @@ CREATE TABLE debate (
   ticket_id int not null,
   title varchar(80) not null,
   created_at timestamp default now(),
-  modified_at timestamp default now()
+  modified_at timestamp default now(),
+  created_by int not null
 
   -- constraint fk_ticket_id foreign key(ticket_id) references ticket(id) on delete no action
 );

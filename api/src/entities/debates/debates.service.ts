@@ -79,7 +79,7 @@ export class DebatesService {
 
     const createDebateSql = `
       insert into debate
-      values (default, $1, $2, default, default)
+      values (default, $1, $2, default, default, $3)
       returning id;
     `;
 
@@ -94,7 +94,7 @@ export class DebatesService {
 
       const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
 
-      const createDebateValues = [ticketId, debateData.title];
+      const createDebateValues = [ticketId, debateData.title, user.id];
       const { rows: [{ id: debateId }] } = await client.query(createDebateSql, createDebateValues);
 
       const assocDebateTagValues = [
