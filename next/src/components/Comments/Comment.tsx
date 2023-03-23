@@ -1,9 +1,9 @@
 import { Comment as IComment } from '@/types/comment';
-import { ForwardedRef, forwardRef, ReactNode, useImperativeHandle, useRef } from 'react';
+import { ForwardedRef, forwardRef, ReactNode, useEffect, useImperativeHandle, useRef } from 'react';
 import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
-import { $getRoot } from 'lexical'
+import { $getRoot, LexicalEditor } from 'lexical'
 
 interface Props {
   commentData?: IComment;
@@ -19,10 +19,14 @@ function CommentPlaceholder() {
 export interface CommentRef {
   getContent: () => string;
   clearContent: () => void;
+  getEditor: () => LexicalEditor | undefined;
 }
 
 function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
   const { commentData } = props;
+
+  const isEditable = !!props.isEditable;
+  const shouldDisplayHeader = !!props.renderHeader;
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
@@ -31,6 +35,7 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
     () => ({
       getContent,
       clearContent,
+      getEditor
     }),
     []
   );
@@ -55,8 +60,10 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
     });
   }
 
-  const isEditable = !!props.isEditable;
-  const shouldDisplayHeader = !!props.renderHeader;
+  const getEditor = () => {
+    const editor = exportEditorContentRef.current?.getEditor();
+    return editor;
+  }
 
   return (
     <div className={styles.container}>
@@ -73,7 +80,7 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
           placeholder={<CommentPlaceholder />}
           containerClassName={styles.commentEditorContainer}
           configOptions={{ editable: isEditable, editorState: commentData?.content }}
-          {...isEditable && { additionalPlugins: <ExportContentPlugin ref={exportEditorContentRef} /> } }
+          {...isEditable && { additionalPlugins: <ExportContentPlugin ref={exportEditorContentRef} /> }}
         />
       </div>
     </div>

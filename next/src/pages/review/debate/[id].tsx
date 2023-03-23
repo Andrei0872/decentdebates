@@ -136,6 +136,15 @@ function Debate() {
     setEditingCommentId(comment.commentId);
   }
 
+  const cancelEditing = (comment: IComment) => {
+    const editor = editableCommentRef.current?.getEditor()!;
+
+    editor.setEditable(false);
+    editor.setEditorState(editor.parseEditorState(comment.content));
+
+    setEditingCommentId(null);
+  }
+
   return (
     <Layout>
       <section className={styles.buttons}>
@@ -189,6 +198,14 @@ function Debate() {
                   }}
                 />
 
+                {
+                  c.commentId === editingCommentId ? (
+                    <div className={styles.commentButtons}>
+                      <button onClick={() => cancelEditing(c)}>Cancel Edits</button>
+                      <button>Save Edits</button>
+                    </div>
+                  ) : null
+                }
               </div>
             ))
           }
