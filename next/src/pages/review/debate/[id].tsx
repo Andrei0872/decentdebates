@@ -2,7 +2,7 @@ import Comment, { CommentRef } from '@/components/Comments/Comment';
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
 import { selectPreviewedCard } from '@/store/slices/moderator.slice';
-import { selectCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react';
@@ -11,12 +11,19 @@ import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import { Comment as IComment } from '@/types/comment';
+import { DebateMetadata, fetchDebateMetadata } from '@/utils/api/debate';
 
-function DebateContent() {
+interface DebateContentProps {
+  debateMetadata: DebateMetadata;
+}
+
+function DebateContent(props: DebateContentProps) {
+  const { debateMetadata } = props;
+  
   return (
     <div className={styles.debateContent}>
-      <h1>Debate title</h1>
-      <div className={styles.addedBy}>Added by: <span>username.here</span></div>
+      <h1>{debateMetadata.title}</h1>
+      <div className={styles.addedBy}>Added by: <span>{debateMetadata.username}</span></div>
     </div>
   )
 }
@@ -26,12 +33,12 @@ function Debate() {
   const router = useRouter()
   const { id: ticketId } = router.query
 
-  const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
   const user = useAppSelector(selectCurrentUser);
 
   const [comments, setComments] = useState<IComment[]>([]);
+  const [debateMetadata, setDebateMetadata] = useState<DebateMetadata | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
 
@@ -75,12 +82,18 @@ function Debate() {
   }, [router.isReady]);
 
   useEffect(() => {
-    // TODO: fetch on the fly so that auth(user & moderator) can be done at the same time.
-    // if (!previewedCard) {
-    //   router.push('/');
-    //   dispatch(setCurrentUser(null));
-    // }
-  }, []);
+    if (!router.isReady) {
+      return () => { };
+    }
+
+    fetchDebateMetadata((ticketId as string))
+      .then(r => setDebateMetadata(r.debateMetadata))
+      .catch(err => {
+        console.log(err.response.statusText);
+        router.push('/');
+        dispatch(setCurrentUser(null));
+      })
+  }, [router.isReady]);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -115,7 +128,7 @@ function Debate() {
         <button onClick={redirectBack} type='button'>Back</button>
       </section>
 
-      <CommentsLayout mainContent={<DebateContent />}>
+      <CommentsLayout mainContent={debateMetadata ? <DebateContent debateMetadata={debateMetadata} /> : <p>Loading...</p>}>
         <CommentsLayout.CommentsList>
           {
             comments.map(c => (

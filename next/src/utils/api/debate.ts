@@ -17,6 +17,24 @@ export interface UpdateDraftParams {
   draftData: CreateArgumentData;
 }
 
+export interface Debate {
+  id: number;
+  title: string;
+  createdAt: string;
+  modifiedAt: string;
+  username: string;
+  userId: number;
+}
+
+export interface DebateMetadata extends Debate {
+  ticketId: number;
+  debateTags: string;
+}
+
+export interface DebateMetadataResponse {
+  debateMetadata: DebateMetadata;
+}
+
 export interface GetDraftResponse {
   debate: Pick<CurrentDebate, 'metadata' | 'args'>;
   draft: DebateArgument;
@@ -55,4 +73,9 @@ export const updateDraft = (params: UpdateDraftParams) => {
 export const submitDraft = (params: UpdateDraftParams) => {
   return api.post(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}/save`, params.draftData)
     .then(r => r.data);
+}
+
+export const fetchDebateMetadata = (ticketId: string): Promise<DebateMetadataResponse> => {
+  return api.get(`${ROOT_PATH}/metadata/${ticketId}`)
+    .then(r => r.data)
 }
