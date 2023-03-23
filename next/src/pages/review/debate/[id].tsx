@@ -12,6 +12,9 @@ import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import { Comment as IComment } from '@/types/comment';
 import { DebateMetadata, fetchDebateMetadata } from '@/utils/api/debate';
+import { Popover2 } from '@blueprintjs/popover2';
+import { EditableText, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
+import { EditorState } from 'lexical';
 
 interface DebateContentProps {
   debateMetadata: DebateMetadata;
@@ -19,7 +22,7 @@ interface DebateContentProps {
 
 function DebateContent(props: DebateContentProps) {
   const { debateMetadata } = props;
-  
+
   return (
     <div className={styles.debateContent}>
       <h1>{debateMetadata.title}</h1>
@@ -39,6 +42,7 @@ function Debate() {
 
   const [comments, setComments] = useState<IComment[]>([]);
   const [debateMetadata, setDebateMetadata] = useState<DebateMetadata | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
 
@@ -106,6 +110,12 @@ function Debate() {
       })
   }, [router.isReady]);
 
+  useEffect(() => {
+    if (editingCommentId) {
+      editableCommentRef.current?.getEditor()?.setEditable(true);
+    }
+  }, [editingCommentId]);
+
   const redirectBack = () => {
     router.back();
   }
@@ -122,6 +132,10 @@ function Debate() {
     socket?.emit('comment/debate:create', { comment });
   }
 
+  const startEditingComment = (comment: IComment) => {
+    setEditingCommentId(comment.commentId);
+  }
+
   return (
     <Layout>
       <section className={styles.buttons}>
@@ -132,28 +146,64 @@ function Debate() {
         <CommentsLayout.CommentsList>
           {
             comments.map(c => (
-              <Comment
-                commentData={c}
-                isEditable={false}
-                renderHeader={() => {
-                  return (
-                    <>
-                      <div className={user?.id === c.commenterId ? styles.isOwnComment : undefined}>{c.commenterUsername}</div>
-                      <div>{c.createdAt}</div>
-                      <div>Edited</div>
+              <div>
+                <Comment
+                  key={c.commentId}
+                  commentData={c}
+                  isEditable={c.commentId === editingCommentId}
+                  ref={r => {
+                    if (c.commentId === editingCommentId) {
+                      editableCommentRef.current = r;
+                    }
+                  }}
+                  renderHeader={() => {
+                    if (c.commentId === editingCommentId) {
+                      return null;
+                    }
 
-                      <div>...</div>
-                    </>
-                  )
-                }}
-              />
+                    return (
+                      <>
+                        <div className={user?.id === c.commenterId ? styles.isOwnComment : undefined}>{c.commenterUsername}</div>
+                        <div>{c.createdAt}</div>
+                        <div>Edited</div>
+
+                        <div className={styles.commentActionsContainer}>
+                          <Popover2
+                            interactionKind="click"
+                            placement="right"
+                            usePortal={false}
+                            content={
+                              <Menu className={styles.commentActions} key="menu">
+                                <MenuItem onClick={() => startEditingComment(c)} icon="edit" text="Edit comment" />
+                              </Menu>
+                            }
+                            renderTarget={({ isOpen, ref, ...targetProps }) => (
+                              <span {...targetProps} ref={ref}>
+                                <Icon className={styles.commentActionsIcon} icon="more" />
+                              </span>
+                            )}
+                          />
+                        </div>
+                      </>
+                    )
+                  }}
+                />
+
+              </div>
             ))
           }
-          <Comment ref={editableCommentRef} isEditable={true} />
+          <Comment
+            ref={r => {
+              if (!editingCommentId) {
+                editableCommentRef.current = r;
+              }
+            }}
+            isEditable={true}
+          />
         </CommentsLayout.CommentsList>
 
         <div className={styles.commentButtons}>
-          <button type='button' onClick={addComment}>Add Comment</button>
+          <button disabled={!!editingCommentId} type='button' onClick={addComment}>Add Comment</button>
         </div>
       </CommentsLayout>
     </Layout>
