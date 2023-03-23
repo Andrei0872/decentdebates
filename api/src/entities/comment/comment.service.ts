@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { UserCookieData } from '../user/user.model';
-import { AddCommentData, Comment } from './comment.model';
+import { AddCommentData, Comment, UpdateCommentData } from './comment.model';
 
 @Injectable()
 export class CommentService {
@@ -91,6 +91,33 @@ export class CommentService {
       const res = await client.query(sqlStr, values);
 
       return res.rows;
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while fetching the comments.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateComment(user: UserCookieData, commentData: UpdateCommentData) {
+    const sqlStr = `
+      update ticket_comment
+      set
+        content = $1,
+        modified_at = now()
+      where id = $2 and commenter_id = $3
+    `;
+    const values = [
+      commentData.content,
+      commentData.commentId,
+      user.id
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      return res;
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while fetching the comments.');

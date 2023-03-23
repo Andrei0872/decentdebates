@@ -12,3 +12,8 @@ export interface Comment {
   modifiedAt: string;
   commenterUsername: string;
 }
+
+export interface UpdateCommentData {
+  commentId: number;
+  content: string;
+}
