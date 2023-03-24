@@ -5,7 +5,7 @@ import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData } from '../user/user.model';
 import { CommentService } from '../comment/comment.service';
-import { AddCommentData } from '../comment/comment.model';
+import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
 
 const PORT = 3002;
 
@@ -44,30 +44,53 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('comment/debate:create')
   async handleDebateCommentCreate(socket: Socket, payload: any): Promise<WsResponse> {
-    const content = payload.comment;
-    if (!content) {
-      throw new WsException(`Comment's content can't be empty.`);
-    }
-    const user = this.userSockets.get(socket.id);
-    const ticketId = +this.getTicketIdFromSocket(socket);
-
-    const commentData: AddCommentData = {
-      ticketId,
-      content,
-      commenterId: user.id,
-    };
-
     try {
+      const content = payload.comment;
+      if (!content) {
+        throw new WsException(`Comment's content can't be empty.`);
+      }
+      const user = this.userSockets.get(socket.id);
+      const ticketId = +this.getTicketIdFromSocket(socket);
+
+      const commentData: AddCommentData = {
+        ticketId,
+        content,
+        commenterId: user.id,
+      };
+
       const insertedComment = await this.commentService.addCommentToDebate(commentData);
 
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit('comment/debate:create', { insertedComment });
-  
+
       return {
         event: 'comment/debate:create',
         data: { insertedComment },
       };
     } catch (err) {
+      this.removeUserFromRoom(socket);
+    }
+  }
+
+  @SubscribeMessage('comment/debate:update')
+  async handleDebateCommentUpdate(socket: Socket, payload: UpdateCommentData): Promise<string> {
+    try {
+      if (!payload.content) {
+        throw new WsException(`Comment's content can't be empty.`);
+      }
+      const user = this.userSockets.get(socket.id);
+
+      const result = await this.commentService.updateComment(user, payload);
+      if (!result.rowCount) {
+        throw new WsException('No updates occurred');
+      }
+
+      const roomIdentifier = this.getRoomIdentifier(socket);
+      socket.to(roomIdentifier).emit('comment/debate:update', { updatedComment: payload });
+
+      return 'OK';
+    } catch (err) {
+      console.error(err.message);
       this.removeUserFromRoom(socket);
     }
   }

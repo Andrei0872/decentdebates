@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments, updateComment } from '@/utils/api/comment';
-import { Comment as IComment } from '@/types/comment';
+import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import { DebateMetadata, fetchDebateMetadata } from '@/utils/api/debate';
 import { Popover2 } from '@blueprintjs/popover2';
 import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
@@ -92,6 +92,16 @@ function Debate() {
       setComments(comments => [...comments, insertedComment]);
     })
 
+    socket.on('comment/debate:update', (data: { updatedComment: UpdateCommentData }) => {
+      const { updatedComment } = data;
+
+      setComments(comments => comments.map(
+        c => +c.commentId === +updatedComment.commentId
+          ? ({ ...c, content: updatedComment.content })
+          : c
+      ));
+    })
+
     socket.connect();
     return () => {
       socket?.disconnect();
@@ -161,29 +171,38 @@ function Debate() {
 
   const saveCommentEdits = (comment: IComment) => {
     const commentContent = editableCommentRef.current?.getContent()!;
+    if (!commentContent) {
+      return;
+    }
 
-    console.log(commentContent);
-    updateComment(comment.commentId.toString(), commentContent)
-      .then(r => {
-        setComments(comments => comments.map(
-          c => c.commentId === comment.commentId
-            ? ({ ...c, content: commentContent })
-            : c
-        ));
+    socket?.emit(
+      'comment/debate:update',
+      {
+        content: commentContent,
+        commentId: comment.commentId
+      },
+      (responseMessage: string) => {
+        if (responseMessage === 'OK') {
+          setComments(comments => comments.map(
+            c => c.commentId === comment.commentId
+              ? ({ ...c, content: commentContent })
+              : c
+          ));
 
-        toasterRef.current?.show({
-          icon: 'tick-circle',
-          intent: Intent.SUCCESS,
-          message: r.message,
-          timeout: 3000,
-        });
-      })
-      .finally(() => {
+          toasterRef.current?.show({
+            icon: 'tick-circle',
+            intent: Intent.SUCCESS,
+            message: 'Comment successfully updated.',
+            timeout: 3000,
+          });
+        }
+
         const editor = editableCommentRef.current?.getEditor()!;
         editor.setEditable(false);
 
         setEditingCommentId(null);
-      });
+      }
+    );
   }
 
   return (

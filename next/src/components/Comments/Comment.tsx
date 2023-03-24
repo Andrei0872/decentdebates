@@ -30,6 +30,16 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
 
+  useEffect(() => {
+    if (!commentData?.content) {
+      return;
+    }
+
+    const editor = exportEditorContentRef.current?.getEditor();
+    editor?.setEditorState(editor.parseEditorState(commentData.content));
+
+  }, [commentData?.content]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -80,7 +90,7 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
           placeholder={<CommentPlaceholder />}
           containerClassName={styles.commentEditorContainer}
           configOptions={{ editable: isEditable, editorState: commentData?.content }}
-          {...isEditable && { additionalPlugins: <ExportContentPlugin ref={exportEditorContentRef} /> }}
+          additionalPlugins={<ExportContentPlugin ref={exportEditorContentRef} />}
         />
       </div>
     </div>
