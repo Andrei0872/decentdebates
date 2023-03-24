@@ -55,6 +55,12 @@ function Debate() {
   const toasterRef = useRef<Toaster>(null);
 
   useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, []);
+
+  useEffect(() => {
     if (!router.isReady) {
       return () => { };
     }
