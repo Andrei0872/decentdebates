@@ -65,7 +65,7 @@ function Debate() {
       return () => { };
     }
 
-    socket = io('ws://localhost:3002/comments', { autoConnect: false, withCredentials: true, query: { ticketId } });
+    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/comments`, { autoConnect: false, withCredentials: true, query: { ticketId } });
 
     socket.on('connect', () => {
       console.log('connect');
