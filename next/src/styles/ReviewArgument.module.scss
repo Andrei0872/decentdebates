@@ -48,3 +48,30 @@
   width: 50vw;
   margin-inline: auto;
 }
+
+.panelsContainer {
+  position: relative;
+  overflow: hidden;
+
+  --width-transition-duration: .2s;
+}
+
+.leftPanel {
+  transition: width var(--width-transition-duration) ease-in-out;
+}
+
+.rightPanel {
+  width: 0px;
+  visibility: hidden;
+  border: 1px solid black;
+  transition: all var(--width-transition-duration) ease-in-out;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+}
+
+.rightPanel.isVisible {
+  width: 300px;
+  visibility: visible;
+}

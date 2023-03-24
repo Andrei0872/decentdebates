@@ -4,7 +4,7 @@ import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment from '@/components/Comments/Comment';
@@ -41,6 +41,8 @@ function ArgumentContent() {
   );
 }
 
+const RIGHT_PANEL_WIDTH = 300;
+
 function Argument() {
   const router = useRouter()
   const { id } = router.query
@@ -48,13 +50,15 @@ function Argument() {
   const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
+  const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
+
   console.log(previewedCard);
 
   useEffect(() => {
-    if (!previewedCard) {
-      router.push('/');
-      dispatch(setCurrentUser(null));
-    }
+    // if (!previewedCard) {
+    //   router.push('/');
+    //   dispatch(setCurrentUser(null));
+    // }
   }, []);
 
   const redirectBack = () => {
@@ -65,27 +69,48 @@ function Argument() {
     console.log('Adding comment.');
   }
 
+  const showRightPanel = () => {
+    setShouldDisplayRightPanel(!shouldDisplayRightPanel);
+  }
+
   return (
     <Layout>
-      <section className={styles.buttons}>
-        <button onClick={redirectBack} type='button'>Back</button>
-      </section>
+      <div className={styles.panelsContainer}>
+        <div style={{ width: shouldDisplayRightPanel ? `${window.innerWidth - RIGHT_PANEL_WIDTH}px` : '100%' }} className={styles.leftPanel}>
+          <button onClick={() => showRightPanel()}>test</button>
 
-      <CommentsLayout mainContent={<ArgumentContent />}>
-        <CommentsLayout.CommentsList>
-          {
-            comments.map(c => (
-              <Comment isEditable={false} />
-            ))
-          }
-          <Comment isEditable={true} />
-        </CommentsLayout.CommentsList>
+          <section className={styles.buttons}>
+            <button onClick={redirectBack} type='button'>Back</button>
+          </section>
 
-        <div className={styles.commentButtons}>
-          <button type='button' onClick={addComment}>Add Comment</button>
+          <CommentsLayout mainContent={<ArgumentContent />}>
+            <CommentsLayout.CommentsList>
+              {
+                comments.map(c => (
+                  <Comment isEditable={false} />
+                ))
+              }
+              <Comment isEditable={true} />
+            </CommentsLayout.CommentsList>
+
+            <div className={styles.commentButtons}>
+              <button type='button' onClick={addComment}>Add Comment</button>
+            </div>
+
+          </CommentsLayout>
         </div>
 
-      </CommentsLayout>
+        <div className={`${styles.rightPanel} ${shouldDisplayRightPanel ? styles.isVisible : ''}`}>
+          {
+            shouldDisplayRightPanel ? (
+              <>
+                <h2>test</h2>
+                <p>content</p>
+              </>
+            ) : null
+          }
+        </div>
+      </div>
     </Layout>
   )
 }
