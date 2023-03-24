@@ -6,10 +6,11 @@ import { ReviewService } from './review.service';
 import { UserCookieData } from '../user/user.model';
 import { CommentService } from '../comment/comment.service';
 import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
+import { config } from 'src/config';
 
 const PORT = 3002;
 
-@WebSocketGateway(PORT, { namespace: 'comments', cors: { origin: 'http://localhost:3000', credentials: true }, cookie: true })
+@WebSocketGateway(PORT, { namespace: 'comments', cors: { origin: config.CLIENT_URL, credentials: true }, cookie: true })
 export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: SocketIOServer;

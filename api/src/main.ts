@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SESSION_MIDDLEWARE_TOKEN } from './middlewares/session.middleware';
 import * as cors from 'cors';
+import { config } from './config'
 
 const PORT = 3001;
 
@@ -18,9 +19,8 @@ async function bootstrap() {
   const sessionMiddleware = app.get(SESSION_MIDDLEWARE_TOKEN);
   app.use(sessionMiddleware);
 
-  // TODO: from `.env` file.
   app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: config.CLIENT_URL,
     credentials: true,
   }));
 
