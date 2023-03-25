@@ -42,6 +42,7 @@
 
 .argContent {
   margin-block-start: .7rem;
+  width: calc(20% + 25vw);
 }
 
 .commentButtons {
@@ -74,4 +75,8 @@
 .rightPanel.isVisible {
   width: 300px;
   visibility: visible;
+}
+
+.argumentEditor[class] {
+  width: 100%;
 }

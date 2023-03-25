@@ -1,6 +1,5 @@
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
-import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
@@ -9,32 +8,47 @@ import { useEffect, useState } from 'react';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment from '@/components/Comments/Comment';
 import { Callout } from '@blueprintjs/core';
+import { fetchArgumentAsModerator } from '@/utils/api/review';
+import { ArgumentAsModerator, ReviewArgumentTypes } from '@/types/review';
+import RichEditor from '@/components/RichEditor/RichEditor';
 
 const comments = [...new Array(3)];
 
-function ArgumentContent() {
+interface ArgumentContentProps {
+  argumentData: ArgumentAsModerator;
+}
+function ModeratorArgumentContent(props: ArgumentContentProps) {
+  const { argumentData } = props;
+
   return (
     <div>
       <Callout className={styles.debateInfo}>
         <div className={styles.debateTitleContainer}>
           <i className={styles.debateIcon}></i>
-          <h3>Debate title</h3>
+          <h3>{argumentData.debateTitle}</h3>
         </div>
       </Callout>
 
       <div className={styles.argContainer}>
-        <h2 className={styles.argTitle}>Arg title</h2>
+        <h2 className={styles.argTitle}>{argumentData.argumentTitle}</h2>
 
         <div className={styles.argInfo}>
-          <div className={styles.argType}>CON</div>
+          <div className={styles.argType}>{argumentData.argumentType}</div>
 
-          <div>
-            Counterargument to <span>Counterargument title</span>
-          </div>
+          {
+            argumentData.counterargumentToId ? (
+              <div>
+                Counterargument to <span>{argumentData.counterargumentToTitle}</span>
+              </div>
+            ) : null
+          }
         </div>
 
         <div className={styles.argContent}>
-          arg content
+          <RichEditor
+            containerClassName={styles.argumentEditor}
+            configOptions={{ editable: false, editorState: argumentData.argumentContent }}
+          />
         </div>
       </div>
     </div>
@@ -45,21 +59,25 @@ const RIGHT_PANEL_WIDTH = 300;
 
 function Argument() {
   const router = useRouter()
-  const { id } = router.query
+  const { id: ticketId } = router.query
 
-  const previewedCard = useAppSelector(selectPreviewedCard);
   const dispatch = useAppDispatch();
 
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
-
-  console.log(previewedCard);
+  const [argument, setArgument] = useState<ArgumentAsModerator | null>(null);
 
   useEffect(() => {
-    // if (!previewedCard) {
-    //   router.push('/');
-    //   dispatch(setCurrentUser(null));
-    // }
-  }, []);
+    if (!router.isReady) {
+      return;
+    }
+
+    fetchArgumentAsModerator((ticketId as string))
+      .then(arg => setArgument(arg))
+      .catch(() => {
+        router.push('/');
+        dispatch(setCurrentUser(null));
+      });
+  }, [router.isReady]);
 
   const redirectBack = () => {
     router.back();
@@ -83,7 +101,13 @@ function Argument() {
             <button onClick={redirectBack} type='button'>Back</button>
           </section>
 
-          <CommentsLayout mainContent={<ArgumentContent />}>
+          <CommentsLayout
+            mainContent={
+              argument?.reviewArgumentType === ReviewArgumentTypes.MODERATOR
+                ? <ModeratorArgumentContent argumentData={argument} />
+                : null
+            }
+          >
             <CommentsLayout.CommentsList>
               {
                 comments.map(c => (
