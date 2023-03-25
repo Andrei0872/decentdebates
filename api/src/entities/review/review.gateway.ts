@@ -96,6 +96,36 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
+  @SubscribeMessage('comment/argument:create')
+  async handleArgumentCommentCreate(socket: Socket, payload: any): Promise<WsResponse> {
+    try {
+      const content = payload.comment;
+      if (!content) {
+        throw new WsException(`Comment's content can't be empty.`);
+      }
+      const user = this.userSockets.get(socket.id);
+      const ticketId = +this.getTicketIdFromSocket(socket);
+
+      const commentData: AddCommentData = {
+        ticketId,
+        content,
+        commenterId: user.id,
+      };
+
+      const insertedComment = await this.commentService.addCommentToArgument(commentData);
+
+      const roomIdentifier = this.getRoomIdentifier(socket);
+      socket.to(roomIdentifier).emit('comment/argument:create', { insertedComment });
+
+      return {
+        event: 'comment/argument:create',
+        data: { insertedComment },
+      };
+    } catch (err) {
+      this.removeUserFromRoom(socket);
+    }
+  }
+
   private addUserToRoom(socket: Socket, user: UserCookieData) {
     this.userSockets.set(socket.id, user);
 

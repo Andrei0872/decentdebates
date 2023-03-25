@@ -125,4 +125,55 @@ export class CommentService {
       client.release();
     }
   }
+
+  async addCommentToArgument(commentData: AddCommentData): Promise<Comment> {
+    const sqlStr = `
+      with insertedComment as (
+        insert into ticket_comment(ticket_id, content, commenter_id)
+        select $1, $2, $3
+        where exists (
+          select 1 from argument a where a.ticket_id = $4
+        ) and exists (
+          select 1
+          from ticket
+          where id = $5 and (created_by = $6 or assigned_to = $7)
+        )
+        returning *
+      )
+      select
+        ic.id "commentId",
+        ic.content,
+        ic.commenter_id "commenterId",
+        ic.created_at "createdAt",
+        ic.modified_at "modifiedAt",
+        u.username "commenterUsername"
+      from insertedComment ic
+      join "user" u
+        on u.id = ic.commenter_id
+    `;
+    const values = [
+      commentData.ticketId,
+      commentData.content,
+      commentData.commenterId,
+      commentData.ticketId,
+      commentData.ticketId,
+      commentData.commenterId,
+      commentData.commenterId,
+    ];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStr, values);
+      if (!res.rowCount) {
+        throw new Error('Ticket and commenter are not connected.')
+      }
+
+      return res.rows[0];
+    } catch (err) {
+      console.error(err.message);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
 }
