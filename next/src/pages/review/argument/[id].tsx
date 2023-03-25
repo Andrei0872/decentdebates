@@ -1,6 +1,6 @@
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
-import { setCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react';
@@ -63,8 +63,16 @@ function Argument() {
 
   const dispatch = useAppDispatch();
 
+  const user = useAppSelector(selectCurrentUser);
+
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
   const [argument, setArgument] = useState<ArgumentAsModerator | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, []);
 
   useEffect(() => {
     if (!router.isReady) {
