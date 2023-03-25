@@ -1,4 +1,4 @@
-import { ModeratorActivity, ModeratorActivityArgument } from "@/dtos/moderator/get-activity.dto";
+import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate } from "@/dtos/moderator/get-activity.dto";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
 
@@ -24,9 +24,12 @@ export const moderatorSlice = createSlice({
     setActivityPreviewedCardArgument(state, action: PayloadAction<ModeratorActivityArgument | null>) {
       state.activity.previewedCard = action.payload;
     },
+    setActivityPreviewedCardDebate(state, action: PayloadAction<ModeratorActivityDebate | null>) {
+      state.activity.previewedCard = action.payload;
+    },
   }
 });
 
-export const { setActivityPreviewedCard, setActivityPreviewedCardArgument } = moderatorSlice.actions;
+export const { setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } = moderatorSlice.actions;
 
 export const selectPreviewedCard = (s: RootState) => s.moderator.activity.previewedCard;

@@ -9,9 +9,10 @@ import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
 import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
-import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument } from "@/store/slices/moderator.slice";
+import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
-import { fetchArgument } from "@/utils/api/moderator";
+import { fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
+import { fetchDebateAsModerator } from "@/utils/api/review";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -110,6 +111,7 @@ function Activity() {
 
   const previewedCard = useAppSelector(selectPreviewedCard);
   const [isArgumentLoading, setIsArgumentLoading] = useState(false);
+  const [isDebateLoading, setIsDebateLoading] = useState(false);
 
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
@@ -173,9 +175,17 @@ function Activity() {
           setIsArgumentLoading(false);
           dispatch(setActivityPreviewedCardArgument({ ...cardData, ...arg }));
         });
+    } else if (cardData.ticketLabel === CardLabels.DEBATE) {
+      setIsDebateLoading(true);
+
+      fetchDebateByTicketId(cardData.ticketId)
+        .then(debate => {
+          setIsDebateLoading(false);
+          dispatch(setActivityPreviewedCardDebate({ ...cardData, ...debate }));
+        });
     }
 
-    dispatch(setActivityPreviewedCard(cardData));
+    // dispatch(setActivityPreviewedCard(cardData));
   }
 
   const expandCardModal = () => {
@@ -185,6 +195,9 @@ function Activity() {
       router.push(`/review/argument/${previewedCard?.ticketId}`);
     }
   }
+
+  console.log(previewedCard);
+  
 
   return (
     <Layout>
@@ -211,9 +224,7 @@ function Activity() {
       <Dialog isOpen={shouldShowPreviewCardModal} onClose={onPreviewCardModalClose}>
         <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
           <div className={styles.cardDialogHeader}>
-            <div className={styles.cardTitle}>
-              {previewedCard?.ticketTitle}
-            </div>
+            <h3 className={styles.cardTitle}>Preview</h3>
             <div className={styles.cardActions}>
               <Icon onClick={expandCardModal} className={styles.cardIcon} icon="maximize" size={14} />
               <Icon onClick={onPreviewCardModalClose} className={styles.cardIcon} icon="cross" />
@@ -224,10 +235,18 @@ function Activity() {
             {
               previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
                 isArgumentLoading ? <p>Loading...</p> : (
-                  <RichEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
+                  <div>
+                    <h2>{previewedCard.ticketTitle}</h2>
+                    <RichEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
+                  </div>
                 )
               ) : (
-                <div>some debate info</div>
+                isDebateLoading ? <p>Loading debate...</p> : (
+                  <div>
+                    <h2>{previewedCard?.title}</h2>
+                    <div className={styles.addedBy}>Added by: <span>{previewedCard?.username}</span></div>
+                  </div>
+                )
               )
             }
           </div>

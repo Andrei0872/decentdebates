@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
 import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateDraftData } from './debates.model';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
@@ -435,6 +436,54 @@ export class DebatesService {
       console.log(err.message);
       await client.query('ROLLBACK');
       throw new Error('An error occurred while submitting the draft.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async getDebateByTicketId(ticketId: string): Promise<DebateAsModerator> {
+    const sqlStr = `
+      with debates_tags as (
+        select
+          d.id "debateId",
+          string_agg(dt.name, ',') "tags"
+        from debate d
+        join assoc_debate_tag adt
+          on adt.debate_id = d.id
+        join debate_tag dt
+          on dt.id = adt.tag_id
+        group by d.id
+      )
+      select
+        d.id,
+        d.title,
+        d.ticket_id "ticketId",
+        d.created_at "createdAt",
+        d.modified_at "modifiedAt",
+        u.username,
+        u.id "userId",
+        dt.tags "debateTags",
+        t.board_list "boardList",
+        t.id "ticketId"
+      from debate d
+      join "user" u
+        on u.id = d.created_by
+      join debates_tags dt
+        on dt."debateId" = d.id
+      join ticket t
+        on d.ticket_id = t.id
+      where d.ticket_id = $1;
+    `;
+    const values = [ticketId];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStr, values);
+
+      return res.rows[0];
+    } catch (err) {
+      console.log(err.message);
+      throw new Error('An error occurred while fetching the debate metadata.');
     } finally {
       client.release();
     }

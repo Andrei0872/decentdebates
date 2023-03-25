@@ -1,3 +1,6 @@
+import { DebateAsModerator } from "@/types/review";
+import { ModeratorDebateResponse } from "@/utils/api/review";
+
 export enum BoardLists {
   PENDING = 'PENDING',
   IN_REVIEW = 'IN REVIEW',
@@ -20,13 +23,13 @@ export enum CardLabels {
 
 export interface ModeratorActivityBase {
   ticketId: number;
-  boardList: string;
+  boardList: BoardLists;
   ticketTitle: string;
   moderatorId: number | null;
   moderatorUsername: string | null;
 }
 
-export interface ModeratorActivityDebate extends ModeratorActivityBase {
+export interface ModeratorActivityDebate extends ModeratorActivityBase, DebateAsModerator {
   ticketLabel: CardLabels.DEBATE;
 }
 

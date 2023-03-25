@@ -1,3 +1,4 @@
+import { BoardLists } from "@/dtos/moderator/get-activity.dto";
 import { Debate } from "./debate";
 
 export enum ReviewItemType {
@@ -25,5 +26,5 @@ export interface DebateAsModerator extends Debate {
 
   ticketId: number;
   debateTags: string;
-  boardList: string;
+  boardList: BoardLists;
 }

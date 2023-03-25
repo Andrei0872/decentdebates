@@ -61,11 +61,22 @@ export class ModeratorController {
 
 
   @Get('debates/:debateId/argument/:argumentId')
-  async getDebateArgumentAsModerator(@Res() res: Response, @Param('debateId') debateId: string, @Param('argumentId') argumentId: string) {
+  async getDebateArgument(@Res() res: Response, @Param('debateId') debateId: string, @Param('argumentId') argumentId: string) {
     return from(this.debatesService.getDebateArgumentAsModerator(debateId, argumentId))
       .pipe(
         mergeAll(),
         map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @Get('/debate/:ticketId')
+  async getDebateByTicketId(@Res() res: Response, @Param('ticketId') ticketId: string) {
+    return from(this.debatesService.getDebateByTicketId(ticketId))
+      .pipe(
+        map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
