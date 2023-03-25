@@ -1,4 +1,5 @@
 import { IoAdapter } from "@nestjs/platform-socket.io";
+import { Debate } from "../debates/debates.model";
 
 export type SocketIOServer = ReturnType<IoAdapter['create']>
 
@@ -13,4 +14,10 @@ export interface ArgumentAsModerator {
   debateTitle: string;
   boardList: string;
   counterargumentToTitle: string;
+}
+
+export interface DebateAsModerator extends Debate {
+  ticketId: number;
+  debateTags: string;
+  boardList: string;
 }

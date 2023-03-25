@@ -8,14 +8,14 @@ import { ReviewService } from './review.service';
 
 @Controller('review')
 export class ReviewController {
-  constructor(private reviewService: ReviewService) {}
-  
+  constructor(private reviewService: ReviewService) { }
+
   @UseGuards(RolesGuard)
   @Roles(UserRoles.MODERATOR)
   @Get('/moderator/argument/:ticketId')
   async getArgumentAsModerator(@Req() req: Request, @Res() res: Response, @Param('ticketId') ticketId: string) {
     const user = (req as any).session.user as UserCookieData;
-    
+
     return from(this.reviewService.getArgumentAsModerator(user, ticketId))
       .pipe(
         map((comments) => res.status(HttpStatus.OK).json({ data: comments })),
@@ -24,5 +24,20 @@ export class ReviewController {
         })
       )
 
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRoles.MODERATOR)
+  @Get('/moderator/debate/:ticketId')
+  async getDebateAsModerator(@Req() req: Request, @Res() res: Response, @Param('ticketId') ticketId: string) {
+    const user = (req as any).session.user as UserCookieData;
+
+    return from(this.reviewService.getDebateAsModerator(user, ticketId))
+      .pipe(
+        map(debateMetadata => res.status(HttpStatus.OK).json({ debateMetadata })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
   }
 }

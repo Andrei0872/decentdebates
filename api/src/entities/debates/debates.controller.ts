@@ -185,14 +185,4 @@ export class DebatesController {
       )
   }
 
-  @Get('/metadata/:ticketId')
-  async getDebateMetadata(@Res() res: Response, @Param('ticketId') ticketId: string) {
-    return from(this.debatesService.getDebateMetadata(ticketId))
-      .pipe(
-        map(debateMetadata => res.status(HttpStatus.OK).json({ debateMetadata })),
-        catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        })
-      )
-  }
 }

@@ -11,11 +11,6 @@ export interface Debate {
   userId: number;
 }
 
-export interface DebateMetadata extends Debate {
-  ticketId: number;
-  debateTags: string;
-}
-
 export enum ArgumentType {
   PRO = 'PRO',
   CON = 'CON',
