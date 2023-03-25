@@ -11,11 +11,15 @@ import { Callout } from '@blueprintjs/core';
 import { fetchArgumentAsModerator } from '@/utils/api/review';
 import { ArgumentAsModerator, ReviewItemType } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
+import { DebateArgument } from '@/store/slices/debates.slice';
+import { fetchArgument } from '@/utils/api/debate';
 
 const comments = [...new Array(3)];
 
 interface ArgumentContentProps {
   argumentData: ArgumentAsModerator;
+
+  counterargumentClick: () => void;
 }
 function ModeratorArgumentContent(props: ArgumentContentProps) {
   const { argumentData } = props;
@@ -37,8 +41,8 @@ function ModeratorArgumentContent(props: ArgumentContentProps) {
 
           {
             argumentData.counterargumentToId ? (
-              <div>
-                Counterargument to <span>{argumentData.counterargumentToTitle}</span>
+              <div className={styles.counterargumentTitle}>
+                Counterargument to <span onClick={props.counterargumentClick}>{argumentData.counterargumentToTitle}</span>
               </div>
             ) : null
           }
@@ -67,6 +71,7 @@ function Argument() {
 
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
   const [argument, setArgument] = useState<ArgumentAsModerator | null>(null);
+  const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -99,12 +104,27 @@ function Argument() {
     setShouldDisplayRightPanel(!shouldDisplayRightPanel);
   }
 
+  const onCounterargumentClick = () => {
+    if (!argument) {
+      return;
+    }
+
+    // TODO: might want to add a loading indicator.
+
+    setShouldDisplayRightPanel(!shouldDisplayRightPanel);
+
+    if (counterargument) {
+      return;
+    }
+
+    fetchArgument(argument.debateId, argument.counterargumentToId)
+      .then(counterarg => setCounterargument(counterarg));
+  }
+
   return (
     <Layout>
       <div className={styles.panelsContainer}>
         <div style={{ width: shouldDisplayRightPanel ? `${window.innerWidth - RIGHT_PANEL_WIDTH}px` : '100%' }} className={styles.leftPanel}>
-          <button onClick={() => showRightPanel()}>test</button>
-
           <section className={styles.buttons}>
             <button onClick={redirectBack} type='button'>Back</button>
           </section>
@@ -112,7 +132,7 @@ function Argument() {
           <CommentsLayout
             mainContent={
               argument?.reviewItemType === ReviewItemType.MODERATOR
-                ? <ModeratorArgumentContent argumentData={argument} />
+                ? <ModeratorArgumentContent counterargumentClick={onCounterargumentClick} argumentData={argument} />
                 : null
             }
           >
@@ -134,10 +154,15 @@ function Argument() {
 
         <div className={`${styles.rightPanel} ${shouldDisplayRightPanel ? styles.isVisible : ''}`}>
           {
-            shouldDisplayRightPanel ? (
+            shouldDisplayRightPanel && !!counterargument ? (
               <>
-                <h2>test</h2>
-                <p>content</p>
+                <h2 className={styles.counterargumentTitle}>{counterargument.title}</h2>
+                <div className={styles.counterargumentEditorContainer}>
+                  <RichEditor
+                    containerClassName={styles.counterargumentEditor}
+                    configOptions={{ editable: false, editorState: counterargument.content }}
+                  />
+                </div>
               </>
             ) : null
           }

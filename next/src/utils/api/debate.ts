@@ -28,7 +28,7 @@ export const createArgument = (debateId: number, data: CreateArgumentData) => {
     .then(r => r.data);
 }
 
-export const fetchArgument = (debateId: number, argId: number) => {
+export const fetchArgument = (debateId: number, argId: number): Promise<DebateArgument> => {
   return api.get(`debates/${debateId}/argument/${argId}`)
     .then(r => r.data.data);
 }

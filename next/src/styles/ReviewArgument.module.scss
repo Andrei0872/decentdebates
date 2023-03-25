@@ -80,3 +80,22 @@
 .argumentEditor[class] {
   width: 100%;
 }
+
+.counterargumentTitle span {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.counterargumentEditor[class] {
+  width: 100%;
+  border: none;
+}
+
+.rightPanel .counterargumentTitle {
+  border-bottom: 1px solid black;
+  padding: .2rem;
+}
+
+.counterargumentEditorContainer {
+  padding: .2rem;
+}
