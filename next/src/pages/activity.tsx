@@ -197,7 +197,7 @@ function Activity() {
   }
 
   console.log(previewedCard);
-  
+
 
   return (
     <Layout>
@@ -226,7 +226,11 @@ function Activity() {
           <div className={styles.cardDialogHeader}>
             <h3 className={styles.cardTitle}>Preview</h3>
             <div className={styles.cardActions}>
-              <Icon onClick={expandCardModal} className={styles.cardIcon} icon="maximize" size={14} />
+              {
+                previewedCard?.boardList !== BoardLists.PENDING ? (
+                  <Icon onClick={expandCardModal} className={styles.cardIcon} icon="maximize" size={14} />
+                ) : null
+              }
               <Icon onClick={onPreviewCardModalClose} className={styles.cardIcon} icon="cross" />
             </div>
           </div>

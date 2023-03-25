@@ -24,7 +24,7 @@ export class ModeratorController {
       .pipe(
         mergeAll(),
         mergeAll(),
-        groupBy(r => r.boardList, { element: ({ boardList, ...cardData }) => cardData }),
+        groupBy(r => r.boardList, { element: cardData => cardData }),
         mergeMap(
           grp$ => grp$.pipe(
             filter(card => card.ticketId !== null),
