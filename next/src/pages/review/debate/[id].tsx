@@ -70,7 +70,6 @@ function Debate() {
 
     socket.on('connect', () => {
       console.log('connect');
-      socket?.emit('message', 'foo')
     });
 
     socket.on('error', err => {
