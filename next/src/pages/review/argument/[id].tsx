@@ -9,7 +9,7 @@ import styles from '@/styles/ReviewArgument.module.scss';
 import Comment from '@/components/Comments/Comment';
 import { Callout } from '@blueprintjs/core';
 import { fetchArgumentAsModerator } from '@/utils/api/review';
-import { ArgumentAsModerator, ReviewArgumentTypes } from '@/types/review';
+import { ArgumentAsModerator, ReviewItemType } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
 
 const comments = [...new Array(3)];
@@ -111,7 +111,7 @@ function Argument() {
 
           <CommentsLayout
             mainContent={
-              argument?.reviewArgumentType === ReviewArgumentTypes.MODERATOR
+              argument?.reviewItemType === ReviewItemType.MODERATOR
                 ? <ModeratorArgumentContent argumentData={argument} />
                 : null
             }

@@ -34,7 +34,7 @@ export class ReviewController {
 
     return from(this.reviewService.getDebateAsModerator(user, ticketId))
       .pipe(
-        map(debateMetadata => res.status(HttpStatus.OK).json({ debateMetadata })),
+        map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

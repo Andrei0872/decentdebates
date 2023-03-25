@@ -1,11 +1,13 @@
-export enum ReviewArgumentTypes {
+import { Debate } from "./debate";
+
+export enum ReviewItemType {
   MODERATOR,
   USER,
 };
 
 export interface ArgumentAsModerator {
-  reviewArgumentType: ReviewArgumentTypes;
-  
+  reviewItemType: ReviewItemType;
+
   ticketId: number;
   userId: number;
   debateId: number;
@@ -16,4 +18,12 @@ export interface ArgumentAsModerator {
   debateTitle: string;
   boardList: string;
   counterargumentToTitle: string;
+}
+
+export interface DebateAsModerator extends Debate {
+  reviewItemType: ReviewItemType;
+
+  ticketId: number;
+  debateTags: string;
+  boardList: string;
 }

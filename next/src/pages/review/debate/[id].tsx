@@ -11,22 +11,23 @@ import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments, updateComment } from '@/utils/api/comment';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
-import { DebateMetadata, fetchDebateMetadata } from '@/utils/api/debate';
 import { Popover2 } from '@blueprintjs/popover2';
 import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { EditorState } from 'lexical';
+import { fetchDebateAsModerator } from '@/utils/api/review';
+import { DebateAsModerator, ReviewItemType } from '@/types/review';
 
-interface DebateContentProps {
-  debateMetadata: DebateMetadata;
+interface ModeratorDebateContentProps {
+  debateData: DebateAsModerator;
 }
 
-function DebateContent(props: DebateContentProps) {
-  const { debateMetadata } = props;
+function ModeratorDebateContent(props: ModeratorDebateContentProps) {
+  const { debateData } = props;
 
   return (
     <div className={styles.debateContent}>
-      <h1>{debateMetadata.title}</h1>
-      <div className={styles.addedBy}>Added by: <span>{debateMetadata.username}</span></div>
+      <h1>{debateData.title}</h1>
+      <div className={styles.addedBy}>Added by: <span>{debateData.username}</span></div>
     </div>
   )
 }
@@ -48,7 +49,7 @@ function Debate() {
   const user = useAppSelector(selectCurrentUser);
 
   const [comments, setComments] = useState<IComment[]>([]);
-  const [debateMetadata, setDebateMetadata] = useState<DebateMetadata | null>(null);
+  const [debate, setDebate] = useState<DebateAsModerator | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
@@ -114,8 +115,8 @@ function Debate() {
       return () => { };
     }
 
-    fetchDebateMetadata((ticketId as string))
-      .then(r => setDebateMetadata(r.debateMetadata))
+    fetchDebateAsModerator((ticketId as string))
+      .then(r => setDebate(r.debate))
       .catch(err => {
         console.log(err.response.statusText);
         router.push('/');
@@ -211,7 +212,13 @@ function Debate() {
         <button onClick={redirectBack} type='button'>Back</button>
       </section>
 
-      <CommentsLayout mainContent={debateMetadata ? <DebateContent debateMetadata={debateMetadata} /> : <p>Loading...</p>}>
+      <CommentsLayout
+        mainContent={
+          debate?.reviewItemType === ReviewItemType.MODERATOR
+            ? <ModeratorDebateContent debateData={debate} />
+            : <p>Loading...</p>
+        }
+      >
         <CommentsLayout.CommentsList>
           {
             comments.map(c => (
