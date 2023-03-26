@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, from, map } from 'rxjs';
+import { catchError, from, map, tap } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -18,6 +18,11 @@ export class ReviewController {
 
     return from(this.reviewService.getArgumentAsModerator(user, ticketId))
       .pipe(
+        tap(data => {
+          if (!data) {
+            throw new Error('The ticket has no moderator assigned or the moderator is not the one assigned to the ticket.');
+          }
+        }),
         map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
