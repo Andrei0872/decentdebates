@@ -33,3 +33,17 @@ export interface DebateAsUser extends Debate {
   moderatorId: number;
   moderatorUsername: string;
 }
+
+export interface ArgumentAsUser {
+  ticketId: number;
+  moderatorId: number;
+  debateId: number;
+  argumentTitle: string;
+  argumentContent: string;
+  counterargumentToId: number;
+  argumentType: string;
+  debateTitle: string;
+  boardList: string;
+  counterargumentToTitle: string;
+  moderatorUsername: string;
+}

@@ -18,12 +18,11 @@ export class ReviewController {
 
     return from(this.reviewService.getArgumentAsModerator(user, ticketId))
       .pipe(
-        map((comments) => res.status(HttpStatus.OK).json({ data: comments })),
+        map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
       )
-
   }
 
   @UseGuards(RolesGuard)
@@ -50,6 +49,21 @@ export class ReviewController {
     return from(this.reviewService.getDebateAsUser(user, ticketId))
       .pipe(
         map(debate => res.status(HttpStatus.OK).json({ debate })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRoles.USER)
+  @Get('/user/argument/:ticketId')
+  async getArgumentAsUser(@Req() req: Request, @Res() res: Response, @Param('ticketId') ticketId: string) {
+    const user = (req as any).session.user as UserCookieData;
+
+    return from(this.reviewService.getArgumentAsUser(user, ticketId))
+      .pipe(
+        map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
