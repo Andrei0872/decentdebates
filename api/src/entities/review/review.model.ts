@@ -21,3 +21,12 @@ export interface DebateAsModerator extends Debate {
   debateTags: string;
   boardList: string;
 }
+
+export interface DebateAsUser extends Debate {
+  ticketId: number;
+  debateTags: string;
+  boardList: string;
+
+  moderatorId: number;
+  moderatorUsername: string;
+}
