@@ -1,3 +1,7 @@
+.moderatorArgumentContainer {
+  --argument-content-width: calc(20% + 25vw);
+}
+
 .debateIcon {
   width: 1rem;
   height: 1rem;
@@ -42,7 +46,7 @@
 
 .argContent {
   margin-block-start: .7rem;
-  width: calc(20% + 25vw);
+  width: var(--argument-content-width);
 }
 
 .commentButtons {
@@ -110,4 +114,16 @@
 
 .commentActionsIcon {
   cursor: pointer;
+}
+
+.argUserInformation {
+  width: var(--argument-content-width);
+  margin-inline: auto;
+  display: flex;
+  justify-content: flex-end;
+  margin-block-start: .5rem;
+}
+
+.argUserInformation .addedBy > span {
+  font-style: italic;
 }

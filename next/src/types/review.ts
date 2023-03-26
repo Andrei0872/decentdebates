@@ -7,7 +7,7 @@ export enum ReviewItemType {
 };
 
 export interface ArgumentAsModerator {
-  reviewItemType: ReviewItemType;
+  reviewItemType: ReviewItemType.MODERATOR;
 
   ticketId: number;
   userId: number;
@@ -19,6 +19,7 @@ export interface ArgumentAsModerator {
   debateTitle: string;
   boardList: string;
   counterargumentToTitle: string;
+  username: string;
 }
 
 export interface DebateAsModerator extends Debate {

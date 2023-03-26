@@ -64,12 +64,15 @@ export class ReviewService {
         a.type "argumentType",
         d.title "debateTitle",
         t.board_list "boardList",
-        aCounterarg.title "counterargumentToTitle"
+        aCounterarg.title "counterargumentToTitle",
+        u.username
       from ticket t
       join argument a
         on a.ticket_id = t.id
       join debate d
         on d.id = a.debate_id
+      join "user" u
+        on u.id = t.created_by
       left join argument aCounterarg
         on aCounterarg.id = a.counterargument_to
       where t.id = $1 and a.is_draft = false and t.assigned_to = $2

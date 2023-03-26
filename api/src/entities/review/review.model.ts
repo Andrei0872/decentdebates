@@ -14,6 +14,7 @@ export interface ArgumentAsModerator {
   debateTitle: string;
   boardList: string;
   counterargumentToTitle: string;
+  username: string;
 }
 
 export interface DebateAsModerator extends Debate {

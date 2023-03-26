@@ -26,7 +26,7 @@ function ModeratorArgumentContent(props: ArgumentContentProps) {
   const { argumentData } = props;
 
   return (
-    <div>
+    <div className={styles.moderatorArgumentContainer}>
       <Callout className={styles.debateInfo}>
         <div className={styles.debateTitleContainer}>
           <i className={styles.debateIcon}></i>
@@ -54,6 +54,12 @@ function ModeratorArgumentContent(props: ArgumentContentProps) {
             containerClassName={styles.argumentEditor}
             configOptions={{ editable: false, editorState: argumentData.argumentContent }}
           />
+        </div>
+      </div>
+
+      <div className={styles.argUserInformation}>
+        <div className={styles.addedBy}>
+          Added by <span>{argumentData.username}</span>
         </div>
       </div>
     </div>
