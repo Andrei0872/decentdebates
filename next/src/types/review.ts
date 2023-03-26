@@ -22,9 +22,20 @@ export interface ArgumentAsModerator {
 }
 
 export interface DebateAsModerator extends Debate {
-  reviewItemType: ReviewItemType;
+  reviewItemType: ReviewItemType.MODERATOR;
 
   ticketId: number;
   debateTags: string;
   boardList: BoardLists;
+}
+
+export interface DebateAsUser extends Debate {
+  reviewItemType: ReviewItemType.USER;
+  
+  ticketId: number;
+  debateTags: string;
+  boardList: string;
+
+  moderatorId: number;
+  moderatorUsername: string;
 }

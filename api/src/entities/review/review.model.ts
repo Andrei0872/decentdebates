@@ -22,6 +22,8 @@ export interface DebateAsModerator extends Debate {
   boardList: string;
 }
 
+// Types not 100% accurate - there are a few redundant/missing properties.
+// But this shouldn't cause problems because the main properties are present.
 export interface DebateAsUser extends Debate {
   ticketId: number;
   debateTags: string;

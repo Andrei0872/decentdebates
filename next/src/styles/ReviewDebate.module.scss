@@ -7,11 +7,11 @@
   margin-inline: auto;
 }
 
-.addedBy {
+.addedBy, .reviewedBy {
   align-self: flex-end;
 }
 
-.addedBy > span {
+:where(.addedBy, .reviewedBy) > span {
   font-style: italic;
 }
 

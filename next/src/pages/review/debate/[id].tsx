@@ -2,7 +2,7 @@ import Comment, { CommentRef } from '@/components/Comments/Comment';
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
 import { selectPreviewedCard } from '@/store/slices/moderator.slice';
-import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react';
@@ -14,13 +14,12 @@ import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import { Popover2 } from '@blueprintjs/popover2';
 import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { EditorState } from 'lexical';
-import { fetchDebateAsModerator } from '@/utils/api/review';
-import { DebateAsModerator, ReviewItemType } from '@/types/review';
+import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
+import { DebateAsModerator, DebateAsUser, ReviewItemType } from '@/types/review';
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
 }
-
 function ModeratorDebateContent(props: ModeratorDebateContentProps) {
   const { debateData } = props;
 
@@ -28,6 +27,25 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
     <div className={styles.debateContent}>
       <h1>{debateData.title}</h1>
       <div className={styles.addedBy}>Added by: <span>{debateData.username}</span></div>
+    </div>
+  )
+}
+
+interface UserDebateContentProps {
+  debateData: DebateAsUser;
+}
+function UserDebateContent(props: UserDebateContentProps) {
+  const { debateData } = props;
+
+  return (
+    <div className={styles.debateContent}>
+      <h1>{debateData.title}</h1>
+
+      {
+        debateData.moderatorId ? (
+          <div className={styles.reviewedBy}>Reviewed by: <span>{debateData.moderatorUsername}</span></div>
+        ) : null
+      }
     </div>
   )
 }
@@ -49,7 +67,7 @@ function Debate() {
   const user = useAppSelector(selectCurrentUser);
 
   const [comments, setComments] = useState<IComment[]>([]);
-  const [debate, setDebate] = useState<DebateAsModerator | null>(null);
+  const [debate, setDebate] = useState<DebateAsModerator | DebateAsUser | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
@@ -114,7 +132,11 @@ function Debate() {
       return () => { };
     }
 
-    fetchDebateAsModerator((ticketId as string))
+    if (!user) {
+      router.push('/');
+    }
+
+    (user!.role === UserRoles.MODERATOR ? fetchDebateAsModerator : fetchDebateAsUser)((ticketId as string))
       .then(r => setDebate(r.debate))
       .catch(err => {
         console.log(err.response.statusText);
@@ -215,7 +237,11 @@ function Debate() {
         mainContent={
           debate?.reviewItemType === ReviewItemType.MODERATOR
             ? <ModeratorDebateContent debateData={debate} />
-            : <p>Loading...</p>
+            : (
+              debate?.reviewItemType === ReviewItemType.USER
+                ? <UserDebateContent debateData={debate} />
+                : <p>Loading...</p>
+            )
         }
       >
         <CommentsLayout.CommentsList>
