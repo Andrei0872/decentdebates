@@ -1,4 +1,4 @@
-import { ArgumentAsModerator, DebateAsModerator, DebateAsUser, ReviewItemType } from "@/types/review";
+import { ArgumentAsModerator, ArgumentAsUser, DebateAsModerator, DebateAsUser, ReviewItemType } from "@/types/review";
 import { api } from ".";
 
 export interface ModeratorDebateResponse {
@@ -35,4 +35,10 @@ export const fetchDebateAsUser = (ticketId: string): Promise<UserDebateResponse>
 
       return r;
     })
+}
+
+export const fetchArgumentAsUser = (ticketId: string): Promise<ArgumentAsUser> => {
+  return api.get(`${ROOT_PATH}/user/argument/${ticketId}`)
+    .then(r => r.data.data)
+    .then(r => ({ ...r, reviewItemType: ReviewItemType.USER }))
 }

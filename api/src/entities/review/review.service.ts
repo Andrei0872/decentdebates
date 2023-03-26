@@ -191,7 +191,7 @@ export class ReviewService {
     const sqlStr = `
       select
         t.id "ticketId",
-        t.created_by "moderatorId",
+        u.id "moderatorId",
         a.debate_id "debateId",
         a.title "argumentTitle",
         a.content "argumentContent",
@@ -206,7 +206,7 @@ export class ReviewService {
         on a.ticket_id = t.id
       join debate d
         on d.id = a.debate_id
-      join "user" u
+      left join "user" u
         on u.id = t.assigned_to
       left join argument aCounterarg
         on aCounterarg.id = a.counterargument_to

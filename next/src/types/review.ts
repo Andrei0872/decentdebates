@@ -32,11 +32,27 @@ export interface DebateAsModerator extends Debate {
 
 export interface DebateAsUser extends Debate {
   reviewItemType: ReviewItemType.USER;
-  
+
   ticketId: number;
   debateTags: string;
   boardList: string;
 
   moderatorId: number;
+  moderatorUsername: string;
+}
+
+export interface ArgumentAsUser {
+  reviewItemType: ReviewItemType.USER;
+
+  ticketId: number;
+  moderatorId: number;
+  debateId: number;
+  argumentTitle: string;
+  argumentContent: string;
+  counterargumentToId: number;
+  argumentType: string;
+  debateTitle: string;
+  boardList: string;
+  counterargumentToTitle: string;
   moderatorUsername: string;
 }

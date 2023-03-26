@@ -1,6 +1,6 @@
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
-import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react';
@@ -8,8 +8,8 @@ import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
 import { Callout, Icon, Intent, Menu, MenuItem, Position, Toaster } from '@blueprintjs/core';
-import { fetchArgumentAsModerator } from '@/utils/api/review';
-import { ArgumentAsModerator, ReviewItemType } from '@/types/review';
+import { fetchArgumentAsModerator, fetchArgumentAsUser } from '@/utils/api/review';
+import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { DebateArgument } from '@/store/slices/debates.slice';
 import { fetchArgument } from '@/utils/api/debate';
@@ -17,12 +17,12 @@ import { Popover2 } from '@blueprintjs/popover2';
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 
-interface ArgumentContentProps {
+interface ModeratorArgumentContentProps {
   argumentData: ArgumentAsModerator;
 
   counterargumentClick: () => void;
 }
-function ModeratorArgumentContent(props: ArgumentContentProps) {
+function ModeratorArgumentContent(props: ModeratorArgumentContentProps) {
   const { argumentData } = props;
 
   return (
@@ -66,6 +66,59 @@ function ModeratorArgumentContent(props: ArgumentContentProps) {
   );
 }
 
+interface UserArgumentContentProps {
+  argumentData: ArgumentAsUser;
+
+  counterargumentClick: () => void;
+}
+function UserArgumentContent(props: UserArgumentContentProps) {
+  const { argumentData } = props;
+
+  return (
+    <div className={styles.moderatorArgumentContainer}>
+      <Callout className={styles.debateInfo}>
+        <div className={styles.debateTitleContainer}>
+          <i className={styles.debateIcon}></i>
+          <h3>{argumentData.debateTitle}</h3>
+        </div>
+      </Callout>
+
+      <div className={styles.argContainer}>
+        <h2 className={styles.argTitle}>{argumentData.argumentTitle}</h2>
+
+        <div className={styles.argInfo}>
+          <div className={styles.argType}>{argumentData.argumentType}</div>
+
+          {
+            argumentData.counterargumentToId ? (
+              <div className={styles.counterargumentTitle}>
+                Counterargument to <span onClick={props.counterargumentClick}>{argumentData.counterargumentToTitle}</span>
+              </div>
+            ) : null
+          }
+        </div>
+
+        <div className={styles.argContent}>
+          <RichEditor
+            containerClassName={styles.argumentEditor}
+            configOptions={{ editable: false, editorState: argumentData.argumentContent }}
+          />
+        </div>
+      </div>
+
+      {
+        argumentData.moderatorId ? (
+          <div className={styles.argModeratorInformation}>
+            <div className={styles.reviewedBy}>
+              Reviewed by <span>{argumentData.moderatorUsername}</span>
+            </div>
+          </div>
+        ) : <div className={styles.argNoModerator}>No moderator assigned.</div>
+      }
+    </div>
+  );
+}
+
 const RIGHT_PANEL_WIDTH = 300;
 
 const toasterOptions = {
@@ -85,7 +138,7 @@ function Argument() {
   const user = useAppSelector(selectCurrentUser);
 
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
-  const [argument, setArgument] = useState<ArgumentAsModerator | null>(null);
+  const [argument, setArgument] = useState<ArgumentAsModerator | ArgumentAsUser | null>(null);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
   const [comments, setComments] = useState<IComment[]>([]);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
@@ -104,7 +157,11 @@ function Argument() {
       return;
     }
 
-    fetchArgumentAsModerator((ticketId as string))
+    if (!user) {
+      router.push('/');
+    }
+
+    (user!.role === UserRoles.MODERATOR ? fetchArgumentAsModerator : fetchArgumentAsUser)((ticketId as string))
       .then(arg => setArgument(arg))
       .catch(() => {
         router.push('/');
@@ -269,7 +326,11 @@ function Argument() {
             mainContent={
               argument?.reviewItemType === ReviewItemType.MODERATOR
                 ? <ModeratorArgumentContent counterargumentClick={onCounterargumentClick} argumentData={argument} />
-                : null
+                : (
+                  argument?.reviewItemType === ReviewItemType.USER
+                    ? <UserArgumentContent counterargumentClick={onCounterargumentClick} argumentData={argument} />
+                    : <p>Loading...</p>
+                )
             }
           >
             <CommentsLayout.CommentsList>

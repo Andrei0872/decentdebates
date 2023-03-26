@@ -116,7 +116,7 @@
   cursor: pointer;
 }
 
-.argUserInformation {
+.argUserInformation, .argModeratorInformation, .argNoModerator {
   width: var(--argument-content-width);
   margin-inline: auto;
   display: flex;
@@ -124,6 +124,6 @@
   margin-block-start: .5rem;
 }
 
-.argUserInformation .addedBy > span {
+:where(.argUserInformation .addedBy, .argModeratorInformation .reviewedBy) > span {
   font-style: italic;
 }
