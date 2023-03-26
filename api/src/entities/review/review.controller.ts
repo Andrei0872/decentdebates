@@ -38,6 +38,11 @@ export class ReviewController {
 
     return from(this.reviewService.getDebateAsModerator(user, ticketId))
       .pipe(
+        tap(data => {
+          if (!data) {
+            throw new Error('The ticket has no moderator assigned or the moderator is not the one assigned to the ticket.');
+          }
+        }),
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
