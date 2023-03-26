@@ -78,6 +78,11 @@ export class ReviewController {
 
     return from(this.reviewService.getArgumentAsUser(user, ticketId))
       .pipe(
+        tap(data => {
+          if (!data) {
+            throw new Error('This user is not assigned to this ticket.');
+          }
+        }),
         map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
