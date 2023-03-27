@@ -4,13 +4,15 @@ import styles from './DebateCard.module.scss'
 
 interface Props {
   cardData: UserActivityDebate;
+
+  click?: () => void;
 }
 
 function DebateCard(props: Props) {
   const { cardData } = props;
 
   return (
-    <div className={styles.container}>
+    <div onClick={props.click} className={styles.container}>
       <div className={styles.header}>
         <div>{cardData.cardType}</div>
       </div>

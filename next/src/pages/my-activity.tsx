@@ -3,7 +3,7 @@ import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
 import { CardLabels } from '@/dtos/moderator/get-activity.dto';
 import styles from '@/styles/MyActivity.module.scss';
-import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument } from '@/types/user';
+import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument, UserActivityDebate } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
 import { Dialog, DialogBody, Icon } from '@blueprintjs/core';
 import { useRouter } from 'next/router';
@@ -47,6 +47,10 @@ function MyActivity() {
     }
   }
 
+  const onDebateClick = (debateData: UserActivityDebate) => {
+    router.push(`/review/debate/${debateData.ticketId}`)
+  }
+
   const shouldDisplayPreviewDialog = !!previewedCard;
 
   return (
@@ -65,7 +69,7 @@ function MyActivity() {
                     <li key={oi.cardType === CardTypes.ARGUMENT ? oi.argumentId : oi.debateId}>
                       {
                         oi.cardType === CardTypes.DEBATE ? (
-                          <DebateCard cardData={oi} />
+                          <DebateCard click={() => onDebateClick(oi)} cardData={oi} />
                         ) : (
                           <ArgumentCard click={onArgumentClick} cardData={oi} />
                         )
