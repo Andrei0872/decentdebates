@@ -66,3 +66,9 @@ export interface UpdateArgumentData {
   argumentId: string;
   argumentData: UpdateArgumentDTO;
 }
+
+export interface UpdateDebateData {
+  user: UserCookieData;
+  debateId: string;
+  title: string;
+}
