@@ -1,6 +1,6 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { SocketIOServer, UpdateReviewArgumentData } from './review.model';
+import { SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -8,7 +8,7 @@ import { CommentService } from '../comment/comment.service';
 import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
 import { config } from 'src/config';
 import { DebatesService } from '../debates/debates.service';
-import { UpdateArgumentData } from '../debates/debates.model';
+import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
 
 const PORT = 3002;
 
@@ -187,8 +187,39 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       console.error(err.message);
       this.removeUserFromRoom(socket);
     }
-
   }
+
+  @SubscribeMessage('debate:update')
+  async handleDebateUpdate(socket: Socket, payload: { data: UpdateReviewDebateData }): Promise<string> {
+    try {
+      if (!payload.data) {
+        throw new WsException(`Debate data is missing.`);
+      }
+      const user = this.userSockets.get(socket.id);
+      if (user.role !== UserRoles.USER) {
+        throw new WsException('Only users can updated their own debate.');
+      }
+
+      const debateData: UpdateDebateData = {
+        debateId: payload.data.debateId.toString(),
+        title: payload.data.title,
+        user,
+      };
+      const result = await this.debatesService.updateDebate(debateData);
+      if (!result.rowCount) {
+        throw new WsException('No updates occurred');
+      }
+
+      const roomIdentifier = this.getRoomIdentifier(socket);
+      socket.to(roomIdentifier).emit('debate:update', payload.data);
+
+      return 'OK';
+    } catch (err) {
+      console.error(err.message);
+      this.removeUserFromRoom(socket);
+    }
+  }
+
 
   private addUserToRoom(socket: Socket, user: UserCookieData) {
     this.userSockets.set(socket.id, user);

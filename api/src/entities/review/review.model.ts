@@ -54,3 +54,8 @@ export interface UpdateReviewArgumentData {
   title: string;
   content: string;
 }
+
+export interface UpdateReviewDebateData {
+  debateId: number;
+  title: string;
+}
