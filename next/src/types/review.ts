@@ -62,3 +62,7 @@ export interface UpdateArgumentData {
   title: string;
   content: string;
 }
+
+export interface UpdateDebateData {
+  title: string;
+}

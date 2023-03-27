@@ -5,7 +5,7 @@ import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
@@ -15,7 +15,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { EditorState } from 'lexical';
 import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
-import { DebateAsModerator, DebateAsUser, ReviewItemType } from '@/types/review';
+import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
@@ -31,21 +31,77 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
   )
 }
 
+type DebateModifiedFields = Partial<Pick<DebateAsUser, 'title'>>;
 interface UserDebateContentProps {
   debateData: DebateAsUser;
+
+  updateDebate: (data: DebateModifiedFields) => void;
 }
 function UserDebateContent(props: UserDebateContentProps) {
   const { debateData } = props;
 
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [debateModifiedFields, setDebateModifiedFields] = useState<DebateModifiedFields>({ title: undefined });
+
+  const toggleEditOrSave = () => {
+    if (!isEditMode) {
+      setIsEditMode(true);
+      setDebateModifiedFields({ title: debateData.title });
+
+      return;
+    }
+
+    setIsEditMode(false);
+
+    props.updateDebate(debateModifiedFields);
+    setDebateModifiedFields({ title: undefined });
+  }
+
+  const cancelChanges = () => {
+    setIsEditMode(false);
+    setDebateModifiedFields({ title: undefined });
+  }
+
+  const onTitleChanged = (ev: BaseSyntheticEvent<InputEvent, any, HTMLInputElement>) => {
+    const { value } = ev.target;
+    if (!value.trim()) {
+      return;
+    }
+
+    setDebateModifiedFields({
+      title: value,
+    });
+  }
+
   return (
     <div className={styles.debateContent}>
-      <h1>{debateData.title}</h1>
+      <h1 className={styles.debateTitle}>
+        {
+          isEditMode ? (
+            <input type="text" value={debateModifiedFields.title} onChange={onTitleChanged} />
+          ) : <>{debateData.title}</>
+        }
+      </h1>
 
       {
         debateData.moderatorId ? (
           <div className={styles.reviewedBy}>Reviewed by: <span>{debateData.moderatorUsername}</span></div>
         ) : null
       }
+
+      <div className={styles.userArgEditButtons}>
+        <button onClick={toggleEditOrSave} type='button'>
+          {
+            !isEditMode ? ('Edit Argument') : ('Save Changes')
+          }
+        </button>
+
+        {
+          isEditMode ? (
+            <button onClick={cancelChanges} type='button'>Cancel Changes</button>
+          ) : null
+        }
+      </div>
     </div>
   )
 }
@@ -84,7 +140,7 @@ function Debate() {
       return () => { };
     }
 
-    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/comments`, { autoConnect: false, withCredentials: true, query: { ticketId } });
+    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
 
     socket.on('connect', () => {
       console.log('connect');
@@ -119,6 +175,26 @@ function Debate() {
           : c
       ));
     })
+
+    socket.on('debate:update', (data: UpdateDebateData) => {
+      toasterRef.current?.show({
+        icon: 'tick-circle',
+        intent: Intent.WARNING,
+        message: 'The debate has been updated!',
+        timeout: 3000,
+      });
+
+      setDebate(d => {
+        if (d?.reviewItemType !== ReviewItemType.MODERATOR) {
+          return d;
+        }
+
+        return {
+          ...d,
+          title: data.title,
+        };
+      });
+    });
 
     socket.connect();
     return () => {
@@ -227,6 +303,34 @@ function Debate() {
     );
   }
 
+  const onUpdateDebate = (data: DebateModifiedFields) => {
+    if (debate?.reviewItemType !== ReviewItemType.USER) {
+      return;
+    }
+
+    socket?.emit(
+      'debate:update',
+      { data: { ...data, debateId: debate?.id } },
+      (responseMessage: string) => {
+        if (responseMessage !== 'OK') {
+          return;
+        }
+
+        setDebate({
+          ...debate,
+          title: data.title!,
+        });
+
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.SUCCESS,
+          message: 'Debate successfully updated.',
+          timeout: 3000,
+        });
+      }
+    )
+  }
+
   return (
     <Layout>
       <section className={styles.buttons}>
@@ -239,7 +343,7 @@ function Debate() {
             ? <ModeratorDebateContent debateData={debate} />
             : (
               debate?.reviewItemType === ReviewItemType.USER
-                ? <UserDebateContent debateData={debate} />
+                ? <UserDebateContent updateDebate={onUpdateDebate} debateData={debate} />
                 : <p>Loading...</p>
             )
         }
