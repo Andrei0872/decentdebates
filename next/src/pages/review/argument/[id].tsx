@@ -287,9 +287,7 @@ function Argument() {
     });
 
     socket.on('error', err => {
-      if (err.reason === 'Unauthenticated') {
         router.push('/');
-      }
     });
 
     socket.on('disconnect', () => {
@@ -451,7 +449,8 @@ function Argument() {
 
     socket?.emit(
       'argument:update',
-      { data: { ...data, argumentId: argument.argumentId } },
+      // { data: { ...data, argumentId: argument.argumentId } },
+      {},
       (responseMessage: string) => {
         if (responseMessage === 'OK') {
           setArgument({

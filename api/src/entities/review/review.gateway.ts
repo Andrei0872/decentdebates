@@ -75,7 +75,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -98,7 +98,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       console.error(err.message);
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -128,7 +128,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -151,7 +151,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       console.error(err.message);
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -185,7 +185,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       console.error(err.message);
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -216,7 +216,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       console.error(err.message);
-      this.removeUserFromRoom(socket);
+      this.removeUserFromRoom(socket, err.message);
     }
   }
 
@@ -228,11 +228,15 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     socket.join(roomIdentifier);
   }
 
-  private removeUserFromRoom(socket: Socket) {
+  private removeUserFromRoom(socket: Socket, errorMessage = null) {
     this.userSockets.delete(socket.id);
 
     const roomIdentifier = this.getRoomIdentifier(socket);
     socket.leave(roomIdentifier);
+
+    if (errorMessage) {
+      socket.emit('error', { reason: errorMessage });
+    }
   }
 
   private getRoomIdentifier(socket: Socket) {
