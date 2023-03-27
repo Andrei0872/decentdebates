@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
-import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateDraftData } from './debates.model';
+import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDraftData } from './debates.model';
 import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -484,6 +484,33 @@ export class DebatesService {
     } catch (err) {
       console.log(err.message);
       throw new Error('An error occurred while fetching the debate metadata.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateArgument(data: UpdateArgumentData) {
+    const sqlStr = `
+      update argument
+      set
+        title = $1,
+        content = $2
+      where id = $3 and created_by = $4;
+    `;
+    const values = [
+      data.argumentData.title,
+      data.argumentData.content,
+      data.argumentId,
+      data.user.id
+    ];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStr, values);
+      return res;
+    } catch (err) {
+      console.log(err.message);
+      throw new Error('An error occurred while updating the argument.');
     } finally {
       client.release();
     }
