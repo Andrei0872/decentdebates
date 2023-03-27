@@ -55,4 +55,10 @@ export interface ArgumentAsUser {
   boardList: string;
   counterargumentToTitle: string;
   moderatorUsername: string;
+  argumentId: string;
+}
+
+export interface UpdateArgumentData {
+  title: string;
+  content: string;
 }

@@ -9,7 +9,7 @@ import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
 import { Callout, Icon, Intent, Menu, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { fetchArgumentAsModerator, fetchArgumentAsUser } from '@/utils/api/review';
-import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType } from '@/types/review';
+import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType, UpdateArgumentData } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { DebateArgument } from '@/store/slices/debates.slice';
 import { fetchArgument } from '@/utils/api/debate';
@@ -17,6 +17,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
+import { $getRoot } from 'lexical';
 
 interface ModeratorArgumentContentProps {
   argumentData: ArgumentAsModerator;
@@ -25,6 +26,18 @@ interface ModeratorArgumentContentProps {
 }
 function ModeratorArgumentContent(props: ModeratorArgumentContentProps) {
   const { argumentData } = props;
+
+  const argumentRef = useRef<ExportContentRefData | null>(null);
+
+  useEffect(() => {
+    if (!argumentData?.argumentContent) {
+      return;
+    }
+
+    const editor = argumentRef.current?.getEditor();
+    editor?.setEditorState(editor.parseEditorState(argumentData.argumentContent));
+
+  }, [argumentData?.argumentContent]);
 
   return (
     <div className={styles.moderatorArgumentContainer}>
@@ -54,6 +67,7 @@ function ModeratorArgumentContent(props: ModeratorArgumentContentProps) {
           <RichEditor
             containerClassName={styles.argumentEditor}
             configOptions={{ editable: false, editorState: argumentData.argumentContent }}
+            additionalPlugins={<ExportContentPlugin ref={argumentRef} />}
           />
         </div>
       </div>
@@ -71,6 +85,7 @@ interface UserArgumentContentProps {
   argumentData: ArgumentAsUser;
 
   counterargumentClick: () => void;
+  updateArgument: (data: UpdateArgumentData) => void;
 }
 type ArgumentModifiedFields = Partial<Pick<ArgumentAsUser, 'argumentTitle'>>;
 const ArgumentPlaceholder = () => <div>Argument Placeholder...</div>;
@@ -97,9 +112,6 @@ function UserArgumentContent(props: UserArgumentContentProps) {
       return;
     }
 
-    setIsEditMode(false);
-    editor?.setEditable(false);
-
     const content = JSON.stringify(editor?.getEditorState() ?? null);
     if (!content) {
       return;
@@ -109,7 +121,12 @@ function UserArgumentContent(props: UserArgumentContentProps) {
       return;
     }
 
-    console.log(argumentModifiedFields.argumentTitle, content);
+    props.updateArgument({
+      title: argumentModifiedFields.argumentTitle,
+      content,
+    });
+
+    resetEditMode();
   }
 
   const onTitleChanged = (ev: BaseSyntheticEvent<InputEvent, any, HTMLInputElement>) => {
@@ -263,7 +280,7 @@ function Argument() {
       return () => { };
     }
 
-    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/comments`, { autoConnect: false, withCredentials: true, query: { ticketId } });
+    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
 
     socket.on('connect', () => {
       console.log('connect');
@@ -298,6 +315,29 @@ function Argument() {
           : c
       ));
     })
+
+    // Only the user can update its own argument.
+    // Here is the moderator receiving the update.
+    socket.on('argument:update', (updatedArg: UpdateArgumentData) => {
+      toasterRef.current?.show({
+        icon: 'tick-circle',
+        intent: Intent.WARNING,
+        message: 'The argument has been updated!',
+        timeout: 3000,
+      });
+
+      setArgument(argument => {
+        if (argument?.reviewItemType !== ReviewItemType.MODERATOR) {
+          return argument;
+        }
+
+        return {
+          ...argument,
+          argumentContent: updatedArg.content,
+          argumentTitle: updatedArg.title
+        }
+      });
+    });
 
     socket.connect();
     return () => {
@@ -403,6 +443,34 @@ function Argument() {
       .then(counterarg => setCounterargument(counterarg));
   }
 
+  // Only a user can update their own argument.
+  const onUpdateArgument = (data: UpdateArgumentData) => {
+    if (argument?.reviewItemType !== ReviewItemType.USER) {
+      return;
+    }
+
+    socket?.emit(
+      'argument:update',
+      { data: { ...data, argumentId: argument.argumentId } },
+      (responseMessage: string) => {
+        if (responseMessage === 'OK') {
+          setArgument({
+            ...argument,
+            argumentTitle: data.title,
+            argumentContent: data.content,
+          });
+
+          toasterRef.current?.show({
+            icon: 'tick-circle',
+            intent: Intent.SUCCESS,
+            message: 'Argument successfully updated.',
+            timeout: 3000,
+          });
+        }
+      }
+    );
+  }
+
   return (
     <Layout>
       <div className={styles.panelsContainer}>
@@ -417,7 +485,7 @@ function Argument() {
                 ? <ModeratorArgumentContent counterargumentClick={onCounterargumentClick} argumentData={argument} />
                 : (
                   argument?.reviewItemType === ReviewItemType.USER
-                    ? <UserArgumentContent counterargumentClick={onCounterargumentClick} argumentData={argument} />
+                    ? <UserArgumentContent updateArgument={onUpdateArgument} counterargumentClick={onCounterargumentClick} argumentData={argument} />
                     : <p>Loading...</p>
                 )
             }
