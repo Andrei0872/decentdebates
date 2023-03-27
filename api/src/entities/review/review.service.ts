@@ -200,7 +200,8 @@ export class ReviewService {
         d.title "debateTitle",
         t.board_list "boardList",
         aCounterarg.title "counterargumentToTitle",
-        u.username "moderatorUsername"
+        u.username "moderatorUsername",
+        a.id "argumentId"
       from ticket t
       join argument a
         on a.ticket_id = t.id

@@ -1,23 +1,29 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { SocketIOServer } from './review.model';
+import { SocketIOServer, UpdateReviewArgumentData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
-import { UserCookieData } from '../user/user.model';
+import { UserCookieData, UserRoles } from '../user/user.model';
 import { CommentService } from '../comment/comment.service';
 import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
 import { config } from 'src/config';
+import { DebatesService } from '../debates/debates.service';
+import { UpdateArgumentData } from '../debates/debates.model';
 
 const PORT = 3002;
 
-@WebSocketGateway(PORT, { namespace: 'comments', cors: { origin: config.CLIENT_URL, credentials: true }, cookie: true })
+@WebSocketGateway(PORT, { namespace: 'review', cors: { origin: config.CLIENT_URL, credentials: true }, cookie: true })
 export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: SocketIOServer;
 
   userSockets: Map<string, UserCookieData> = new Map();
 
-  constructor(private reviewService: ReviewService, private commentService: CommentService) { }
+  constructor(
+    private reviewService: ReviewService,
+    private commentService: CommentService,
+    private debatesService: DebatesService,
+  ) { }
 
   afterInit(server: any) {
     console.log(`Websocket server up & running on port ${PORT}.`);
@@ -147,6 +153,41 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       console.error(err.message);
       this.removeUserFromRoom(socket);
     }
+  }
+
+  @SubscribeMessage('argument:update')
+  async handleArgumentUpdate(socket: Socket, payload: { data: UpdateReviewArgumentData }): Promise<string> {
+    try {
+      if (!payload.data) {
+        throw new WsException(`Argument data is missing.`);
+      }
+      const user = this.userSockets.get(socket.id);
+      if (user.role !== UserRoles.USER) {
+        throw new WsException('Only users can updated their own comment.');
+      }
+
+      const argData: UpdateArgumentData = {
+        user,
+        argumentId: payload.data.argumentId.toString(),
+        argumentData: {
+          title: payload.data.title,
+          content: payload.data.content,
+        },
+      };
+      const result = await this.debatesService.updateArgument(argData);
+      if (!result.rowCount) {
+        throw new WsException('No updates occurred');
+      }
+
+      const roomIdentifier = this.getRoomIdentifier(socket);
+      socket.to(roomIdentifier).emit('argument:update', payload.data);
+
+      return 'OK';
+    } catch (err) {
+      console.error(err.message);
+      this.removeUserFromRoom(socket);
+    }
+
   }
 
   private addUserToRoom(socket: Socket, user: UserCookieData) {

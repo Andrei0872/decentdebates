@@ -46,4 +46,11 @@ export interface ArgumentAsUser {
   boardList: string;
   counterargumentToTitle: string;
   moderatorUsername: string;
+  argumentId: string;
+}
+
+export interface UpdateReviewArgumentData {
+  argumentId: number;
+  title: string;
+  content: string;
 }
