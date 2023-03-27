@@ -3,7 +3,7 @@ import Layout from '@/components/Layout/Layout';
 import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react';
+import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
@@ -16,6 +16,7 @@ import { fetchArgument } from '@/utils/api/debate';
 import { Popover2 } from '@blueprintjs/popover2';
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
+import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
 
 interface ModeratorArgumentContentProps {
   argumentData: ArgumentAsModerator;
@@ -71,8 +72,74 @@ interface UserArgumentContentProps {
 
   counterargumentClick: () => void;
 }
+type ArgumentModifiedFields = Partial<Pick<ArgumentAsUser, 'argumentTitle'>>;
+const ArgumentPlaceholder = () => <div>Argument Placeholder...</div>;
 function UserArgumentContent(props: UserArgumentContentProps) {
   const { argumentData } = props;
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [argumentModifiedFields, setArgumentModifiedFields] = useState<ArgumentModifiedFields>({ argumentTitle: argumentData.argumentTitle });
+
+  const argumentRef = useRef<ExportContentRefData | null>(null);
+
+  const toggleEditOrSave = () => {
+    const editor = argumentRef.current?.getEditor();
+
+    if (!isEditMode) {
+      setIsEditMode(true);
+
+      editor?.setEditable(true);
+
+      setArgumentModifiedFields({
+        argumentTitle: argumentData.argumentTitle,
+      });
+
+      return;
+    }
+
+    setIsEditMode(false);
+    editor?.setEditable(false);
+
+    const content = JSON.stringify(editor?.getEditorState() ?? null);
+    if (!content) {
+      return;
+    }
+
+    if (!argumentModifiedFields.argumentTitle) {
+      return;
+    }
+
+    console.log(argumentModifiedFields.argumentTitle, content);
+  }
+
+  const onTitleChanged = (ev: BaseSyntheticEvent<InputEvent, any, HTMLInputElement>) => {
+    const { value } = ev.target;
+    if (!value.trim()) {
+      return;
+    }
+
+    setArgumentModifiedFields({
+      ...argumentModifiedFields,
+      argumentTitle: value,
+    });
+  }
+
+  const cancelChanges = () => {
+    resetEditMode();
+
+    const editor = argumentRef.current?.getEditor();
+    editor?.setEditorState(editor.parseEditorState(argumentData.argumentContent));
+  }
+
+  const resetEditMode = () => {
+    setIsEditMode(false);
+
+    const editor = argumentRef.current?.getEditor();
+    editor?.setEditable(false);
+
+    setArgumentModifiedFields({ argumentTitle: undefined });
+  }
+
 
   return (
     <div className={styles.moderatorArgumentContainer}>
@@ -83,8 +150,28 @@ function UserArgumentContent(props: UserArgumentContentProps) {
         </div>
       </Callout>
 
+      <div className={styles.userArgEditButtons}>
+        <button onClick={toggleEditOrSave} type='button'>
+          {
+            !isEditMode ? ('Edit Argument') : ('Save Changes')
+          }
+        </button>
+
+        {
+          isEditMode ? (
+            <button onClick={cancelChanges} type='button'>Cancel Changes</button>
+          ) : null
+        }
+      </div>
+
       <div className={styles.argContainer}>
-        <h2 className={styles.argTitle}>{argumentData.argumentTitle}</h2>
+        <h2 className={styles.argTitle}>
+          {
+            isEditMode ? (
+              <input type="text" value={argumentModifiedFields.argumentTitle} onChange={onTitleChanged} />
+            ) : <>{argumentData.argumentTitle}</>
+          }
+        </h2>
 
         <div className={styles.argInfo}>
           <div className={styles.argType}>{argumentData.argumentType}</div>
@@ -101,7 +188,9 @@ function UserArgumentContent(props: UserArgumentContentProps) {
         <div className={styles.argContent}>
           <RichEditor
             containerClassName={styles.argumentEditor}
-            configOptions={{ editable: false, editorState: argumentData.argumentContent }}
+            configOptions={{ editable: isEditMode, editorState: argumentData.argumentContent }}
+            additionalPlugins={<ExportContentPlugin ref={argumentRef} />}
+            placeholder={<ArgumentPlaceholder />}
           />
         </div>
       </div>

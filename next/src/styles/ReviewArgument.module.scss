@@ -44,6 +44,10 @@
   font-size: 1.7rem;
 }
 
+.argTitle > input {
+  font-size: inherit;
+}
+
 .argContent {
   margin-block-start: .7rem;
   width: var(--argument-content-width);
