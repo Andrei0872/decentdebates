@@ -108,7 +108,8 @@ export class UserService {
         d.title "debateTitle",
         d.id "debateId",
         'argument' "cardType",
-        u.username "moderatorUsername"
+        u.username "moderatorUsername",
+        t.id "ticketId"
       from argument a
       left join ticket t
         on t.id = a.ticket_id

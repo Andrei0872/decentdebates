@@ -43,6 +43,7 @@ export interface UserActivityArgument {
   cardType: CardTypes.ARGUMENT;
   moderatorUsername: string;
   activityList: ActivityTypes;
+  ticketId: number;
 }
 
 export type UserActivity = UserActivityDebate | UserActivityArgument;

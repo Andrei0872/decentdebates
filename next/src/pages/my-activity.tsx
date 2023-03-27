@@ -31,6 +31,8 @@ function MyActivity() {
 
   const onArgumentClick = (arg: UserActivityArgument) => {
     if (!arg.argumentIsDraft) {
+      router.push(`/review/argument/${arg.ticketId}`);
+
       return;
     }
 
