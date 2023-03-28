@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, throwError } from 'rxjs';
+import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, tap, throwError } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { DebatesService } from '../debates/debates.service';
@@ -77,6 +77,24 @@ export class ModeratorController {
     return from(this.debatesService.getDebateByTicketId(ticketId))
       .pipe(
         map(debate => res.status(HttpStatus.OK).json({ debate })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @Patch('/approve/ticket/:ticketId')
+  async approveTicket(@Req() req: Request, @Res() res: Response, @Param('ticketId') ticketId: string) {
+    const user = (req as any).session.user as UserCookieData;
+
+    return from(this.moderatorService.approveTicket(user, ticketId))
+      .pipe(
+        tap(res => {
+          if (!res.rowCount) {
+            throw new Error('Wrong attempt to update the ticket.');
+          }
+        }),
+        map(() => res.status(HttpStatus.OK).json({ message: 'The ticket has been approved.' })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

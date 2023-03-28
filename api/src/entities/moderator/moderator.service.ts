@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { UserCookieData } from '../user/user.model';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
 
@@ -118,6 +119,31 @@ export class ModeratorService {
       if (!res.rowCount) {
         throw new Error('Wrong attempt to update the ticket.');
       }
+    } catch (err) {
+      console.error(err.message);
+      throw new Error('An error occurred while updated the ticket.');
+    } finally {
+      client.release();
+    }
+  }
+
+  async approveTicket(user: UserCookieData, ticketId: string) {
+    const sqlStr = `
+      update ticket 
+      set
+        board_list = 'ACCEPTED'
+      where id = $1 and assigned_to = $2;
+    `;
+    const values = [
+      ticketId,
+      user.id,
+    ];
+
+    const client = await this.pool.connect();
+
+    try {
+      const res = await client.query(sqlStr, values);
+      return res;
     } catch (err) {
       console.error(err.message);
       throw new Error('An error occurred while updated the ticket.');
