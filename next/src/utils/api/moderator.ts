@@ -10,3 +10,8 @@ export const fetchDebateByTicketId = (debateId: number): Promise<DebateAsModerat
   return api.get(`/moderator/debate/${debateId}`)
     .then(r => r.data.debate);
 }
+
+export const approveTicket = (ticketId: string) => {
+  return api.patch(`/moderator/approve/ticket/${ticketId}`)
+    .then(r => r.data);
+}

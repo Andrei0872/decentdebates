@@ -71,3 +71,12 @@
   width: 100%;
   border: none;
 }
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cardActionsList {
+  border: 1px solid black;
+}

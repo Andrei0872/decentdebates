@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { BaseSyntheticEvent, MouseEventHandler, ReactElement, ReactNode, useEffect, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
@@ -8,11 +8,12 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
-import { Dialog, DialogBody, Icon, IconSize } from "@blueprintjs/core";
+import { Dialog, DialogBody, Icon, IconSize, Menu, MenuItem } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
-import { fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
+import { approveTicket, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
 import { fetchDebateAsModerator } from "@/utils/api/review";
+import { Popover2 } from "@blueprintjs/popover2";
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -62,6 +63,7 @@ interface CardProps {
   crtUser: User;
 
   cardClick: (cardData: ModeratorActivity) => void;
+  approveTicket: (t: ModeratorActivity) => void;
 }
 const Card: React.FC<CardProps> = (props) => {
   const { cardData } = props;
@@ -82,10 +84,43 @@ const Card: React.FC<CardProps> = (props) => {
     canDrag: hasRightsOnTicket,
   }));
 
+  const approveItem = (ev: BaseSyntheticEvent) => {
+    ev.stopPropagation();
+    props.approveTicket(cardData);
+  }
+
+  const handleActionsClick = (ev: any, initialHandler: MouseEventHandler<any> | undefined) => {
+    ev.stopPropagation();
+    initialHandler?.(ev);
+  }
+
   return (
     <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag}>
       <div className={styles.cardHeader}>
-        #{cardData.ticketLabel}
+        <h4>#{cardData.ticketLabel}</h4>
+
+        {
+          cardData.boardList === BoardLists.IN_REVIEW && hasRightsOnTicket ? (
+            <div className={styles.cardActionsContainer}>
+              <Popover2
+                interactionKind="click"
+                placement="right"
+                usePortal={false}
+                content={
+                  <Menu className={styles.cardActionsList} key="menu">
+                    <MenuItem onClick={approveItem} icon="tick-circle" text="Approve Ticket" />
+                  </Menu>
+                }
+                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                  <span {...targetProps} onClick={ev => handleActionsClick(ev, targetProps.onClick)} ref={ref}>
+                    <Icon className={styles.commentActionsIcon} icon="more" />
+                  </span>
+                )}
+                modifiers={{ arrow: { enabled: true } }}
+              />
+            </div>
+          ) : null
+        }
       </div>
       <div className={styles.cardBody}>
         {
@@ -196,8 +231,35 @@ function Activity() {
     }
   }
 
-  console.log(previewedCard);
+  const onApproveTicket = (updatedBoardList: BoardLists, card: ModeratorActivity) => {
+    approveTicket(card.ticketId.toString())
+      .then(r => {
+        const { message } = r;
+        // TODO: show toaster.
 
+        card.boardList = BoardLists.ACCEPTED;
+
+        setActivityBoards(boards => {
+          return boards.map(b => {
+            if (b.boardList !== updatedBoardList && b.boardList !== BoardLists.ACCEPTED) {
+              return b;
+            }
+
+            if (b.boardList === BoardLists.ACCEPTED) {
+              return {
+                ...b,
+                cards: [...b.cards, card],
+              };
+            }
+
+            return {
+              ...b,
+              cards: b.cards.filter(c => c.ticketId !== card.ticketId),
+            };
+          });
+        });
+      });
+  }
 
   return (
     <Layout>
@@ -211,7 +273,14 @@ function Activity() {
                 header={<p>{b.boardList}</p>}
                 cards={
                   b.cards.map(c => (
-                    <Card cardClick={onCardClick} crtUser={crtModerator} boardList={b.boardList} key={c.ticketId} cardData={c} />
+                    <Card
+                      approveTicket={ticket => onApproveTicket(b.boardList, ticket)}
+                      cardClick={onCardClick}
+                      crtUser={crtModerator}
+                      boardList={b.boardList}
+                      key={c.ticketId}
+                      cardData={c}
+                    />
                   ))
                 }
                 itemDropped={onItemDropped}
