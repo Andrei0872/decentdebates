@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, MouseEventHandler, ReactElement, ReactNode, useEffect, useState } from "react";
+import { BaseSyntheticEvent, MouseEventHandler, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
@@ -8,7 +8,7 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/router";
-import { Dialog, DialogBody, Icon, IconSize, Menu, MenuItem } from "@blueprintjs/core";
+import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, Position, Toaster } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
 import { approveTicket, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
@@ -141,6 +141,13 @@ const Card: React.FC<CardProps> = (props) => {
   )
 }
 
+const toasterOptions = {
+  autoFocus: false,
+  canEscapeKeyClear: true,
+  position: Position.TOP,
+  usePortal: true,
+};
+
 function Activity() {
   const [activityBoards, setActivityBoards] = useState<BoardData[]>([]);
 
@@ -150,6 +157,8 @@ function Activity() {
 
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
+
+  const toasterRef = useRef<Toaster>(null);
 
   const dispatch = useAppDispatch();
 
@@ -235,7 +244,12 @@ function Activity() {
     approveTicket(card.ticketId.toString())
       .then(r => {
         const { message } = r;
-        // TODO: show toaster.
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.SUCCESS,
+          message: message,
+          timeout: 3000,
+        });
 
         card.boardList = BoardLists.ACCEPTED;
 
@@ -325,6 +339,8 @@ function Activity() {
           </div>
         </DialogBody>
       </Dialog>
+
+      <Toaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }
