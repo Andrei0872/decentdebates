@@ -193,6 +193,7 @@ function Activity() {
           }
         }
 
+        item.cardData.boardList = toBoardList;
         a.cards = [...a.cards, item.cardData];
       }
 
