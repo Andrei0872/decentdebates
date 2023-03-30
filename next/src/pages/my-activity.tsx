@@ -1,3 +1,4 @@
+import CardSlider from '@/components/CardSlider/CardSlider';
 import Layout from '@/components/Layout/Layout';
 import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
@@ -64,7 +65,7 @@ function MyActivity() {
           <section className={styles.ongoing}>
             <h2 className={styles.title}>Ongoing</h2>
 
-            <ul className={styles.list}>
+            {/* <ul className={styles.list}>
               {
                 ongoingItems.length ? (
                   ongoingItems.map(oi => (
@@ -80,13 +81,29 @@ function MyActivity() {
                   ))
                 ) : <p>Nothing here yet.</p>
               }
-            </ul>
+            </ul> */}
+
+            {
+              ongoingItems.length ? (
+                <CardSlider>
+                  {
+                    ongoingItems.map(oi => (
+                      oi.cardType === CardTypes.DEBATE ? (
+                        <DebateCard click={() => onDebateClick(oi)} cardData={oi} />
+                      ) : (
+                        <ArgumentCard click={onArgumentClick} cardData={oi} />
+                      )
+                    ))
+                  }
+                </CardSlider>
+              ) : <p>Nothing here yet.</p>
+            }
           </section>
 
           <section className={styles.solved}>
             <h2 className={styles.title}>Solved</h2>
 
-            <ul className={styles.list}>
+            {/* <ul className={styles.list}>
               {
                 solvedItems.length ? (
                   solvedItems.map(si => (
@@ -102,7 +119,22 @@ function MyActivity() {
                   ))
                 ) : <p>Nothing here yet.</p>
               }
-            </ul>
+            </ul> */}
+            {
+              solvedItems.length ? (
+                <CardSlider>
+                  {
+                    solvedItems.map(si => (
+                      si.cardType === CardTypes.DEBATE ? (
+                        <DebateCard click={() => onDebateClick(si)} cardData={si} />
+                      ) : (
+                        <ArgumentCard click={onArgumentClick} cardData={si} />
+                      )
+                    ))
+                  }
+                </CardSlider>
+              ) : <p>Nothing here yet.</p>
+            }
           </section>
         </div>
       </div>
