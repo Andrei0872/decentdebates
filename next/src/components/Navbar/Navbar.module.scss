@@ -7,3 +7,18 @@
   justify-content: flex-end;
   margin-inline-end: 6vw;
 }
+
+.navbarItem {
+  color: #000;
+}
+
+.navbarItem > * {
+  cursor: pointer;
+  text-decoration: none;
+  color: #000;
+}
+
+.navbarItem > *:hover {
+  color: #000;
+  text-decoration: underline;
+}

@@ -24,7 +24,7 @@ export default function Layout({ children }: Props) {
 
       <header className={layoutStyles.header}>
         <h1 className={layoutStyles.title}>Decent Debates</h1>
-        <Navbar user={null} />
+        <Navbar />
       </header>
 
       <main className={layoutStyles.main}>{children}</main>
