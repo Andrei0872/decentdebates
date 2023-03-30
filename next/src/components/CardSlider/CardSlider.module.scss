@@ -1,0 +1,19 @@
+.container {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.cards {
+  display: flex;
+  gap: var(--cards-gap, 48px);
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+
+  // Firefox.
+  scrollbar-width: none;
+}
+
+.cards::-webkit-scrollbar {
+  // display: none;
+}
