@@ -1,5 +1,5 @@
 import { UserActivityArgument } from "@/types/user";
-import { Icon } from "@blueprintjs/core";
+import { Icon, IconSize } from "@blueprintjs/core";
 import styles from './ArgumentCard.module.scss'
 
 interface Props {
@@ -14,17 +14,24 @@ function ArgumentCard(props: Props) {
   return (
     <div onClick={() => props.click?.(cardData)} className={styles.container}>
       <div className={styles.header}>
-        <div>{cardData.cardType}</div>
+        <div className={styles.argumentLabel}>{cardData.cardType}</div>
       </div>
 
       <div className={styles.body}>
-        {cardData.debateTitle}
-        <br />
-        {cardData.argumentTitle}
+        <p className={styles.debateTitle} >
+          <Icon size={IconSize.LARGE} icon="document" />
+          <span>{cardData.debateTitle}</span>
+        </p>
+        <p className={styles.argumentTitle}>
+          <Icon size={IconSize.LARGE} icon="chat" />
+          <span>{cardData.argumentTitle}</span>
+        </p>
       </div>
 
       <div className={styles.footer}>
-        <div className={styles.status}>{cardData.boardList ? cardData.boardList : (cardData.argumentIsDraft ? '#draft' : null)}</div>
+        <div className={`${styles.status}`}>
+          {cardData.boardList ? cardData.boardList : (cardData.argumentIsDraft ? '#draft' : null)}
+        </div>
 
         {
           cardData.argumentIsDraft ? (

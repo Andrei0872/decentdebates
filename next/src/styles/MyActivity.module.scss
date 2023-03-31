@@ -1,28 +1,35 @@
 .container {
   height: 100%;
-}
-
-.container>.title {
-  padding: 2rem 4rem;
-  font-size: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
 }
 
 .activities {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  flex-grow: 1;
 }
 
 .ongoing,
 .solved {
-  padding-inline: 2rem;
+  padding-inline: 7rem;
   width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .ongoing .title,
 .solved .title {
   font-size: 2rem;
+  display: inline-block;
+  background: var(--cl-neutral-1);
+  color: var(--cl-secondary);
+  padding: 0.2rem 0.7rem;
+  border-radius: 7px;
+  align-self: flex-start;
 }
 
 .ongoing .list,
@@ -35,8 +42,21 @@
   width: 100vw;
 }
 
-.list > li {
+.list>li {
   height: calc(5rem + 5vh);
   border: 1px solid black;
   min-width: calc(7rem + 10vw);
+}
+
+.header {
+  display: flex;
+  margin-block-start: 2rem;
+  width: 80%;
+  margin-inline-start: 4rem;
+  justify-content: space-between
+}
+
+.pageTitle {
+  font-size: 2.4rem;
+  color: var(--cl-secondary-shade-1);
 }
