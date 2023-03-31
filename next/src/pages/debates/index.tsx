@@ -77,7 +77,7 @@ function Debates(props: Props) {
       <div className={styles.container}>
         <section className={styles.search}>
           <div className={styles.input}>
-            <Input placeholder="Search by title..." onChange={onSearchInputChange} />
+            <Input inputProps={{ placeholder: "Search by title..." }} onChange={onSearchInputChange} />
           </div>
 
           {/* <div className={styles.tags}>

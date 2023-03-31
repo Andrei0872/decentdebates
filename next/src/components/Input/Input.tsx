@@ -1,10 +1,11 @@
 import { debounce } from '@/utils/debounce';
 import { useCallback } from 'react';
 import styles from './Input.module.scss';
+import { InputHTMLAttributes } from 'react'
 
 interface Props {
   debounceMs?: number;
-  placeholder?: string;
+  inputProps?: InputHTMLAttributes<any>;
   onChange: (v: string) => void;
 }
 
@@ -18,7 +19,7 @@ function Input(props: Props) {
   );
 
   return (
-    <input className={styles.input} type="text" placeholder={props.placeholder ?? 'Search...'} onChange={onChangeDebounced} />
+    <input className={styles.input} type="text" placeholder='Search...' {...props.inputProps} onChange={onChangeDebounced} />
   )
 }
 
