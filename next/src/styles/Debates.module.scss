@@ -39,3 +39,19 @@
 .debate:hover {
   scale: 1.01;
 }
+
+.createDebateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.createDebateDialog {
+  &>div h6 {
+    color: var(--cl-secondary-shade-1);
+  }
+
+  &>div button span svg {
+    color: var(--cl-secondary-shade-1);
+  }
+}

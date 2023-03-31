@@ -60,16 +60,19 @@ function Debates(props: Props) {
   }
 
   const onNewDebateSubmit = async (data: NewDebateData) => {
-    setIsDebateModalOpen(false);
+    // TODO: make it work after finishing the work on tags.
+    console.log(data);
+
+    // setIsDebateModalOpen(false);
     reset();
 
-    const res = (await api.post('/debates', data)).data;
-    toasterRef.current?.show({
-      icon: 'tick-circle',
-      intent: Intent.SUCCESS,
-      message: res.message,
-      timeout: 2000,
-    });
+    // const res = (await api.post('/debates', data)).data;
+    // toasterRef.current?.show({
+    //   icon: 'tick-circle',
+    //   intent: Intent.SUCCESS,
+    //   message: res.message,
+    //   timeout: 2000,
+    // });
   }
 
   return (
@@ -112,13 +115,20 @@ function Debates(props: Props) {
         </section>
       </div>
 
-      <Dialog title="Start a debate" isOpen={isDebateModalOpen} onClose={onStartDebateModalClosed}>
+      <Dialog className={styles.createDebateDialog} title="Start a debate" isOpen={isDebateModalOpen} onClose={onStartDebateModalClosed}>
         <DialogBody useOverflowScrollContainer={undefined}>
-          <form onSubmit={handleSubmit(onNewDebateSubmit)}>
-            <input type="text" {...register('title')} />
-            <input type="text`" {...register('tagsIds')} />
+          <form className={styles.createDebateForm} onSubmit={handleSubmit(onNewDebateSubmit)}>
+            <Input register={register('title')} />
 
-            <button type="submit">Submit</button>
+            <div>
+              <button
+                className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.submitDebateBtn}`}
+                style={{ background: 'transparent' }}
+                type="submit"
+              >
+                Submit
+              </button>
+            </div>
           </form>
         </DialogBody>
       </Dialog>
