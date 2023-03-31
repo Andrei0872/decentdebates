@@ -5,17 +5,18 @@
   z-index: 1;
   position: relative;
 }
+
 .header {
   display: flex;
-  border: 1px solid black;
+  background: var(--cl-primary);
 }
 
-.main {
-  // color: red;
+.title {
+  color: var(--cl-secondary-shade-5);
+  padding: 0.3rem 0;
 }
 
-.footer {
-}
+.footer {}
 
 .title {
   margin-inline-start: 3vw;

@@ -10,15 +10,19 @@
 
 .navbarItem {
   color: #000;
-}
+  height: 100%;
 
-.navbarItem > * {
-  cursor: pointer;
-  text-decoration: none;
-  color: #000;
-}
+  & > * {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--cl-secondary-shade-5);
 
-.navbarItem > *:hover {
-  color: #000;
-  text-decoration: underline;
+    &:hover {
+      text-decoration: underline;
+      color: var(--cl-secondary-shade-5);
+    }
+  }
 }
