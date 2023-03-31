@@ -17,7 +17,7 @@ function CardSlider(props: Props) {
   // const scrollAmount = sliderContainerRef.current ? sliderContainerRef.current.offsetWidth - 400 : 0;
 
   const slidesCount = sliderContainerRef.current ? Math.ceil((cardsContainerRef.current!.scrollWidth) / sliderContainerRef.current.clientWidth) : 1;
-  const scrollAmount = sliderContainerRef.current ? sliderContainerRef.current.offsetWidth: 0;
+  const scrollAmount = sliderContainerRef.current ? sliderContainerRef.current.offsetWidth : 0;
 
   const goNextSlide = () => {
     setSliderIdx(sliderIdx + 1);
@@ -44,10 +44,20 @@ function CardSlider(props: Props) {
         })}
       </ul>
 
-      <button disabled={!canSlidePrev} onClick={goPrevSlide} type='button'>
+      <button
+        disabled={!canSlidePrev}
+        onClick={goPrevSlide}
+        type='button'
+        className={`${styles.cardButton} ${styles.buttonPrev}`}
+      >
         <Icon icon="chevron-left" />
       </button>
-      <button disabled={!canSlideNext} onClick={goNextSlide} type='button'>
+      <button
+        disabled={!canSlideNext}
+        onClick={goNextSlide}
+        type='button'
+        className={`${styles.cardButton} ${styles.buttonNext}`}
+      >
         <Icon icon="chevron-right" />
       </button>
     </div>

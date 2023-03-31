@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   overflow-x: hidden;
+  padding-inline: 3rem;
 }
 
 .cards {
@@ -15,5 +16,29 @@
 }
 
 .cards::-webkit-scrollbar {
-  // display: none;
+  display: none;
+}
+
+.cardButton {
+  position: absolute;
+  border-radius: 50%;
+  padding: .2rem;
+  border: 1px solid #000;
+
+  cursor: not-allowed;
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.cardButton.buttonPrev {
+  left: .5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.cardButton.buttonNext {
+  right: .5rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
