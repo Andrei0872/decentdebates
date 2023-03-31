@@ -29,7 +29,9 @@ export default function Layout({ children }: Props) {
 
       <main className={layoutStyles.main}>{children}</main>
 
-      <footer className={layoutStyles.footer}>footer</footer>
+      <footer className={layoutStyles.footer}>
+        <p>Created by <a target='_blank' className='link' href="https://andreigatej.dev">Andrei Gatej</a></p>
+      </footer>
     </div>
   );
 }

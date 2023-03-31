@@ -16,7 +16,14 @@
   padding: 0.3rem 0;
 }
 
-.footer {}
+.footer {
+  background: var(--cl-primary);
+  padding: 0.3rem;
+  display: flex;
+  justify-content: center;
+  font-style: italic;
+  color: var(--cl-secondary-shade-5);
+}
 
 .title {
   margin-inline-start: 3vw;

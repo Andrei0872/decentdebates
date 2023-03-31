@@ -13,11 +13,12 @@
   --cl-secondary-shade-5: #323A71;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
-body > div:first-child {
+body>div:first-child {
   height: 100%;
 }
 
@@ -27,4 +28,12 @@ ul {
 
 p {
   margin-bottom: 0 !important;
+}
+
+.link {
+  color: var(--cl-secondary);
+
+  &:hover {
+    text-decoration: none;
+  }
 }
