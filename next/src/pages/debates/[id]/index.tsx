@@ -12,6 +12,7 @@ import { fetchArgument } from '@/utils/api/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 import { Breadcrumbs2 } from '@blueprintjs/popover2';
+import buttonStyles from '@/styles/shared/button.module.scss';
 
 const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
@@ -171,7 +172,7 @@ function DebatePage(props: Props) {
 
   const renderAdditionalActions = (arg: DebateArgument) => {
     const shouldDisableCounterargsButton = !arg.counterarguments?.length || arg.argumentId === counterargumentsOfArgId;
-    
+
     return (
       <Menu key="menu">
         <MenuDivider title="Actions" />
@@ -191,14 +192,32 @@ function DebatePage(props: Props) {
           {
             isAuthenticatedUser ? (
               <div className={styles.actionButtons}>
-                <button onClick={redirectToNewArgumentPage} type='button'>Add PRO/CON argument</button>
-                <button type='button'>Subscribe to discussion</button>
+                <button
+                  className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+                  onClick={redirectToNewArgumentPage}
+                  type='button'
+                >
+                  Add PRO/CON argument
+                </button>
+
+                <button
+                  className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+                  type='button'
+                >
+                  Subscribe to discussion
+                </button>
               </div>
             ) : null
           }
 
           <div className={styles.backButton}>
-            <button onClick={redirectToDebates} type='button'>Back to debates</button>
+            <button
+              className={`${buttonStyles.button} ${buttonStyles.secondary}`}
+              onClick={redirectToDebates}
+              type='button'
+            >
+              Back to debates
+            </button>
           </div>
         </section>
 

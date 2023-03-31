@@ -19,3 +19,8 @@
     border: 2px solid var(--cl-secondary);
   }
 }
+
+.button.secondary {
+  background-color: var(--cl-primary);
+  color: var(--cl-secondary);
+}
