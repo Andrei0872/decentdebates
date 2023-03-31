@@ -4,6 +4,15 @@
   margin: 0;
 }
 
+:root {
+  --cl-primary: #FFEBA9;
+  --cl-neutral-1: #F8F1E5;
+  --cl-neutral-2: #2F3131;
+  --cl-secondary: #525FB3;
+  --cl-secondary-tint-1: #D0D6FF;
+  --cl-secondary-shade-5: #323A71;
+}
+
 html, body {
   height: 100%;
 }
