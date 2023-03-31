@@ -1,16 +1,19 @@
 .container {
-  border: 1px solid black;
+  border: 2px solid var(--cl-secondary-shade-1);
+  border-radius: 4px;
 }
 
 .title {
   text-align: center;
   font-size: 1.8rem;
   padding-block: 0.4rem;
+  color: var(--cl-secondary);
 }
 
 .info {
   display: flex;
-  border-top: 1px solid black;
+  border-top: 2px solid var(--cl-secondary-shade-1);
   padding: 0.2rem;
   justify-content: space-between;
+  background-color: var(--cl-secondary-tint-2);
 }

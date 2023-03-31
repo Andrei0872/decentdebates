@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastProps } from '@blueprintjs/core';
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
+import buttonStyles from '@/styles/shared/button.module.scss';
 
 interface Props {
   debates: Debate[];
@@ -61,7 +62,7 @@ function Debates(props: Props) {
   const onNewDebateSubmit = async (data: NewDebateData) => {
     setIsDebateModalOpen(false);
     reset();
-    
+
     const res = (await api.post('/debates', data)).data;
     toasterRef.current?.show({
       icon: 'tick-circle',
@@ -76,20 +77,26 @@ function Debates(props: Props) {
       <div className={styles.container}>
         <section className={styles.search}>
           <div className={styles.input}>
-            <Input onChange={onSearchInputChange} />
+            <Input placeholder="Search by title..." onChange={onSearchInputChange} />
           </div>
 
-          <div className={styles.tags}>
+          {/* <div className={styles.tags}>
             tags
             <button type="button">
               Apply
             </button>
-          </div>
+          </div> */}
 
         </section>
 
         <section className={styles.debatesContainer}>
-          <button className={styles.createDebateBtn} type="button" onClick={startDebate}>Start a debate</button>
+          <button
+            className={`${styles.createDebateBtn} ${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.contained}`}
+            type="button"
+            onClick={startDebate}
+          >
+            Start a debate
+          </button>
 
           <ul className={styles.debates}>
             {

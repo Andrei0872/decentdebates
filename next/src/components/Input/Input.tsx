@@ -4,6 +4,7 @@ import styles from './Input.module.scss';
 
 interface Props {
   debounceMs?: number;
+  placeholder?: string;
   onChange: (v: string) => void;
 }
 
@@ -17,9 +18,7 @@ function Input(props: Props) {
   );
 
   return (
-    <div>
-      <input type="text" placeholder='Search' onChange={onChangeDebounced} />
-    </div>
+    <input className={styles.input} type="text" placeholder={props.placeholder ?? 'Search...'} onChange={onChangeDebounced} />
   )
 }
 
