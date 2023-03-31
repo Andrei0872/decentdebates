@@ -1,13 +1,16 @@
 .argument {
-  border: 1px solid black;
   display: flex;
   flex-direction: column;
+  border: none;
+  border-radius: 5px;
 }
 
 .header {
   position: relative;
   text-align: center;
-  border-bottom: 1px solid black;
+  background: var(--cl-secondary-tint-2);
+  border-bottom: 2px solid var(--cl-secondary);
+  padding: .5rem;
 }
 
 .actions {
@@ -16,6 +19,13 @@
   cursor: pointer;
   height: 100%;
   right: .5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  & h6[class] {
+    color: var(--cl-secondary-shade-1);
+  }
 }
 
 .content {
@@ -23,16 +33,42 @@
 }
 
 .footer {
-  border-top: 1px solid black;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  background: var(--cl-secondary-tint-2);
+  padding: .3rem .5rem;
 }
 
 .body {
   flex-grow: 1;
+  border: 2px solid var(--cl-secondary-shade-1);
+
+  // Margins won't collapse.
+  border-top: none;
 }
 
 .argumentEditorContainer[class] {
   width: 100%;
   border: none;
+}
+
+.title {
+  color: var(--cl-secondary-shade-1);
+}
+
+.argButton {
+  font-size: .8rem;
+}
+
+.username {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .3rem;
+  color: var(--cl-secondary);
+
+  & > span {
+    font-weight: bold;
+  }
 }

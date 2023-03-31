@@ -4,6 +4,7 @@ import styles from './DebateArgument.module.scss';
 import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 import { DebateArgument } from '@/store/slices/debates.slice';
 import RichEditor from '../RichEditor/RichEditor';
+import buttonStyles from '@/styles/shared/button.module.scss';
 
 interface Props {
   debateArgumentData: DebateArgument;
@@ -26,7 +27,7 @@ function DebateArgument(props: Props) {
   return (
     <div className={styles.argument}>
       <div className={styles.header}>
-        <h3>{debateArgumentData.title}</h3>
+        <h3 className={styles.title}>{debateArgumentData.title}</h3>
         {
           additionalActions ? (
             <div className={styles.actions}>
@@ -56,7 +57,8 @@ function DebateArgument(props: Props) {
 
       <div className={styles.footer}>
         <div className={styles.username}>
-          {debateArgumentData.username}
+          <Icon icon="person" />
+          <span>{debateArgumentData.username}</span>
         </div>
 
         {
@@ -64,9 +66,21 @@ function DebateArgument(props: Props) {
             <div className={styles.expand}>
               {
                 !isExpanded ? (
-                  <button onClick={() => readArgument(debateArgumentData.argumentId)} type='button'>Read more</button>
+                  <button
+                    onClick={() => readArgument(debateArgumentData.argumentId)}
+                    type='button'
+                    className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
+                  >
+                    Read more
+                  </button>
                 ) : (
-                  <button onClick={() => readArgument(null)} type='button'>Collapse</button>
+                  <button
+                    onClick={() => readArgument(null)}
+                    type='button'
+                    className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
+                  >
+                    Collapse
+                  </button>
                 )
               }
             </div>

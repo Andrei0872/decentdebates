@@ -129,7 +129,7 @@ function DebatePage(props: Props) {
     const debateId = +router.query.id!;
     fetchArgument(debateId, argId)
       .then(arg => {
-        dispatch(setCrtExpandedArgument({ id: argId, content: arg.content }));
+        dispatch(setCrtExpandedArgument({ id: argId, content: arg.content! }));
         setCrtReadArgumentId(argId);
         setIsReadArgumentLoading(false);
       });
