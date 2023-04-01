@@ -1,6 +1,7 @@
 import { Icon } from '@blueprintjs/core'
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './CardSlider.module.scss'
+import buttonStyles from '@/styles/shared/button.module.scss'
 
 interface Props {
   children: ReactNode
@@ -48,7 +49,7 @@ function CardSlider(props: Props) {
         disabled={!canSlidePrev}
         onClick={goPrevSlide}
         type='button'
-        className={`${styles.cardButton} ${styles.buttonPrev}`}
+        className={`${styles.cardButton} ${styles.buttonPrev} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-left" />
       </button>
@@ -56,7 +57,7 @@ function CardSlider(props: Props) {
         disabled={!canSlideNext}
         onClick={goNextSlide}
         type='button'
-        className={`${styles.cardButton} ${styles.buttonNext}`}
+        className={`${styles.cardButton} ${styles.buttonNext} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-right" />
       </button>

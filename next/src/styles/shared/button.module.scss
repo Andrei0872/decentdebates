@@ -5,6 +5,10 @@
   font-size: .9rem;
   font-weight: bold;
   cursor: pointer;
+
+  &:disabled {
+    opacity: .4;
+  }
 }
 
 .button.primary {
