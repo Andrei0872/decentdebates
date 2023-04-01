@@ -78,17 +78,22 @@
 .rightPanel {
   width: 0px;
   visibility: hidden;
-  border: 1px solid black;
   transition: all var(--width-transition-duration) ease-in-out;
   position: absolute;
   top: 0;
   right: 0;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-inline: 2rem;
+  padding-block-start: 3rem;
+  border: none;
+  gap: 1rem;
 }
 
 .rightPanel.isVisible {
-  width: 300px;
   visibility: visible;
+  width: 400px;
 }
 
 .argumentEditor[class] {
@@ -195,4 +200,16 @@
   margin-inline: auto;
   display: flex;
   gap: .5rem;
+}
+
+.rightPanelContent {
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 6px;
+  padding: 0.3rem .5rem;
+  background: var(--cl-secondary-tint-2);
+
+  & .counterargumentTitle {
+    color: initial;
+    border: none;
+  }
 }

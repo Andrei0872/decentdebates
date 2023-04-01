@@ -236,7 +236,7 @@ function UserArgumentContent(props: UserArgumentContentProps) {
   );
 }
 
-const RIGHT_PANEL_WIDTH = 300;
+const RIGHT_PANEL_WIDTH = 400;
 
 const toasterOptions = {
   autoFocus: false,
@@ -603,9 +603,19 @@ function Argument() {
         </div>
 
         <div className={`${styles.rightPanel} ${shouldDisplayRightPanel ? styles.isVisible : ''}`}>
+          <div className={styles.rightPanelHeader}>
+            <button
+              className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+              type='button'
+              onClick={onCounterargumentClick}
+            >
+              Close
+            </button>
+          </div>
+
           {
             shouldDisplayRightPanel && !!counterargument ? (
-              <>
+              <div className={styles.rightPanelContent}>
                 <h2 className={styles.counterargumentTitle}>{counterargument.title}</h2>
                 <div className={styles.counterargumentEditorContainer}>
                   <RichEditor
@@ -613,7 +623,7 @@ function Argument() {
                     configOptions={{ editable: false, editorState: counterargument.content }}
                   />
                 </div>
-              </>
+              </div>
             ) : null
           }
         </div>
