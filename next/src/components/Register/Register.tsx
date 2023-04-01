@@ -4,7 +4,10 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form"
-import styles from '@/styles/shared/form.module.scss';
+import formStyles from '@/styles/shared/form.module.scss';
+import styles from './Register.module.scss'
+import Input from "../Input/Input";
+import buttonStyles from '@/styles/shared/button.module.scss'
 
 export interface RegisterData {
   email: string;
@@ -12,7 +15,7 @@ export interface RegisterData {
   password: string;
 }
 
-function Register () {
+function Register() {
   const {
     register,
     handleSubmit,
@@ -31,15 +34,20 @@ function Register () {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={formStyles.container}>
       <h2 className={styles.title}>Register</h2>
-      
-      <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-        <input type="text" {...register('email')} />
-        <input type="text" {...register('username')} />
-        <input type="password" {...register('password')} />
 
-        <button type="submit">Submit</button>
+      <form className={formStyles.form} onSubmit={handleSubmit(onSubmit)}>
+        <Input inputProps={{ type: 'email', placeholder: 'Email' }} register={register('email')} />
+        <Input inputProps={{ placeholder: 'Username' }} register={register('username')} />
+        <Input inputProps={{ type: 'password', placeholder: 'Password' }} register={register('password')} />
+
+        <button
+          className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+          type="submit"
+        >
+          Submit
+        </button>
       </form>
     </div>
   )
