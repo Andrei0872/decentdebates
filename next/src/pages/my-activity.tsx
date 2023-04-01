@@ -6,7 +6,7 @@ import { CardLabels } from '@/dtos/moderator/get-activity.dto';
 import styles from '@/styles/MyActivity.module.scss';
 import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument, UserActivityDebate } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
-import { Dialog, DialogBody, Icon } from '@blueprintjs/core';
+import { Dialog, DialogBody, Icon, IconSize } from '@blueprintjs/core';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import buttonStyles from '@/styles/shared/button.module.scss';
@@ -15,8 +15,6 @@ function MyActivity() {
   const [activities, setActivities] = useState<UserActivity[]>([]);
 
   const router = useRouter();
-
-  const [previewedCard, setPreviewedCard] = useState<UserActivity | null>(null);
 
   useEffect(() => {
     fetchUserActivity()
@@ -38,24 +36,12 @@ function MyActivity() {
       return;
     }
 
-    setPreviewedCard(arg);
-  }
-
-  const onDialogClose = () => {
-    setPreviewedCard(null);
-  }
-
-  const expandDialog = () => {
-    if (previewedCard?.cardType === CardTypes.ARGUMENT) {
-      router.push(`/debates/${previewedCard.debateId}/new-argument?draftId=${previewedCard.argumentId}`);
-    }
+    router.push(`/debates/${arg.debateId}/new-argument?draftId=${arg.argumentId}`);
   }
 
   const onDebateClick = (debateData: UserActivityDebate) => {
     router.push(`/review/debate/${debateData.ticketId}`)
   }
-
-  const shouldDisplayPreviewDialog = !!previewedCard;
 
   return (
     <Layout>
@@ -75,7 +61,10 @@ function MyActivity() {
 
         <div className={styles.activities}>
           <section className={styles.ongoing}>
-            <h2 className={styles.title}>Ongoing</h2>
+            <h2 className={styles.title}>
+              <Icon size={24} icon="build" />
+              <span>Ongoing</span>
+            </h2>
 
             {
               ongoingItems.length ? (
@@ -95,7 +84,10 @@ function MyActivity() {
           </section>
 
           <section className={styles.solved}>
-            <h2 className={styles.title}>Solved</h2>
+            <h2 className={styles.title}>
+              <Icon size={24} icon="tick" />
+              <span>Solved</span>
+            </h2>
 
             {
               solvedItems.length ? (
@@ -115,47 +107,6 @@ function MyActivity() {
           </section>
         </div>
       </div>
-
-      <Dialog isOpen={shouldDisplayPreviewDialog} onClose={onDialogClose}>
-        <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
-          <div className={styles.cardDialogHeader}>
-            <div className={styles.cardTitle}>
-              <div>
-                {previewedCard?.debateTitle}
-              </div>
-              {
-                previewedCard?.cardType === CardTypes.ARGUMENT ? (
-                  <div>
-                    <div>{previewedCard.argumentTitle}</div>
-                    {
-                      previewedCard.argumentIsDraft ? (
-                        <div>#draft</div>
-                      ) : null
-                    }
-                  </div>
-                ) : null
-              }
-            </div>
-            <div className={styles.cardActions}>
-              <Icon onClick={expandDialog} className={styles.cardIcon} icon="maximize" size={14} />
-              <Icon onClick={onDialogClose} className={styles.cardIcon} icon="cross" />
-            </div>
-          </div>
-
-          <div className={styles.cardDialogBody}>
-            {/* TODO: preview arg content here */}
-            {/* {
-              previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
-                isArgumentLoading ? <p>Loading...</p> : (
-                  <ArgumentEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
-                )
-              ) : (
-                <div>some debate info</div>
-              )
-            } */}
-          </div>
-        </DialogBody>
-      </Dialog>
     </Layout>
   )
 }

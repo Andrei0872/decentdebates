@@ -8,7 +8,7 @@
 .activities {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 5rem;
   flex-grow: 1;
 }
 
@@ -30,6 +30,9 @@
   padding: 0.2rem 0.7rem;
   border-radius: 7px;
   align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
 }
 
 .ongoing .list,
