@@ -28,7 +28,7 @@ function CommentsLayout(props: Props) {
 
       <section className={styles.comments}>
         <div className={styles.commentsHeader}>
-          <h2>Comments</h2>
+          <h2 className={styles.title}>Comments</h2>
         </div>
 
         {children}

@@ -19,12 +19,15 @@
   // TODO: set it properly.
   width: 50vw;
   margin-inline: auto;
+  background: var(--cl-secondary-tint-2);
+  border-radius: 6px;
 }
 
 .debateTitleContainer {
   display: flex;
   align-items: center;
   gap: .5rem;
+  color: var(--cl-secondary-shade-1);
 }
 
 .argContainer {
@@ -44,7 +47,7 @@
   font-size: 1.7rem;
 }
 
-.argTitle > input {
+.argTitle>input {
   font-size: inherit;
 }
 
@@ -56,6 +59,9 @@
 .commentButtons {
   width: 50vw;
   margin-inline: auto;
+  margin-block-start: 0.5rem;
+  display: flex;
+  gap: 0.9rem;
 }
 
 .panelsContainer {
@@ -87,11 +93,17 @@
 
 .argumentEditor[class] {
   width: 100%;
+  border: 1px solid var(--cl-secondary-tint-1);
+}
+
+.counterargumentTitle {
+  color: var(--cl-secondary-shade-1);
 }
 
 .counterargumentTitle span {
   text-decoration: underline;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .counterargumentEditor[class] {
@@ -108,8 +120,19 @@
   padding: .2rem;
 }
 
-.isOwnComment {
+
+.commenter {
+  background: var(--cl-secondary-tint-1);
+  color: var(--cl-neutral-2);
   font-weight: bold;
+  padding: 2px 5px;
+  line-height: 1;
+  border-radius: 4px;
+
+  &.isOwnComment {
+    background: var(--cl-primary);
+    color: var(--cl-secondary);
+  }
 }
 
 .commentActions {
@@ -120,7 +143,9 @@
   cursor: pointer;
 }
 
-.argUserInformation, .argModeratorInformation, .argNoModerator {
+.argUserInformation,
+.argModeratorInformation,
+.argNoModerator {
   width: var(--argument-content-width);
   margin-inline: auto;
   display: flex;
@@ -128,6 +153,39 @@
   margin-block-start: .5rem;
 }
 
-:where(.argUserInformation .addedBy, .argModeratorInformation .reviewedBy) > span {
+:where(.argUserInformation .addedBy, .argModeratorInformation .reviewedBy)>span {
   font-style: italic;
+  font-weight: 600;
+}
+
+.addedBy {
+  color: var(--cl-secondary-shade-1);
+}
+
+.argType {
+  color: #fff;
+  padding: 2.1px 5px;
+  border-radius: 6px;
+  line-height: 1;
+
+  &.CON {
+    background: var(--cl-accent-1);
+  }
+
+  &.PRO {
+    background: var(--cl-accent-2);
+  }
+}
+
+.commentCreatedAt {
+  color: var(--cl-secondary-shade-1);
+}
+
+.commentIsEdited {
+  color: var(--cl-secondary);
+}
+
+.commentActionsContainer {
+  color: var(--cl-secondary-shade-1);
+  margin-inline-start: auto;
 }

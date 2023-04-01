@@ -1,12 +1,19 @@
 .container {
   display: flex;
   flex-direction: column;
-  border: 1px solid black;
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 6px;
 }
 
 .header {
   display: flex;
   gap: 1.2rem;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--cl-neutral-1);
+
+  &:empty {
+    display: none;
+  }
 }
 
 .body {
@@ -16,4 +23,11 @@
 .commentEditorContainer {
   width: 100%;
   border: 0;
+}
+
+.placeholder {
+  position: absolute;
+  top: .9rem;
+  left: .8rem;
+  color: var(--cl-secondary);
 }

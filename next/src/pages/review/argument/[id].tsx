@@ -7,7 +7,7 @@ import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
-import { Callout, Icon, Intent, Menu, MenuItem, Position, Toaster } from '@blueprintjs/core';
+import { Callout, Icon, IconSize, Intent, Menu, MenuItem, Position, Toaster } from '@blueprintjs/core';
 import { fetchArgumentAsModerator, fetchArgumentAsUser } from '@/utils/api/review';
 import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType, UpdateArgumentData } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
@@ -17,7 +17,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
-import { $getRoot } from 'lexical';
+import buttonStyles from '@/styles/shared/button.module.scss';
 
 interface ModeratorArgumentContentProps {
   argumentData: ArgumentAsModerator;
@@ -43,7 +43,7 @@ function ModeratorArgumentContent(props: ModeratorArgumentContentProps) {
     <div className={styles.moderatorArgumentContainer}>
       <Callout className={styles.debateInfo}>
         <div className={styles.debateTitleContainer}>
-          <i className={styles.debateIcon}></i>
+          <Icon size={IconSize.LARGE} icon="document" />
           <h3>{argumentData.debateTitle}</h3>
         </div>
       </Callout>
@@ -52,7 +52,7 @@ function ModeratorArgumentContent(props: ModeratorArgumentContentProps) {
         <h2 className={styles.argTitle}>{argumentData.argumentTitle}</h2>
 
         <div className={styles.argInfo}>
-          <div className={styles.argType}>{argumentData.argumentType}</div>
+          <div className={`${styles.argType} ${styles[argumentData.argumentType]}`}>{argumentData.argumentType}</div>
 
           {
             argumentData.counterargumentToId ? (
@@ -287,7 +287,7 @@ function Argument() {
     });
 
     socket.on('error', err => {
-        router.push('/');
+      router.push('/');
     });
 
     socket.on('disconnect', () => {
@@ -475,7 +475,13 @@ function Argument() {
       <div className={styles.panelsContainer}>
         <div style={{ width: shouldDisplayRightPanel ? `${window.innerWidth - RIGHT_PANEL_WIDTH}px` : '100%' }} className={styles.leftPanel}>
           <section className={styles.buttons}>
-            <button onClick={redirectBack} type='button'>Back</button>
+            <button
+              className={`${buttonStyles.button} ${buttonStyles.secondary}`}
+              onClick={redirectBack}
+              type='button'
+            >
+              Back
+            </button>
           </section>
 
           <CommentsLayout
@@ -509,9 +515,9 @@ function Argument() {
 
                         return (
                           <>
-                            <div className={user?.id === c.commenterId ? styles.isOwnComment : undefined}>{c.commenterUsername}</div>
-                            <div>{c.createdAt}</div>
-                            <div>Edited</div>
+                            <div className={`${styles.commenter} ${user?.id === c.commenterId ? styles.isOwnComment : ''}`}>{c.commenterUsername}</div>
+                            <div className={styles.commentCreatedAt}>{c.createdAt}</div>
+                            <div className={styles.commentIsEdited}>Edited</div>
 
                             {
                               c.commenterId === user?.id ? (
@@ -542,8 +548,19 @@ function Argument() {
                     {
                       c.commentId === editingCommentId ? (
                         <div className={styles.commentButtons}>
-                          <button onClick={() => cancelEditing(c)}>Cancel Edits</button>
-                          <button onClick={() => saveCommentEdits(c)}>Save Edits</button>
+                          <button
+                            className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+                            onClick={() => cancelEditing(c)}
+                          >
+                            Cancel Edits
+                          </button>
+
+                          <button
+                            className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                            onClick={() => saveCommentEdits(c)}
+                          >
+                            Save Edits
+                          </button>
                         </div>
                       ) : null
                     }
@@ -561,7 +578,14 @@ function Argument() {
             </CommentsLayout.CommentsList>
 
             <div className={styles.commentButtons}>
-              <button disabled={!!editingCommentId} type='button' onClick={addComment}>Add Comment</button>
+              <button
+                className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                disabled={!!editingCommentId}
+                type='button'
+                onClick={addComment}
+              >
+                Add Comment
+              </button>
             </div>
 
           </CommentsLayout>
