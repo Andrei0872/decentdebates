@@ -1,0 +1,32 @@
+.description>span {
+  font-weight: 600;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rem;
+}
+
+.header {
+  margin-block-start: calc(2rem + 5vh);
+  width: calc(5rem + 40vw);
+  background: var(--cl-secondary-tint-2);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-size: 1.2rem;
+  color: var(--cl-secondary-shade-1);
+}
+
+.collapseHeader {
+  color: var(--cl-secondary-shade-1);
+  font-size: 1.5rem;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
