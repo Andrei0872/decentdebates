@@ -37,7 +37,7 @@ function ArgumentCard(props: Props) {
           cardData.argumentIsDraft ? (
             null
           ) : (
-            <div className={styles.moderator}>
+            <div className={`${styles.moderator} ${!cardData.moderatorUsername ? styles.unassigned : ''}`}>
               <div><Icon icon="person" /></div>
               <div>{cardData.moderatorUsername ?? <b>unassigned</b>}</div>
             </div>

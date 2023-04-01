@@ -64,4 +64,8 @@
   align-items: center;
   gap: 0.3rem;
   color: var(--cl-secondary-shade-1);
+
+  &.unassigned {
+    color: var(--cl-secondary);
+  }
 }
