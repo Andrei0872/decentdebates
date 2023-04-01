@@ -7,12 +7,15 @@
   margin-inline: auto;
 }
 
-.addedBy, .reviewedBy {
+.addedBy,
+.reviewedBy {
   align-self: flex-end;
+  color: var(--cl-secondary-shade-1);
 }
 
-:where(.addedBy, .reviewedBy) > span {
+:where(.addedBy, .reviewedBy)>span {
   font-style: italic;
+  font-weight: 600;
 }
 
 .buttons {
@@ -40,4 +43,42 @@
 
 .debateTitle input {
   font-size: inherit;
+}
+
+.debateTitle {
+  font-size: 1.7rem;
+}
+
+.commenter {
+  background: var(--cl-secondary-tint-1);
+  color: var(--cl-neutral-2);
+  font-weight: bold;
+  padding: 2px 5px;
+  line-height: 1;
+  border-radius: 4px;
+
+  &.isOwnComment {
+    background: var(--cl-primary);
+    color: var(--cl-secondary);
+  }
+}
+
+.commentCreatedAt {
+  color: var(--cl-secondary-shade-1);
+}
+
+.commentIsEdited {
+  color: var(--cl-secondary);
+}
+
+.commentActionsContainer {
+  color: var(--cl-secondary-shade-1);
+  margin-inline-start: auto;
+}
+
+.userArgEditButtons {
+  width: var(--argument-content-width);
+  margin-inline: auto;
+  display: flex;
+  gap: .5rem;
 }

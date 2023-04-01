@@ -16,6 +16,7 @@ import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toas
 import { EditorState } from 'lexical';
 import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
 import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
+import buttonStyles from '@/styles/shared/button.module.scss';
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
@@ -25,7 +26,7 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
 
   return (
     <div className={styles.debateContent}>
-      <h1>{debateData.title}</h1>
+      <h1 className={styles.debateTitle}>{debateData.title}</h1>
       <div className={styles.addedBy}>Added by: <span>{debateData.username}</span></div>
     </div>
   )
@@ -90,15 +91,25 @@ function UserDebateContent(props: UserDebateContentProps) {
       }
 
       <div className={styles.userArgEditButtons}>
-        <button onClick={toggleEditOrSave} type='button'>
+        <button
+          className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
+          onClick={toggleEditOrSave}
+          type='button'
+        >
           {
-            !isEditMode ? ('Edit Argument') : ('Save Changes')
+            !isEditMode ? ('Edit title') : ('Save Changes')
           }
         </button>
 
         {
           isEditMode ? (
-            <button onClick={cancelChanges} type='button'>Cancel Changes</button>
+            <button
+              className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+              onClick={cancelChanges}
+              type='button'
+            >
+              Cancel Changes
+            </button>
           ) : null
         }
       </div>
@@ -334,7 +345,13 @@ function Debate() {
   return (
     <Layout>
       <section className={styles.buttons}>
-        <button onClick={redirectBack} type='button'>Back</button>
+        <button
+          className={`${buttonStyles.button} ${buttonStyles.secondary}`}
+          onClick={redirectBack}
+          type='button'
+        >
+          Back
+        </button>
       </section>
 
       <CommentsLayout
@@ -368,9 +385,9 @@ function Debate() {
 
                     return (
                       <>
-                        <div className={user?.id === c.commenterId ? styles.isOwnComment : undefined}>{c.commenterUsername}</div>
-                        <div>{c.createdAt}</div>
-                        <div>Edited</div>
+                        <div className={`${styles.commenter} ${user?.id === c.commenterId ? styles.isOwnComment : ''}`}>{c.commenterUsername}</div>
+                        <div className={styles.commentCreatedAt}>{c.createdAt}</div>
+                        <div className={styles.commentIsEdited}>Edited</div>
 
                         {
                           c.commenterId === user?.id ? (
@@ -420,7 +437,14 @@ function Debate() {
         </CommentsLayout.CommentsList>
 
         <div className={styles.commentButtons}>
-          <button disabled={!!editingCommentId} type='button' onClick={addComment}>Add Comment</button>
+          <button
+            className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+            disabled={!!editingCommentId}
+            type='button'
+            onClick={addComment}
+          >
+            Add Comment
+          </button>
         </div>
       </CommentsLayout>
 
