@@ -45,3 +45,11 @@
     color: #fff;
   }
 }
+
+.button.warning {
+  &.contained {
+    border: none;
+    background: var(--cl-accent-3);
+    color: #fff;
+  }
+}
