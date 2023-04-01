@@ -167,20 +167,6 @@ function UserArgumentContent(props: UserArgumentContentProps) {
         </div>
       </Callout>
 
-      <div className={styles.userArgEditButtons}>
-        <button onClick={toggleEditOrSave} type='button'>
-          {
-            !isEditMode ? ('Edit Argument') : ('Save Changes')
-          }
-        </button>
-
-        {
-          isEditMode ? (
-            <button onClick={cancelChanges} type='button'>Cancel Changes</button>
-          ) : null
-        }
-      </div>
-
       <div className={styles.argContainer}>
         <h2 className={styles.argTitle}>
           {
@@ -221,6 +207,31 @@ function UserArgumentContent(props: UserArgumentContentProps) {
           </div>
         ) : <div className={styles.argNoModerator}>No moderator assigned.</div>
       }
+
+      <div className={styles.userArgEditButtons}>
+        <button
+          className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
+          onClick={toggleEditOrSave}
+          type='button'
+        >
+          {
+            !isEditMode ? ('Edit Argument') : ('Save Changes')
+          }
+        </button>
+
+        {
+          isEditMode ? (
+
+            <button
+              className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+              onClick={cancelChanges}
+              type='button'
+            >
+              Cancel Changes
+            </button>
+          ) : null
+        }
+      </div>
     </div>
   );
 }

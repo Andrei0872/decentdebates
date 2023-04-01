@@ -189,3 +189,10 @@
   color: var(--cl-secondary-shade-1);
   margin-inline-start: auto;
 }
+
+.userArgEditButtons {
+  width: var(--argument-content-width);
+  margin-inline: auto;
+  display: flex;
+  gap: .5rem;
+}
