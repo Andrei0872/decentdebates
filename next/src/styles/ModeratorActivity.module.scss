@@ -8,15 +8,18 @@
 }
 
 .board {
-  border: 1px solid black;
   flex-basis: calc(8rem + 11vw);
   display: flex;
   flex-direction: column;
+  max-height: 78vh;
+  overflow-y: auto;
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 6px;
+  background: var(--cl-secondary-tint-2);
 }
 
 .boardHeader {
-  padding: .2rem .5rem;
-  border-bottom: 1px solid black;
+  padding: 0.7rem 0.8rem 0.3rem;
 }
 
 .boardBody {
@@ -28,13 +31,22 @@
 }
 
 .card {
-  border: 1px solid green;
   cursor: pointer;
+  box-shadow: rgba(140, 149, 159, 0.15) 0px 3px 6px;
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 6px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  --padding-left-amount: .5rem;
+  --padding-top-amount: .4rem;
 }
 
 .card:not(.canDrag) {
-  opacity: .8;
-  cursor: auto;
+  opacity: .6;
+  cursor: not-allowed;
 }
 
 .cardDialogBodyContainer {
@@ -75,8 +87,75 @@
 .cardHeader {
   display: flex;
   justify-content: space-between;
+  padding: var(--padding-top-amount) var(--padding-left-amount) 0;
 }
 
 .cardActionsList {
   border: 1px solid black;
+}
+
+.boardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cl-secondary-shade-1);
+}
+
+.ticketLabel {
+  display: inline-block;
+  background-color: var(--cl-accent-1);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.2rem;
+}
+
+.cardBody {
+  flex-grow: 1;
+  padding-inline-start: var(--padding-left-amount);
+  padding-block-start: .3rem;
+}
+
+.cardBodyDebateTitle,
+.cardBodyArgumentTitle {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+
+.cardModeratorUsername {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--cl-secondary);
+}
+
+.cardFooter {
+  display: flex;
+  padding-inline: var(--padding-left-amount);
+  padding-block-end: var(--padding-top-amount);
+  justify-content: flex-end;
+}
+
+.cardBodyArgument {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+
+  & .cardBodyArgumentTitle {
+    padding-inline-start: .7rem;
+  }
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.boardItemsCount {
+  background: var(--cl-primary);
+  font-weight: 600;
+  padding: 2px 5px;
+  line-height: 1;
+  border-radius: 20px;
+  border: 1px solid var(--cl-secondary-tint-1);
 }

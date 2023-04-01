@@ -97,7 +97,7 @@ const Card: React.FC<CardProps> = (props) => {
   return (
     <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag}>
       <div className={styles.cardHeader}>
-        <h4>#{cardData.ticketLabel}</h4>
+        <h4 className={styles.ticketLabel}>#{cardData.ticketLabel}</h4>
 
         {
           cardData.boardList === BoardLists.IN_REVIEW && hasRightsOnTicket ? (
@@ -125,17 +125,32 @@ const Card: React.FC<CardProps> = (props) => {
       <div className={styles.cardBody}>
         {
           cardData.ticketLabel === CardLabels.DEBATE ? (
-            <div>{cardData.ticketTitle}</div>
+            <div className={styles.cardBodyDebateTitle}>
+              <Icon icon="document" />
+              <span>{cardData.ticketTitle}</span>
+            </div>
           ) : (
-            <>
-              <div>{cardData.debateTitle}</div>
-              <div>{cardData.ticketTitle}</div>
-            </>
+            <div className={styles.cardBodyArgument}>
+              <div className={styles.cardBodyDebateTitle}>
+                <Icon icon="document" />
+                <span>{cardData.debateTitle}</span>
+              </div>
+
+              <div className={styles.cardBodyArgumentTitle}>
+                <Icon icon="chat" />
+                <span>{cardData.ticketTitle}</span>
+              </div>
+            </div>
           )
         }
       </div>
       <div className={styles.cardFooter}>
-        {cardData.moderatorUsername ? cardData.moderatorUsername : <b>unassigned</b>}
+        <div className={styles.cardModeratorUsername}>
+          <Icon icon="person" />
+          <span>
+            {cardData.moderatorUsername ? cardData.moderatorUsername : <b>unassigned</b>}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -285,7 +300,12 @@ function Activity() {
               <Board
                 key={b.boardList}
                 boardType={b.boardList}
-                header={<p>{b.boardList}</p>}
+                header={
+                  <div className={styles.headerContent}>
+                    <p className={styles.boardTitle}>{b.boardList}</p>
+                    <p className={styles.boardItemsCount}>10</p>
+                  </div>
+                }
                 cards={
                   b.cards.map(c => (
                     <Card
