@@ -8,6 +8,7 @@
 
   &:disabled {
     opacity: .4;
+    cursor: not-allowed;
   }
 }
 
@@ -27,4 +28,20 @@
 .button.secondary {
   background-color: var(--cl-primary);
   color: var(--cl-secondary);
+}
+
+.button.success {
+  &.contained {
+    border: none;
+    background: var(--cl-accent-2);
+    color: #fff;
+  }
+}
+
+.button.danger {
+  &.contained {
+    border: none;
+    background: var(--cl-accent-1);
+    color: #fff;
+  }
 }
