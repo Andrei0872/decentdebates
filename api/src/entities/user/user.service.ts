@@ -116,7 +116,7 @@ export class UserService {
       join debate d
         on d.id = a.debate_id
       left join "user" u
-        on t.created_by = u.id
+        on t.assigned_to = u.id
       where a.created_by = $1
       order by a.created_at desc
     `;

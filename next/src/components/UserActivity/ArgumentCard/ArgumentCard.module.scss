@@ -35,11 +35,6 @@
   border-bottom-right-radius: var(--border-radius-amount);
 }
 
-.moderator {
-  display: flex;
-  align-items: center;
-}
-
 .argumentLabel {
   display: inline-block;
   background-color: var(--cl-accent-1);
@@ -68,4 +63,5 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  color: var(--cl-secondary-shade-1);
 }
