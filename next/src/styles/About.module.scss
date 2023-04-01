@@ -1,0 +1,18 @@
+.body {
+  width: calc(5rem + 45vw);
+  margin-inline: auto;
+  margin-block-start: calc(5rem + 13vh);
+  background: var(--cl-secondary-tint-2);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+}
+
+.title {
+  font-size: 2.2rem;
+  color: var(--cl-secondary-shade-1);
+}
+
+.content {
+  line-height: 1.3;
+  font-size: 1.2rem;
+}
