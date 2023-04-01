@@ -59,7 +59,8 @@
   display: flex;
   justify-content: space-between;
   padding: .6rem;
-  border-bottom: 1px solid black;
+  color: var(--cl-secondary-shade-1);
+  border-bottom: 1px solid var(--cl-neutral-3);
 }
 
 .cardActions {
@@ -91,7 +92,7 @@
 }
 
 .cardActionsList {
-  border: 1px solid black;
+  border: 1px solid var(--cl-neutral-3);
 }
 
 .boardTitle {
@@ -158,4 +159,15 @@
   line-height: 1;
   border-radius: 20px;
   border: 1px solid var(--cl-secondary-tint-1);
+}
+
+.addedBy {
+  text-align: right;
+  font-style: italic;
+  color: var(--cl-secondary-shade-1);
+  padding: .2rem .4rem;
+
+  & span {
+    font-weight: bold;
+  }
 }

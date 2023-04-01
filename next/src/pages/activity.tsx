@@ -325,7 +325,7 @@ function Activity() {
         </div>
       </DndProvider>
 
-      <Dialog isOpen={shouldShowPreviewCardModal} onClose={onPreviewCardModalClose}>
+      <Dialog className={styles.activityDialogContainer} isOpen={shouldShowPreviewCardModal} onClose={onPreviewCardModalClose}>
         <DialogBody className={styles.cardDialogBodyContainer} useOverflowScrollContainer={undefined}>
           <div className={styles.cardDialogHeader}>
             <h3 className={styles.cardTitle}>Preview</h3>
@@ -343,7 +343,7 @@ function Activity() {
             {
               previewedCard?.ticketLabel === CardLabels.ARGUMENT ? (
                 isArgumentLoading ? <p>Loading...</p> : (
-                  <div>
+                  <div className={styles.dialogArgument}>
                     <h2>{previewedCard.ticketTitle}</h2>
                     <RichEditor containerClassName={styles.cardArgumentContainer} configOptions={{ editable: false, editorState: previewedCard.content }} />
                   </div>
@@ -352,11 +352,11 @@ function Activity() {
                 isDebateLoading ? <p>Loading debate...</p> : (
                   <div>
                     <h2>{previewedCard?.title}</h2>
-                    <div className={styles.addedBy}>Added by: <span>{previewedCard?.username}</span></div>
                   </div>
                 )
               )
             }
+            <div className={styles.addedBy}>Added by: <span>{previewedCard?.username}</span></div>
           </div>
         </DialogBody>
       </Dialog>

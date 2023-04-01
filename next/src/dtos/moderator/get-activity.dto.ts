@@ -41,6 +41,7 @@ export interface ModeratorActivityArgument extends ModeratorActivityBase {
   debateTitle: string;
   argumentId: number;
   counterargumentTo: number;
+  username: string;
 }
 
 export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;
