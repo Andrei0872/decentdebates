@@ -1,0 +1,33 @@
+.container {
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 6px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: .3rem .5rem;
+  align-items: center;
+}
+
+.body {
+  height: 0;
+  visibility: hidden;
+  transition: all .1s ease-in;
+  padding-inline: .3rem;
+
+  &.isOpen {
+    height: 200px;
+    visibility: visible;
+  }
+}
+
+.triggerButton {
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: var(--cl-secondary);
+}
