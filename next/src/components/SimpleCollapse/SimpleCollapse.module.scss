@@ -8,6 +8,10 @@
   justify-content: space-between;
   padding: .3rem .5rem;
   align-items: center;
+
+  &.expandOnClick {
+    cursor: pointer;
+  }
 }
 
 // Idea taken from here: https://stackoverflow.com/a/69802208/9632621.

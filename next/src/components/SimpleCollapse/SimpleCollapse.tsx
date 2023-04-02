@@ -5,14 +5,27 @@ import styles from './SimpleCollapse.module.scss'
 interface Props {
   header: ReactNode;
   children: ReactNode;
+  expandOnClick?: boolean;
+
+  click?: () => void;
 }
 
 function SimpleCollapse(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const shouldExpandOnClick = props.expandOnClick === true;
+
+  const onContainerClick = () => {
+    if (shouldExpandOnClick) {
+      setIsOpen(!isOpen);
+    }
+
+    props.click?.();
+  }
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div onClick={onContainerClick} className={styles.container}>
+      <div className={`${styles.header} ${shouldExpandOnClick ? styles.expandOnClick : ''}`}>
         {props.header}
 
         <button className={styles.triggerButton} onClick={() => setIsOpen(!isOpen)} type='button'>
