@@ -10,6 +10,9 @@ import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastPr
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import buttonStyles from '@/styles/shared/button.module.scss';
+import Tags from "@/components/Tags/Tags";
+
+const TAGS = [{ id: 1, name: 'tag1' }, { id: 2, name: 'tag2' }, { id: 3, name: 'tag3' }];
 
 interface Props {
   debates: Debate[];
@@ -83,6 +86,7 @@ function Debates(props: Props) {
             <Input inputProps={{ placeholder: "Search by title..." }} onChange={onSearchInputChange} />
           </div>
 
+          <Tags debateTags={TAGS} />
           {/* <div className={styles.tags}>
             tags
             <button type="button">
