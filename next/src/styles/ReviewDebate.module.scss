@@ -27,6 +27,9 @@
 .commentButtons {
   width: 50vw;
   margin-inline: auto;
+  margin-block-start: 0.5rem;
+  display: flex;
+  gap: 0.9rem;
 }
 
 .isOwnComment {
@@ -82,3 +85,4 @@
   display: flex;
   gap: .5rem;
 }
+

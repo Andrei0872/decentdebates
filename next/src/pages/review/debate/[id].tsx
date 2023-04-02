@@ -418,8 +418,19 @@ function Debate() {
                 {
                   c.commentId === editingCommentId ? (
                     <div className={styles.commentButtons}>
-                      <button onClick={() => cancelEditing(c)}>Cancel Edits</button>
-                      <button onClick={() => saveCommentEdits(c)}>Save Edits</button>
+                      <button
+                        className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+                        onClick={() => cancelEditing(c)}
+                      >
+                        Cancel Edits
+                      </button>
+
+                      <button
+                        className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                        onClick={() => saveCommentEdits(c)}
+                      >
+                        Save Edits
+                      </button>
                     </div>
                   ) : null
                 }
