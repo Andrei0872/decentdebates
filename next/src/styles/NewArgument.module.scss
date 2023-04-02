@@ -16,6 +16,7 @@
 
 .title {
   font-size: 2.4rem;
+  color: var(--cl-secondary-shade-1);
 }
 
 .argumentContainer {
@@ -23,6 +24,7 @@
   width: 60vw;
   margin-inline: auto;
   margin-top: 2rem;
+  padding-block-end: 2rem;
 }
 
 .argumentForm {
@@ -55,6 +57,7 @@
 .counterargumentSelect {
   display: flex;
   gap: .7rem;
+  align-items: center;
 }
 
 .argumentTitle {
@@ -85,6 +88,8 @@
   margin-inline: auto;
   margin-block-start: 1rem;
   border-radius: 6px;
+  background-color: var(--cl-secondary-tint-2);
+  color: var(--cl-neutral-3);
 }
 
 .counterArgContainer {
@@ -95,4 +100,44 @@
 
 .loadingSpinner {
   margin-block-start: 3rem;
+}
+
+.argTypeLabel {
+  padding: 2px 5px;
+  line-height: 1;
+  border-radius: 3px;
+  font-weight: 600;
+  color: #fff;
+
+  &.labelPRO {
+    background-color: var(--cl-accent-2);
+  }
+
+  &.labelCON {
+    background-color: var(--cl-accent-1);
+  }
+}
+
+.counterargumentSelectInput {
+  background: var(--cl-secondary-tint-2);
+  border: 1px solid var(--cl-neutral-3);
+  padding: 2px 5px;
+  color: var(--cl-secondary-shade-1);
+  font-weight: 600;
+}
+
+.argumentEditorContainer {
+  border: 1px solid var(--cl-neutral-3GA);
+}
+
+.counterargumentTitle {
+  color: var(--cl-secondary-shade-1);
+  font-weight: 600;
+}
+
+.argumentButtons {
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+  margin-inline: auto;
 }

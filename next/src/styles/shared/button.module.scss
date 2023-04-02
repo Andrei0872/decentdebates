@@ -52,4 +52,11 @@
     background: var(--cl-accent-3);
     color: #fff;
   }
+
+  &.outlined {
+    border: 2px solid var(--cl-accent-3);
+    background: transparent;
+    color: var(--cl-accent-3);
+    font-weight: bold;
+  }
 }

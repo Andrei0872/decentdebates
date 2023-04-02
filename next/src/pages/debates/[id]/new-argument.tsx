@@ -4,7 +4,7 @@ import styles from '@/styles/NewArgument.module.scss';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
+import { Callout, Collapse, Icon, IconSize, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
@@ -14,6 +14,8 @@ import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fet
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
+import buttonStyles from '@/styles/shared/button.module.scss';
+import SimpleCollapse from '@/components/SimpleCollapse/SimpleCollapse';
 
 interface CreateArgumentFormData {
   counterargumentId?: number;
@@ -265,7 +267,13 @@ function NewArgument() {
     <Layout>
       <div className={styles.container}>
         <section className={styles.buttons}>
-          <button onClick={redirectBack} type='button'>Back</button>
+          <button
+            className={`${buttonStyles.button} ${buttonStyles.secondary}`}
+            onClick={redirectBack}
+            type='button'
+          >
+            Back
+          </button>
         </section>
 
         <section className={styles.titleContainer}>
@@ -282,7 +290,7 @@ function NewArgument() {
             <>
               <Callout className={styles.debateInfo}>
                 <div className={styles.debateTitleContainer}>
-                  <i className={styles.debateIcon}></i>
+                  <Icon size={IconSize.LARGE} icon="document" />
                   <h3>{crtDebate?.metadata.debateTitle}</h3>
                 </div>
               </Callout>
@@ -291,12 +299,12 @@ function NewArgument() {
                 <form className={styles.argumentForm} onSubmit={handleSubmit(onSubmit)}>
                   <div className={styles.argumentType}>
                     <div className={styles.radioGroup}>
-                      <label htmlFor="pro">Pro</label>
+                      <label className={`${styles.argTypeLabel} ${styles.labelPRO}`} htmlFor="pro">Pro</label>
                       <input type="radio" id="pro" value="PRO" {...register('argType')} />
                     </div>
 
                     <div className={styles.radioGroup}>
-                      <label htmlFor="con">Con</label>
+                      <label className={`${styles.argTypeLabel} ${styles.labelCON}`} htmlFor="con">Con</label>
                       <input type="radio" id="con" value="CON" {...register('argType')} />
                     </div>
                   </div>
@@ -308,7 +316,7 @@ function NewArgument() {
                         is counterargument for
                       </label>
 
-                      <select {...register('counterargumentId')} disabled={!isCounterargument}>
+                      <select className={styles.counterargumentSelectInput} {...register('counterargumentId')} disabled={!isCounterargument}>
                         <option value="">Select counterargument</option>
                         {
                           debateArguments?.map(arg => (
@@ -321,18 +329,17 @@ function NewArgument() {
 
                   {
                     !!counterargumentId ? (
-                      <div>
-                        <button onClick={expandCounterargument} type='button'>{unexpandedArg!.title} <Icon icon="chevron-down" /></button>
-                        <Collapse isOpen={isCounterargumentExpanded}>
-                          <div className={styles.counterArgContainer}>
-                            {
-                              counterargument ? (
-                                <DebateArgumentCard isExpanded={true} debateArgumentData={counterargument} />
-                              ) : <p>Loading..</p>
-                            }
-                          </div>
-                        </Collapse>
-                      </div>
+                      <SimpleCollapse
+                        expandOnClick={true}
+                        header={<p className={styles.counterargumentTitle}>{unexpandedArg?.title}</p>}
+                        click={expandCounterargument}
+                      >
+                        {
+                          counterargument ? (
+                            <DebateArgumentCard isExpanded={true} debateArgumentData={counterargument} />
+                          ) : <p>Loading..</p>
+                        }
+                      </SimpleCollapse>
                     ) : null
                   }
 
@@ -343,6 +350,7 @@ function NewArgument() {
                   {
                     isArgumentEditorReady ? (
                       <RichEditor
+                        containerClassName={styles.argumentEditorContainer}
                         additionalPlugins={
                           <ExportContentPlugin ref={exportEditorContentRef} />
                         }
@@ -352,8 +360,19 @@ function NewArgument() {
                   }
 
                   <div className={styles.argumentButtons}>
-                    <button type='submit'>Submit</button>
-                    <button data-is-draft={true} type='submit'>{isUpdatingDraft ? 'Update' : 'Save'} Draft</button>
+                    <button
+                      className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                      type='submit'
+                    >
+                      Submit
+                    </button>
+                    <button
+                      className={`${buttonStyles.button} ${isUpdatingDraft ? `${buttonStyles.primary} ${buttonStyles.outlined}` : `${buttonStyles.warning} ${buttonStyles.outlined}`}`}
+                      data-is-draft={true}
+                      type='submit'
+                    >
+                      {isUpdatingDraft ? 'Update' : 'Save'} Draft
+                    </button>
                   </div>
                 </form>
               </section>
