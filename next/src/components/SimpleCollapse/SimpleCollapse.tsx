@@ -21,9 +21,11 @@ function SimpleCollapse(props: Props) {
       </div>
 
       <div
-        className={`${styles.body} ${isOpen ? styles.isOpen : ''}`}
+        className={`${styles.bodyWrapper} ${isOpen ? styles.isOpen : ''}`}
       >
-        {props.children}
+        <div className={styles.body}>
+          {props.children}
+        </div>
       </div>
     </div>
   )

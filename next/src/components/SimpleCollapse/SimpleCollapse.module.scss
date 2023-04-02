@@ -10,15 +10,27 @@
   align-items: center;
 }
 
-.body {
-  height: 0;
-  visibility: hidden;
-  transition: all .1s ease-in;
-  padding-inline: .3rem;
+// Idea taken from here: https://stackoverflow.com/a/69802208/9632621.
+.bodyWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .1s;
+  overflow: hidden;
 
   &.isOpen {
-    height: 200px;
+    grid-template-rows: 1fr;
+  }
+}
+
+.body {
+  visibility: hidden;
+  transition: all .1s;
+  min-height: 0;
+  padding: 0;
+  
+  .isOpen & {
     visibility: visible;
+    padding: .3rem .5rem;
   }
 }
 
