@@ -84,7 +84,7 @@ function NewArgument() {
   }, []);
 
   useEffect(() => {
-    if (!router.isReady || !!crtDebate) {
+    if (!router.isReady) {
       return () => { };
     }
 
