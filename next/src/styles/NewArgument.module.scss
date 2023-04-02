@@ -89,7 +89,7 @@
   margin-block-start: 1rem;
   border-radius: 6px;
   background-color: var(--cl-secondary-tint-2);
-  color: var(--cl-neutral-3);
+  color: var(--cl-neutral-2);
 }
 
 .counterArgContainer {
@@ -140,4 +140,9 @@
   gap: .4rem;
   align-items: center;
   margin-inline: auto;
+}
+
+.counterargumentCheckInput:not(:checked)~.counterargumentSelect>.counterargumentSelectInput {
+  opacity: .4;
+  cursor: not-allowed;
 }

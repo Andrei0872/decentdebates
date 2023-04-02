@@ -93,7 +93,6 @@ function NewArgument() {
       return () => { };
     }
 
-    const isDraft = !!draftId && !Number.isNaN(+draftId);
     if (isDraft) {
       setIsArgumentEditorReady(false);
 
@@ -263,6 +262,8 @@ function NewArgument() {
 
   const isUpdatingDraft = !!prefilledEditorContent;
 
+  const isDraft = !!draftId && !Number.isNaN(+draftId);
+
   return (
     <Layout>
       <div className={styles.container}>
@@ -277,7 +278,19 @@ function NewArgument() {
         </section>
 
         <section className={styles.titleContainer}>
-          <h2 className={styles.title}>Adding a new argument</h2>
+          <h2 className={styles.title}>
+            {
+              isDraft ? (
+                <>
+                  Updating a draft
+                </>
+              ) : (
+                <>
+                  Adding a new argument
+                </>
+              )
+            }
+          </h2>
         </section>
 
         {
@@ -310,7 +323,7 @@ function NewArgument() {
                   </div>
 
                   <div className={styles.counterargumentCheck}>
-                    <input id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
+                    <input className={styles.counterargumentCheckInput} id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
                     <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
                       <label htmlFor='counterargumentCheck'>
                         is counterargument for
