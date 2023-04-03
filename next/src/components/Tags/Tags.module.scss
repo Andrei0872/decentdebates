@@ -1,0 +1,17 @@
+.createdItem {
+  color: var(--cl-accent-2);
+
+  &:hover {
+    font-weight: 600;
+    color: var(--cl-accent-2);
+  }
+}
+
+.tag {
+  background-color: var(--cl-secondary);
+
+  &.tagNew {
+    background-color: var(--cl-accent-2);
+    font-weight: 600;
+  }
+}
