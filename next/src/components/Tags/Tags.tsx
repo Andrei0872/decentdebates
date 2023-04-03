@@ -1,6 +1,6 @@
 import { Tag } from '@/types/tag'
 import styles from './Tags.module.scss'
-import { ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
+import { ItemPredicate, ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
 import { MenuItem2 } from '@blueprintjs/popover2'
 import { ReactNode, useMemo, useState } from 'react';
 
@@ -51,7 +51,14 @@ function Tags(props: Props) {
   const handleTagRemove = (tag: ReactNode, tagIndex: number) => {
     deselectTag(tagIndex);
   }
-  
+
+  const filterTag: ItemPredicate<Tag> = (query, tag, tagIndex) => {
+    const normalizedQuery = query.toLowerCase();
+    const normalizedTagName = tag.name.toLowerCase();
+
+    return normalizedTagName.includes(normalizedQuery);
+  }
+
   const selectedTags = useMemo(() => {
     return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
   }, [selectedTagsIds]);
@@ -67,6 +74,8 @@ function Tags(props: Props) {
         tagInputProps={{
           onRemove: handleTagRemove,
         }}
+        itemPredicate={filterTag}
+        resetOnSelect={true}
       />
     </div>
   )
