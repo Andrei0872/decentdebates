@@ -9,6 +9,7 @@ export interface Debate {
   modifiedAt: string;
   username: string;
   userId: number;
+  tags: string[];
 }
 
 export interface DebateMetadata {

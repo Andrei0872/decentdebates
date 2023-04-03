@@ -179,7 +179,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       cookie: context.req.headers.cookie,
     },
   });
-  const debates = res.data?.data;
+  const debates = res.data?.data
+    .map((d: any) => ({ ...d, tags: d.tags.split(',') }));
 
   return {
     props: {
