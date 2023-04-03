@@ -2,20 +2,43 @@ import { Tag } from '@/types/tag'
 import styles from './Tags.module.scss'
 import { ItemPredicate, ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
 import { MenuItem2 } from '@blueprintjs/popover2'
-import { ReactNode, useMemo, useState } from 'react';
+import React, { ForwardedRef, ReactNode, useImperativeHandle, useMemo, useState } from 'react';
 
 interface Props {
   debateTags: Tag[];
   canCreateTags?: boolean;
 }
 
-function Tags(props: Props) {
+export interface TagsRef {
+  getSelectedTags: () => { tags: Tag[], createdTags: string[] };
+}
+
+function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
   const { debateTags: tags } = props;
   const canCreateTags = props.canCreateTags === true;
 
   const [selectedTagsIds, setSelectedTagsIds] = useState<number[]>([]);
   const [debateTags, setDebateTags] = useState(tags);
   const [createdTagsIds, setCreatedTagsIds] = useState<{ [k: number]: boolean }>({});
+
+  useImperativeHandle(ref, () => ({
+    getSelectedTags,
+  }));
+
+  const getSelectedTags = () => {
+    const existingSelectedTags = selectedTagsIds
+      .filter(tId => !createdTagsIds[tId])
+      .map(tId => debateTags.find(dt => dt.id === tId)!);
+    
+    const createdTagsNames = selectedTagsIds
+      .filter(tId => !!createdTagsIds[tId])
+      .map(tId => debateTags.find(dt => dt.id === tId)!.name);
+
+    return {
+      tags: existingSelectedTags,
+      createdTags: createdTagsNames,
+    }
+  };
 
   const itemRenderer: ItemRenderer<Tag> = (tag, props) => {
     if (!props.modifiers.matchesPredicate) {
@@ -175,4 +198,4 @@ function Tags(props: Props) {
   )
 }
 
-export default Tags
+export default React.forwardRef(Tags);
