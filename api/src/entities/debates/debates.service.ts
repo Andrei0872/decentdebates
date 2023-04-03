@@ -95,9 +95,16 @@ export class DebatesService {
 
       const hasCreatedTags = !!debateData.createdTags;
       if (hasCreatedTags) {
+        /*
+        Ensuring no duplicate tags are inserted.
+        Some ideas were taken from here: https://github.com/brianc/node-postgres/issues/1644#issuecomment-387961410.
+        */
         const insertTagsSql = `
           insert into debate_tag(name)
-          select * from unnest($1::text[])
+          select new_tags.name from unnest($1::text[]) as new_tags (name)
+          left join debate_tag dt
+            on lower(dt.name) = lower(trim(both new_tags.name))
+          where dt.name is null
           returning id
         `;
         const values = [debateData.createdTags];
