@@ -1,6 +1,7 @@
 import { UserActivityDebate } from "@/types/user"
 import { Icon, IconSize } from "@blueprintjs/core";
 import styles from './DebateCard.module.scss'
+import tagStyles from '@/styles/shared/debate-tag.module.scss';
 
 interface Props {
   cardData: UserActivityDebate;
@@ -20,8 +21,18 @@ function DebateCard(props: Props) {
       <div className={styles.body}>
         <p className={styles.debateTitle}>
           <Icon size={IconSize.LARGE} icon="document" />
-          <span>{cardData.debateTitle}</span>
+          <h4>{cardData.debateTitle}</h4>
         </p>
+
+        <ul className={styles.debateTags}>
+          {
+            cardData.tags.map((t, idx) => (
+              <li className={tagStyles.debateTag} key={idx}>
+                {t}
+              </li>
+            ))
+          }
+        </ul>
       </div>
 
       <div className={styles.footer}>

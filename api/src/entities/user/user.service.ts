@@ -57,6 +57,17 @@ export class UserService {
 
   async getActivityDebates(user: UserCookieData): Promise<UserActivityDebate[]> {
     const sqlStr = `
+      with debates_tags as (
+        select
+          d.id "debateId",
+          string_agg(dt.name, ',') "tags"
+        from debate d
+        join assoc_debate_tag adt
+          on adt.debate_id = d.id
+        join debate_tag dt
+          on dt.id = adt.tag_id
+        group by d.id
+      )
       select
         t.id "ticketId",
         t.board_list "boardList",
@@ -67,10 +78,13 @@ export class UserService {
         case
           when t.board_list = 'ACCEPTED' then 'SOLVED'
           else 'ONGOING'
-        end "activityList"
+        end "activityList",
+        dts."tags"
       from ticket t
       right join debate d
         on d.ticket_id = t.id
+      join debates_tags dts
+        on d.id = dts."debateId"
       left join "user" u
         on u.id = t.assigned_to
       where

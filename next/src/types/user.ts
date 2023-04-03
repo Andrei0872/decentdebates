@@ -16,6 +16,7 @@ export interface UserActivityDebate {
   cardType: CardTypes.DEBATE;
   moderatorUsername: string;
   activityList: ActivityTypes;
+  tags: string[];
 }
 
 export interface UserActivityArgument {

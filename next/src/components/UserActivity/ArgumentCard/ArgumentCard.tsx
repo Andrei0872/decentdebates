@@ -20,7 +20,7 @@ function ArgumentCard(props: Props) {
       <div className={styles.body}>
         <p className={styles.debateTitle} >
           <Icon size={IconSize.LARGE} icon="document" />
-          <span>{cardData.debateTitle}</span>
+          <h4>{cardData.debateTitle}</h4>
         </p>
         <p className={styles.argumentTitle}>
           <Icon size={IconSize.LARGE} icon="chat" />

@@ -59,6 +59,10 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
+
+  & h4 {
+    color: var(--cl-secondary-shade-1);
+  }
 }
 
 .status {
@@ -67,4 +71,11 @@
   background: var(--cl-secondary-shade-1);
   padding: 0.2rem 0.4rem;
   border-radius: 6px;
+}
+
+.debateTags {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: .4rem;
+  row-gap: .2rem;
 }
