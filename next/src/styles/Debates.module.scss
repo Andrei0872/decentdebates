@@ -10,6 +10,9 @@
 .search {
   width: min(400px, 60vw);
   margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .debates {

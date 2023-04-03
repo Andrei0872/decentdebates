@@ -32,7 +32,7 @@ function Tags(props: Props) {
         elementRef={props.ref}
         roleStructure="listoption"
         shouldDismissPopover={false}
-        className={`${createdTagsIds[tag.id] ? styles.createdItem : ''}`}
+        className={`${styles.tagItem} ${createdTagsIds[tag.id] ? styles.createdItem : ''}`}
       />
     )
   }
@@ -122,6 +122,12 @@ function Tags(props: Props) {
     );
   }
 
+  const handleOnClear = () => {
+    setSelectedTagsIds([]);
+    setCreatedTagsIds({});
+    setDebateTags(props.debateTags);
+  }
+
   const selectedTags = useMemo(() => {
     return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
   }, [selectedTagsIds]);
@@ -136,6 +142,7 @@ function Tags(props: Props) {
         tagRenderer={tagRenderer}
         tagInputProps={{
           onRemove: handleTagRemove,
+          className: styles.tagInputContainer,
           tagProps: (_tagElement, index) => {
             const tag = selectedTags[index];
             const isTagNew = !!createdTagsIds[tag.id];
@@ -151,6 +158,18 @@ function Tags(props: Props) {
         noResults={<MenuItem2 disabled={true} text="No results." roleStructure="listoption" />}
         createNewItemFromQuery={canCreateTags ? createTag : undefined}
         createNewItemRenderer={canCreateTags ? renderCreatedTag : undefined}
+        onClear={handleOnClear}
+        placeholder="Search tags..."
+        popoverContentProps={{
+          className: styles.tagsPopover,
+        }}
+        popoverProps={{
+          matchTargetWidth: true,
+          minimal: true,
+        }}
+        menuProps={{
+          className: styles.tagsMenu
+        }}
       />
     </div>
   )

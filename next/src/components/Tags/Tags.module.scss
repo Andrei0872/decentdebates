@@ -1,9 +1,13 @@
-.createdItem {
-  color: var(--cl-accent-2);
-
-  &:hover {
-    font-weight: 600;
+.tagItem {
+  color: var(--cl-secondary-shade-1);
+  
+  &.createdItem {
     color: var(--cl-accent-2);
+  
+    &:hover {
+      font-weight: 600;
+      color: var(--cl-accent-2);
+    }
   }
 }
 
@@ -13,5 +17,23 @@
   &.tagNew {
     background-color: var(--cl-accent-2);
     font-weight: 600;
+  }
+}
+
+.tagsPopover {
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 5px;
+}
+
+.tagsMenu {
+  padding: 0;
+}
+
+.tagInputContainer {
+  border: 1px solid var(--cl-neutral-3);
+  border-radius: 5px;
+
+  & input {
+    border: none;
   }
 }
