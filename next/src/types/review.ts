@@ -26,7 +26,7 @@ export interface DebateAsModerator extends Debate {
   reviewItemType: ReviewItemType.MODERATOR;
 
   ticketId: number;
-  debateTags: string;
+  debateTags: string[];
   boardList: BoardLists;
 }
 

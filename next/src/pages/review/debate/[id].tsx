@@ -27,6 +27,15 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
   return (
     <div className={styles.debateContent}>
       <h1 className={styles.debateTitle}>{debateData.title}</h1>
+      <ul className={styles.debateTags}>
+        {
+          debateData.debateTags.map((t, i) => (
+            <li className={styles.debateTag} key={i}>
+              {t}
+            </li>
+          ))
+        }
+      </ul>
       <div className={styles.addedBy}>Added by: <span>{debateData.username}</span></div>
     </div>
   )

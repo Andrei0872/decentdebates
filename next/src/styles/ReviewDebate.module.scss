@@ -11,6 +11,7 @@
 .reviewedBy {
   align-self: flex-end;
   color: var(--cl-secondary-shade-1);
+  margin-block-start: 0.8rem;
 }
 
 :where(.addedBy, .reviewedBy)>span {
@@ -86,3 +87,16 @@
   gap: .5rem;
 }
 
+.debateTags {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.debateTag {
+  background: var(--cl-secondary-tint-1);
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: bold;
+}

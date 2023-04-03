@@ -22,6 +22,7 @@ export const fetchDebateAsModerator = (ticketId: string): Promise<ModeratorDebat
     .then(r => r.data)
     .then(r => {
       r.debate.reviewItemType = ReviewItemType.MODERATOR;
+      r.debate.debateTags = r.debate.debateTags.split(',');
 
       return r;
     })
@@ -32,6 +33,7 @@ export const fetchDebateAsUser = (ticketId: string): Promise<UserDebateResponse>
     .then(r => r.data)
     .then(r => {
       r.debate.reviewItemType = ReviewItemType.USER;
+      r.debate.debateTags = r.debate.debateTags.split(',');
 
       return r;
     })
