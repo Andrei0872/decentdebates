@@ -88,10 +88,23 @@ export class DebatesService {
       insert into assoc_debate_tag
       select * from unnest ($1::int[], $2::int[])
     `;
-    const tagsIdsArr = debateData.tagsIds.split(',').map(tagIdStr => +tagIdStr);
+    const tagsIdsArr = debateData.tagsIds;
 
     try {
       await client.query('BEGIN');
+
+      const hasCreatedTags = !!debateData.createdTags;
+      if (hasCreatedTags) {
+        const insertTagsSql = `
+          insert into debate_tag(name)
+          select * from unnest($1::text[])
+          returning id
+        `;
+        const values = [debateData.createdTags];
+
+        const res = await client.query(insertTagsSql, values);
+        tagsIdsArr.push(...res.rows.map(r => r.id));
+      }
 
       const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
 

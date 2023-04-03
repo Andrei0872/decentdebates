@@ -10,7 +10,8 @@ import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastPr
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import buttonStyles from '@/styles/shared/button.module.scss';
-import Tags from "@/components/Tags/Tags";
+import Tags, { TagsRef } from "@/components/Tags/Tags";
+import { createDebate, CreateDebateData } from "@/utils/api/debate";
 
 const TAGS = [{ id: 1, name: 'tag1' }, { id: 2, name: 'tag2' }, { id: 3, name: 'tag3' }];
 
@@ -20,7 +21,6 @@ interface Props {
 
 interface NewDebateData {
   title: string;
-  tagsIds: string;
 }
 
 const toasterOptions = {
@@ -43,6 +43,8 @@ function Debates(props: Props) {
   const toasterRef = useRef<Toaster>(null);
   const router = useRouter();
 
+  const createDebateTagsRef = useRef<TagsRef | null>(null);
+
   const onSearchInputChange = async (value: string) => {
     const encodedQueryParams = btoa(JSON.stringify({ queryStr: value }));
     const res = (await api.get(`/debates?q=${encodedQueryParams}`)).data.data;
@@ -63,19 +65,33 @@ function Debates(props: Props) {
   }
 
   const onNewDebateSubmit = async (data: NewDebateData) => {
-    // TODO: make it work after finishing the work on tags.
+    if (!createDebateTagsRef.current) {
+      return;
+    }
+
     console.log(data);
 
-    // setIsDebateModalOpen(false);
+    console.log(createDebateTagsRef.current?.getSelectedTags());
+
+
+    setIsDebateModalOpen(false);
     reset();
 
-    // const res = (await api.post('/debates', data)).data;
-    // toasterRef.current?.show({
-    //   icon: 'tick-circle',
-    //   intent: Intent.SUCCESS,
-    //   message: res.message,
-    //   timeout: 2000,
-    // });
+    const { tags, createdTags } = createDebateTagsRef.current.getSelectedTags();
+    const debateData: CreateDebateData = {
+      title: data.title,
+      createdTags,
+      tagsIds: tags.map(t => t.id),
+    };
+    createDebate(debateData)
+      .then(r => {
+        toasterRef.current?.show({
+          icon: 'tick-circle',
+          intent: Intent.SUCCESS,
+          message: r.message,
+          timeout: 2000,
+        });
+      });
   }
 
   return (
@@ -122,7 +138,19 @@ function Debates(props: Props) {
       <Dialog className={styles.createDebateDialog} title="Start a debate" isOpen={isDebateModalOpen} onClose={onStartDebateModalClosed}>
         <DialogBody useOverflowScrollContainer={undefined}>
           <form className={styles.createDebateForm} onSubmit={handleSubmit(onNewDebateSubmit)}>
-            <Input register={register('title')} />
+            <Input
+              inputProps={{
+                className: styles.createDebateTitle,
+                placeholder: 'Debate title..'
+              }}
+              register={register('title')}
+            />
+
+            <Tags
+              ref={createDebateTagsRef}
+              canCreateTags={true}
+              debateTags={TAGS}
+            />
 
             <div>
               <button

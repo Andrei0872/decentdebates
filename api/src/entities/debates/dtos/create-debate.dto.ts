@@ -1,9 +1,13 @@
-import { IsString } from "class-validator";
+import { IsArray, IsOptional, IsString } from "class-validator";
 
 export class CreateDebateDTO {
   @IsString()
   title: string;
 
-  @IsString()
-  tagsIds: string;
+  @IsArray()
+  tagsIds: number[];
+
+  @IsArray()
+  @IsOptional()
+  createdTags: string[];
 }

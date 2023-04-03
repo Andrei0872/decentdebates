@@ -57,3 +57,13 @@ export const submitDraft = (params: UpdateDraftParams) => {
   return api.post(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}/save`, params.draftData)
     .then(r => r.data);
 }
+
+export interface CreateDebateData {
+  title: string;
+  tagsIds: number[];
+  createdTags: string[];
+}
+export const createDebate = (data: CreateDebateData): Promise<{ message: string }> => {
+  return api.post(`${ROOT_PATH}`, data)
+    .then(r => r.data);
+}

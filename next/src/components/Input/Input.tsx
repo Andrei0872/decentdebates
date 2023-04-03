@@ -22,12 +22,12 @@ function Input(props: Props) {
 
   return (
     <input
-      className={styles.input}
       type="text"
       placeholder='Search...'
       {...props.inputProps}
       {...props.register}
       onChange={onChangeDebounced}
+      className={`${styles.input} ${props.inputProps?.className ?? ''}`}
     />
   )
 }
