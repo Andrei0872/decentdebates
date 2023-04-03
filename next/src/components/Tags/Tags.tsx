@@ -23,6 +23,11 @@ function Tags(props: Props) {
         onClick={props.handleClick}
         key={tag.id}
         text={tag.name}
+        selected={isTagSelected(tag)}
+        onFocus={props.handleFocus}
+        elementRef={props.ref}
+        roleStructure="listoption"
+        shouldDismissPopover={false}
       />
     )
   }
@@ -59,6 +64,14 @@ function Tags(props: Props) {
     return normalizedTagName.includes(normalizedQuery);
   }
 
+  const isTagSelected = (tag: Tag) => {
+    return selectedTagsIds.includes(tag.id);
+  }
+
+  const areTagsEqual = (tag1: Tag, tag2: Tag) => {
+    return tag1.name.toLowerCase() === tag2.name.toLowerCase();
+  }
+
   const selectedTags = useMemo(() => {
     return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
   }, [selectedTagsIds]);
@@ -76,6 +89,8 @@ function Tags(props: Props) {
         }}
         itemPredicate={filterTag}
         resetOnSelect={true}
+        itemsEqual={areTagsEqual}
+        noResults={<MenuItem2 disabled={true} text="No results." roleStructure="listoption" />}
       />
     </div>
   )
