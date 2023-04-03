@@ -2,7 +2,7 @@ import { Tag } from '@/types/tag'
 import styles from './Tags.module.scss'
 import { ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
 import { MenuItem2 } from '@blueprintjs/popover2'
-import { useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 
 interface Props {
   debateTags: Tag[];
@@ -29,7 +29,6 @@ function Tags(props: Props) {
 
   const handleItemSelect = (tag: Tag) => {
     setSelectedTagsIds((selectedTags) => {
-      debugger;
       const isItemSelected = !!selectedTags.find(tId => tId === tag.id);
       if (isItemSelected) {
         return selectedTags.filter(tId => tId !== tag.id);
@@ -41,6 +40,16 @@ function Tags(props: Props) {
 
   const tagRenderer = (tag: Tag) => {
     return tag.name;
+  }
+
+  const deselectTag = (tagIdx: number) => {
+    setSelectedTagsIds(selectedTagsIds => {
+      return selectedTagsIds.filter((_, idx) => idx !== tagIdx);
+    });
+  }
+
+  const handleTagRemove = (tag: ReactNode, tagIndex: number) => {
+    deselectTag(tagIndex);
   }
   
   const selectedTags = useMemo(() => {
@@ -55,6 +64,9 @@ function Tags(props: Props) {
         selectedItems={selectedTags}
         onItemSelect={handleItemSelect}
         tagRenderer={tagRenderer}
+        tagInputProps={{
+          onRemove: handleTagRemove,
+        }}
       />
     </div>
   )
