@@ -14,6 +14,7 @@ import RichEditor from "@/components/RichEditor/RichEditor";
 import { approveTicket, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
 import { fetchDebateAsModerator } from "@/utils/api/review";
 import { Popover2 } from "@blueprintjs/popover2";
+import tagStyles from '@/styles/shared/debate-tag.module.scss';
 
 enum DNDItemTypes {
   CARD = 'CARD',
@@ -125,10 +126,22 @@ const Card: React.FC<CardProps> = (props) => {
       <div className={styles.cardBody}>
         {
           cardData.ticketLabel === CardLabels.DEBATE ? (
-            <div className={styles.cardBodyDebateTitle}>
-              <Icon icon="document" />
-              <span>{cardData.ticketTitle}</span>
-            </div>
+            <>
+              <div className={styles.cardBodyDebateTitle}>
+                <Icon icon="document" />
+                <span>{cardData.ticketTitle}</span>
+              </div>
+
+              <ul className={styles.cardBodyDebateTags}>
+                {
+                  cardData.tags.map((t, idx) => (
+                    <li className={tagStyles.debateTag} key={idx}>
+                      {t}
+                    </li>
+                  ))
+                }
+              </ul>
+            </>
           ) : (
             <div className={styles.cardBodyArgument}>
               <div className={styles.cardBodyDebateTitle}>

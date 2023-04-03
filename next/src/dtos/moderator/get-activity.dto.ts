@@ -31,6 +31,7 @@ export interface ModeratorActivityBase {
 
 export interface ModeratorActivityDebate extends ModeratorActivityBase, DebateAsModerator {
   ticketLabel: CardLabels.DEBATE;
+  tags: string[];
 }
 
 export interface ModeratorActivityArgument extends ModeratorActivityBase {
@@ -54,5 +55,12 @@ export interface BoardData {
 export const getActivityDTO = (data: BoardData[]) => {
   data.sort((b1, b2) => BOARD_LISTS_SORT_ORDER[b1.boardList] - BOARD_LISTS_SORT_ORDER[b2.boardList]);
 
-  return data;
+  return data.map(d => ({
+    ...d,
+    cards: d.cards.map(
+      c => c.ticketLabel === CardLabels.DEBATE
+        ? (({ ...c, tags: (c.tags as any).split(',') }))
+        : c
+    )
+  }));
 };

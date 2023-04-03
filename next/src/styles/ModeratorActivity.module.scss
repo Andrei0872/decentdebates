@@ -113,6 +113,9 @@
   flex-grow: 1;
   padding-inline-start: var(--padding-left-amount);
   padding-block-start: .3rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
 }
 
 .cardBodyDebateTitle,
@@ -170,4 +173,11 @@
   & span {
     font-weight: bold;
   }
+}
+
+.cardBodyDebateTags {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.5rem;
+  row-gap: 0.1rem;
 }

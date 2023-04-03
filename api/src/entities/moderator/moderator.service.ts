@@ -11,6 +11,17 @@ export class ModeratorService {
 
   async getDebateCards(): Promise<ModeratorActivityDebate[]> {
     const sqlStr = `
+      with debates_tags as (
+        select
+          d.id "debateId",
+          string_agg(dt.name, ',') "tags"
+        from debate d
+        join assoc_debate_tag adt
+          on adt.debate_id = d.id
+        join debate_tag dt
+          on dt.id = adt.tag_id
+        group by d.id
+      )
       select
         t.id "ticketId",
         case
@@ -22,10 +33,13 @@ export class ModeratorService {
         u.username "moderatorUsername",
         case
           when d.id is not null then 'debate'
-        end "ticketLabel"
+        end "ticketLabel",
+        dts."tags"
       from ticket t
       right join debate d
         on d.ticket_id = t.id
+      join debates_tags dts
+        on d.id = dts."debateId"
       left join "user" u
         on u.id = t.assigned_to
       right join (

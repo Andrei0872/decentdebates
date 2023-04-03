@@ -17,6 +17,7 @@ export interface ModeratorActivityBase {
 
 export interface ModeratorActivityDebate extends ModeratorActivityBase {
   ticketLabel: CardLabels.DEBATE;
+  tags: string;
 }
 
 export interface ModeratorActivityArgument extends ModeratorActivityBase {

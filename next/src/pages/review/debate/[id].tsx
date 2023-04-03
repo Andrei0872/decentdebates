@@ -17,6 +17,7 @@ import { EditorState } from 'lexical';
 import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
 import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
 import buttonStyles from '@/styles/shared/button.module.scss';
+import tagStyles from '@/styles/shared/debate-tag.module.scss';
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
@@ -30,7 +31,7 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
       <ul className={styles.debateTags}>
         {
           debateData.debateTags.map((t, i) => (
-            <li className={styles.debateTag} key={i}>
+            <li className={tagStyles.debateTag} key={i}>
               {t}
             </li>
           ))
