@@ -135,8 +135,8 @@ const Card: React.FC<CardProps> = (props) => {
               <ul className={styles.cardBodyDebateTags}>
                 {
                   cardData.tags.map((t, idx) => (
-                    <li className={tagStyles.debateTag} key={idx}>
-                      {t}
+                    <li className={tagStyles.debateTag} key={t.id}>
+                      {t.name}
                     </li>
                   ))
                 }

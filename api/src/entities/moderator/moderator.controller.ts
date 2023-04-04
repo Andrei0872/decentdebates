@@ -20,7 +20,28 @@ export class ModeratorController {
 
   @Get('/activity')
   getActivity(@Res() res: Response) {
-    return forkJoin([this.moderatorService.getDebateCards(), this.moderatorService.getArgumentCards()])
+    return forkJoin([
+      from(this.moderatorService.getDebateCards())
+        .pipe(
+          map(debates => debates.map(rawDebate => {
+            // When a board list is empty.
+            if (!rawDebate.ticketId) {
+              return rawDebate;
+            }
+
+            const { tags: rawTags, tagsIds: rawTagsIds, ...debate } = rawDebate;
+
+            const tags = rawTags.split(',');
+            const tagsIds = rawTagsIds.split(',');
+
+            return {
+              ...debate,
+              tags: tags.map((t, i) => ({ id: tagsIds[i], name: t })),
+            };
+          }))
+        ),
+      this.moderatorService.getArgumentCards()
+    ])
       .pipe(
         mergeAll(),
         mergeAll(),
