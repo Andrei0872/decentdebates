@@ -90,5 +90,4 @@ export const fetchDebatesWithFilters = (filters: RawDebateFilters) => {
   const encodedQueryParams = btoa(JSON.stringify(queryParams));
   return api.get(`/debates?q=${encodedQueryParams}`)
     .then(r => r.data.data)
-    .then(debates => debates.map((d: any) => ({ ...d, tags: d.tags.split(',') })))
 }
