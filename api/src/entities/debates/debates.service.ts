@@ -4,7 +4,6 @@ import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
 import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDebateData, UpdateDraftData } from './debates.model';
-import { CreateArgumentDTO } from './dtos/create-argument.dto';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
 export interface Filters {

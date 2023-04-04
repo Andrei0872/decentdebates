@@ -30,6 +30,10 @@ export interface UserActivityDebate {
   cardType: CardTypes.DEBATE;
   moderatorUsername: string;
   activityList: ActivityTypes;
+
+  // Raw values.
+  tags: string;
+  tagsIds: string;
 }
 
 export interface UserActivityArgument {
