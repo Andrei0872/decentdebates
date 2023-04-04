@@ -6,9 +6,23 @@ import { UserCookieData } from '../user/user.model';
 import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDebateData, UpdateDraftData } from './debates.model';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
+export enum TagsMatchingStrategy {
+  ALL,
+  ANY
+};
+
+export interface RawFilters {
+  queryStr?: string;
+  tags?: string;
+  tags_match?: string;
+}
+
 export interface Filters {
-  queryStr: string;
-  tags: string;
+  queryStr?: string;
+  tags?: {
+    values?: string;
+    matchingStrategy?: TagsMatchingStrategy;
+  };
 }
 
 // This corresponds to the DB's ENUM type.
@@ -52,11 +66,13 @@ export class DebatesService {
       where t.board_list = 'ACCEPTED'
     `;
 
-    if (filters) {
-      sqlStr += '\n' + 'and ' + this.getFiltersAsSQLString(filters);
-    }
+    const values = [];
 
-    const values = filters ? this.getFiltersValues(filters) : [];
+    if (filters) {
+      const { sql, values: paramsValues } = this.applyDebateFilters(filters);
+      sqlStr += ` and ${sql}`;
+      values.push(...paramsValues);
+    }
 
     try {
       const res = await client.query(sqlStr, values);
@@ -562,31 +578,41 @@ export class DebatesService {
     }
   }
 
-  private getFiltersAsSQLString(filters: Filters) {
-    const queryStrFilter = filters.queryStr || null;
-    const tagsFilter = filters.tags || null;
-
-    const hasAll = queryStrFilter && tagsFilter;
-    if (hasAll) {
-      return `d.title = $1 and dt.id in ($2)`;
-    }
-
-    if (queryStrFilter) {
-      return 'd.title::text ilike $1';
-    }
-
-    return 'dt.id in ($2)';
-  }
-
-  private getFiltersValues(filters: Filters) {
+  private applyDebateFilters(filters: Filters) {
     const queryStrFilter = filters.queryStr ? `%${filters.queryStr}%` : null;
     const tagsFilter = filters.tags || null;
 
     const hasAll = queryStrFilter && tagsFilter;
     if (hasAll) {
-      return [queryStrFilter, tagsFilter];
+      return {
+        sql: `d.title::text ilike $1 and ${this.getTagFiltersSql(tagsFilter, 2)}`,
+        values: [queryStrFilter, filters.tags.values, ...tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL ? [filters.tags.values] : []],
+      }
     }
 
-    return [queryStrFilter || tagsFilter];
+    if (queryStrFilter) {
+      return {
+        sql: `d.title::text ilike $1`,
+        values: [queryStrFilter],
+      }
+    }
+
+    return {
+      sql: `${this.getTagFiltersSql(tagsFilter, 1)}`,
+      values: [filters.tags.values, filters.tags.values],
+    }
+  }
+
+  // Ideas came from here: https://www.postgresql.org/docs/current/functions-array.html.
+  private getTagFiltersSql(tags: Filters['tags'], parameterizedIdx: number) {
+    if (tags.matchingStrategy === TagsMatchingStrategy.ANY) {
+      return `string_to_array(dts."tagsIds", ',') && string_to_array($${parameterizedIdx++}, ',')`;
+    }
+
+    // Basically checking if the 2 sets of tags are equal.
+    return `
+      string_to_array(dts."tagsIds", ',') @> string_to_array($${parameterizedIdx++}, ',')
+        and string_to_array(dts."tagsIds", ',') <@ string_to_array($${parameterizedIdx++}, ',')
+    `;
   }
 }
