@@ -1,12 +1,13 @@
 import styles from './DebateCard.module.scss'
 import tagStyles from '@/styles/shared/debate-tag.module.scss';
 import { Icon } from '@blueprintjs/core';
+import { Tag } from '@/types/tag'
 
 export interface DebateCardData {
   title: string;
   createdAt: string;
   username: string;
-  tags: string[];
+  tags: Tag[];
 }
 
 interface Props {
@@ -28,8 +29,8 @@ function DebateCard(props: Props) {
         <ul className={styles.tags}>
           {
             cardData.tags.map((t, idx) => (
-              <li className={tagStyles.debateTag} key={idx}>
-                {t}
+              <li className={tagStyles.debateTag} key={t.id}>
+                {t.name}
               </li>
             ))
           }

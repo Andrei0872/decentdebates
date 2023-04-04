@@ -1,4 +1,5 @@
 import { DebateAsModerator } from "@/types/review";
+import { Tag } from "@/types/tag";
 import { ModeratorDebateResponse } from "@/utils/api/review";
 
 export enum BoardLists {
@@ -31,7 +32,7 @@ export interface ModeratorActivityBase {
 
 export interface ModeratorActivityDebate extends ModeratorActivityBase, DebateAsModerator {
   ticketLabel: CardLabels.DEBATE;
-  tags: string[];
+  tags: Tag[];
 }
 
 export interface ModeratorActivityArgument extends ModeratorActivityBase {

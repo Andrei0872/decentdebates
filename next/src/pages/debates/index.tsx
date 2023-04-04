@@ -5,7 +5,7 @@ import { api } from '@/utils/api'
 import { Debate } from "@/store/slices/debates.slice";
 import DebateCard from "@/components/DebateCard/DebateCard";
 import Input from "@/components/Input/Input";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastProps } from '@blueprintjs/core';
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
@@ -92,6 +92,10 @@ function Debates(props: Props) {
       });
   }
 
+  const debateTags = useMemo(() => {
+    return debates.flatMap(d => d.tags);
+  }, []);
+
   return (
     <Layout>
       <div className={styles.container}>
@@ -177,8 +181,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       cookie: context.req.headers.cookie,
     },
   });
-  const debates = res.data?.data
-    .map((d: any) => ({ ...d, tags: d.tags.split(',') }));
+  const debates = res.data?.data;
 
   return {
     props: {

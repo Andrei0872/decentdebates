@@ -1,3 +1,5 @@
+import { Tag } from "./tag";
+
 export enum CardTypes {
   DEBATE = 'debate',
   ARGUMENT = 'argument',
@@ -16,7 +18,7 @@ export interface UserActivityDebate {
   cardType: CardTypes.DEBATE;
   moderatorUsername: string;
   activityList: ActivityTypes;
-  tags: string[];
+  tags: Tag[];
 }
 
 export interface UserActivityArgument {

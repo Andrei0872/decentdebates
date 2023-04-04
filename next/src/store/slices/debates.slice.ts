@@ -1,3 +1,4 @@
+import { Tag } from "@/types/tag";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import { RootState } from "..";
@@ -9,7 +10,7 @@ export interface Debate {
   modifiedAt: string;
   username: string;
   userId: number;
-  tags: string[];
+  tags: Tag[];
 }
 
 export interface DebateMetadata {
