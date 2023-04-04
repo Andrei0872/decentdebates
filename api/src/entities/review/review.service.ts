@@ -96,7 +96,8 @@ export class ReviewService {
       with debates_tags as (
         select
           d.id "debateId",
-          string_agg(dt.name, ',') "tags"
+          string_agg(dt.name, ',') "tags",
+          string_agg(dt.id::text, ',') "tagsIds"
         from debate d
         join assoc_debate_tag adt
           on adt.debate_id = d.id
@@ -112,9 +113,10 @@ export class ReviewService {
         d.modified_at "modifiedAt",
         u.username,
         u.id "userId",
-        dt.tags "debateTags",
+        dt."tags",
         t.board_list "boardList",
-        t.id "ticketId"
+        t.id "ticketId",
+        dt."tagsIds"
       from debate d
       join "user" u
         on u.id = d.created_by
@@ -144,7 +146,8 @@ export class ReviewService {
       with debates_tags as (
         select
           d.id "debateId",
-          string_agg(dt.name, ',') "tags"
+          string_agg(dt.name, ',') "tags",
+          string_agg(dt.id::text, ',') "tagsIds"
         from debate d
         join assoc_debate_tag adt
           on adt.debate_id = d.id
@@ -160,9 +163,10 @@ export class ReviewService {
         d.modified_at "modifiedAt",
         u.username "moderatorUsername",
         u.id "moderatorId",
-        dt.tags "debateTags",
+        dt."tags",
         t.board_list "boardList",
-        t.id "ticketId"
+        t.id "ticketId",
+        dt."tagsIds"
       from debate d
       join debates_tags dt
         on dt."debateId" = d.id

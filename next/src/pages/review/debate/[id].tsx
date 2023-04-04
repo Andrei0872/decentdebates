@@ -32,7 +32,7 @@ function ModeratorDebateContent(props: ModeratorDebateContentProps) {
         {
           debateData.debateTags.map((t, i) => (
             <li className={tagStyles.debateTag} key={i}>
-              {t}
+              {t.name}
             </li>
           ))
         }
@@ -93,6 +93,15 @@ function UserDebateContent(props: UserDebateContentProps) {
           ) : <>{debateData.title}</>
         }
       </h1>
+      <ul className={styles.debateTags}>
+        {
+          debateData.tags.map((t, i) => (
+            <li className={tagStyles.debateTag} key={i}>
+              {t.name}
+            </li>
+          ))
+        }
+      </ul>
 
       {
         debateData.moderatorId ? (
@@ -236,7 +245,6 @@ function Debate() {
     (user!.role === UserRoles.MODERATOR ? fetchDebateAsModerator : fetchDebateAsUser)((ticketId as string))
       .then(r => setDebate(r.debate))
       .catch(err => {
-        console.log(err.response.statusText);
         router.push('/');
         dispatch(setCurrentUser(null));
       })

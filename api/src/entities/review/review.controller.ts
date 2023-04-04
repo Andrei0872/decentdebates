@@ -43,6 +43,17 @@ export class ReviewController {
             throw new Error('The ticket has no moderator assigned or the moderator is not the one assigned to the ticket.');
           }
         }),
+        map(rawDebate => {
+          const { tags: rawTags, tagsIds: rawTagsIds, ...debate } = rawDebate;
+
+          const tags = rawTags.split(',');
+          const tagsIds = rawTagsIds.split(',');
+
+          return {
+            ...debate,
+            debateTags: tags.map((t, i) => ({ id: tagsIds[i], name: t })),
+          };
+        }),
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -62,6 +73,17 @@ export class ReviewController {
           if (!data) {
             throw new Error('This user is not assigned to this ticket.');
           }
+        }),
+        map(rawDebate => {
+          const { tags: rawTags, tagsIds: rawTagsIds, ...debate } = rawDebate;
+
+          const tags = rawTags.split(',');
+          const tagsIds = rawTagsIds.split(',');
+
+          return {
+            ...debate,
+            tags: tags.map((t, i) => ({ id: tagsIds[i], name: t })),
+          };
         }),
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {

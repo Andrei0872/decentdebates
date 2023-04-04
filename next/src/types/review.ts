@@ -40,6 +40,7 @@ export interface DebateAsUser extends Debate {
 
   moderatorId: number;
   moderatorUsername: string;
+  tags: Tag[];
 }
 
 export interface ArgumentAsUser {

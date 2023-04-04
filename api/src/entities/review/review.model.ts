@@ -19,19 +19,25 @@ export interface ArgumentAsModerator {
 
 export interface DebateAsModerator extends Debate {
   ticketId: number;
-  debateTags: string;
   boardList: string;
+
+  // Raw values.
+  tags: string;
+  tagsIds: string;
 }
 
 // Types not 100% accurate - there are a few redundant/missing properties.
 // But this shouldn't cause problems because the main properties are present.
 export interface DebateAsUser extends Debate {
   ticketId: number;
-  debateTags: string;
   boardList: string;
 
   moderatorId: number;
   moderatorUsername: string;
+
+  // Raw values.
+  tags: string;
+  tagsIds: string;
 }
 
 export interface ArgumentAsUser {
