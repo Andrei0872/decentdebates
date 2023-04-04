@@ -10,6 +10,10 @@ export interface Debate {
   modifiedAt: string;
   username: string;
   userId: number;
+
+  // Raw values.
+  tags: string;
+  tagsIds: string;
 }
 
 export enum ArgumentType {

@@ -25,7 +25,8 @@ export class DebatesService {
       with debates_tags as (
         select
           d.id "debateId",
-          string_agg(dt.name, ',') "tags"
+          string_agg(dt.name, ',') "tags",
+          string_agg(dt.id::text, ',') "tagsIds"
         from debate d
         join assoc_debate_tag adt
           on adt.debate_id = d.id
@@ -40,7 +41,8 @@ export class DebatesService {
         d.modified_at "modifiedAt",
         u.username,
         u.id "userId",
-        dts."tags"
+        dts."tags",
+        dts."tagsIds"
       from debate d
       join ticket t
         on d.ticket_id = t.id

@@ -20,14 +20,24 @@ export class DebatesController {
   @SetMetadata('skipAuth', true)
   @Get('/')
   async getAll(@Res() res: Response, @Query('q', new DebatesQueryPipe()) filters: Filters) {
-    try {
-      const debates = await this.debatesService.getAll(filters);
-      return res.json({
-        data: debates,
-      });
-    } catch (err) {
-      throw new HttpException(err.message, 400);
-    }
+    return from(this.debatesService.getAll(filters))
+      .pipe(
+        map(debates => debates.map(rawDebate => {
+          const { tags: rawTags, tagsIds: rawTagsIds, ...debate } = rawDebate;
+          
+          const tags = rawTags.split(',');
+          const tagsIds = rawTagsIds.split(',');
+
+          return {
+            ...debate,
+            tags: tags.map((t, i) => ({ id: tagsIds[i], name: t })),
+          };
+        })),
+        map((debates) => res.status(HttpStatus.OK).json({ data: debates })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
   }
 
   @Post('/')
