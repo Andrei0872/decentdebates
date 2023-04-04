@@ -52,7 +52,7 @@ export class DebatesService {
     `;
 
     if (filters) {
-      sqlStr += '\n' + 'where ' + this.getFiltersAsSQLString(filters);
+      sqlStr += '\n' + 'and ' + this.getFiltersAsSQLString(filters);
     }
 
     const values = filters ? this.getFiltersValues(filters) : [];

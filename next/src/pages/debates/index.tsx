@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import buttonStyles from '@/styles/shared/button.module.scss';
 import Tags, { TagsRef } from "@/components/Tags/Tags";
-import { createDebate, CreateDebateData } from "@/utils/api/debate";
+import { createDebate, CreateDebateData, fetchDebatesWithFilters } from "@/utils/api/debate";
 
 const TAGS = [{ id: 1, name: 'tag1' }, { id: 2, name: 'tag2' }, { id: 3, name: 'tag3' }];
 
@@ -46,10 +46,8 @@ function Debates(props: Props) {
   const createDebateTagsRef = useRef<TagsRef | null>(null);
 
   const onSearchInputChange = async (value: string) => {
-    const encodedQueryParams = btoa(JSON.stringify({ queryStr: value }));
-    const res = (await api.get(`/debates?q=${encodedQueryParams}`)).data.data;
-
-    setDebates(res);
+    fetchDebatesWithFilters({ query: value })
+      .then(debates => setDebates(debates));
   }
 
   const redirectToDebatePage = (debate: Debate) => {

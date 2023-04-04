@@ -67,3 +67,28 @@ export const createDebate = (data: CreateDebateData): Promise<{ message: string 
   return api.post(`${ROOT_PATH}`, data)
     .then(r => r.data);
 }
+
+export interface RawDebateFilters {
+  query?: string;
+  tags?: string[];
+}
+export interface DebateFilters {
+  queryStr?: string;
+  tags?: string;
+}
+export const fetchDebatesWithFilters = (filters: RawDebateFilters) => {
+  const queryParams: DebateFilters = {};
+
+  if (filters.query) {
+    queryParams.queryStr = filters.query;
+  }
+
+  if (filters.tags) {
+    queryParams.tags = filters.tags.join(',');
+  }
+
+  const encodedQueryParams = btoa(JSON.stringify(queryParams));
+  return api.get(`/debates?q=${encodedQueryParams}`)
+    .then(r => r.data.data)
+    .then(debates => debates.map((d: any) => ({ ...d, tags: d.tags.split(',') })))
+}
