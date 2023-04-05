@@ -1,5 +1,5 @@
 import { Tag } from "@/types/tag";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Input from "../Input/Input";
 import SimpleCollapse from "../SimpleCollapse/SimpleCollapse";
 import Tags, { TagsRef } from "../Tags/Tags";
@@ -19,6 +19,8 @@ interface Props {
 }
 
 function DebateFilters(props: Props) {
+  const [shouldUseTagsFilter, setShouldUseTagsFilter] = useState(false);
+
   const inputFilterRef = useRef<HTMLInputElement | null>(null);
   const tagFiltersRef = useRef<TagsRef | null>(null);
 
@@ -34,8 +36,10 @@ function DebateFilters(props: Props) {
   const applyFilters = () => {
     const filters: AppliedDebateFilters = {
       query: inputFilterRef.current?.value,
-      tags: getFilterTags(),
-      tags_match: getValues().tagsMatchingStrategy,
+      ...shouldUseTagsFilter && {
+        tags: getFilterTags(),
+        tags_match: getValues().tagsMatchingStrategy,
+      }
     };
     props.applyFilters(filters);
   }
@@ -53,6 +57,10 @@ function DebateFilters(props: Props) {
     return tags.map(t => t.id.toString());
   }
 
+  const onExpandChange = (isExpanded: boolean) => {
+    setShouldUseTagsFilter(isExpanded);
+  }
+
   return (
     <>
       <div className={styles.input}>
@@ -64,10 +72,8 @@ function DebateFilters(props: Props) {
       </div>
 
       <SimpleCollapse
-        header={<p className={styles.tagsHeader}
-        >
-          Tags
-        </p>}
+        expandChange={onExpandChange}
+        header={<p className={styles.tagsHeader}>Tags</p>}
       >
         <div className={styles.tagsContainer}>
           <Tags
