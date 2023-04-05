@@ -599,7 +599,7 @@ export class DebatesService {
 
     return {
       sql: `${this.getTagFiltersSql(tagsFilter, 1)}`,
-      values: [filters.tags.values, filters.tags.values],
+      values: [filters.tags.values, ...tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL ? [filters.tags.values] : []],
     }
   }
 
