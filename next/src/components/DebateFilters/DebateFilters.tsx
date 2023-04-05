@@ -5,10 +5,12 @@ import SimpleCollapse from "../SimpleCollapse/SimpleCollapse";
 import Tags, { TagsRef } from "../Tags/Tags";
 import styles from "./DebateFilters.module.scss";
 import buttonStyles from '@/styles/shared/button.module.scss';
+import { useForm } from "react-hook-form";
 
 export interface AppliedDebateFilters {
-  queryTitle?: string;
+  query?: string;
   tags?: string[];
+  tags_match?: string;
 }
 
 interface Props {
@@ -20,10 +22,20 @@ function DebateFilters(props: Props) {
   const inputFilterRef = useRef<HTMLInputElement | null>(null);
   const tagFiltersRef = useRef<TagsRef | null>(null);
 
+  const {
+    getValues,
+    register,
+  } = useForm<{ tagsMatchingStrategy: 'all' | 'any' }>({
+    defaultValues: {
+      tagsMatchingStrategy: 'any',
+    },
+  });
+
   const applyFilters = () => {
     const filters: AppliedDebateFilters = {
-      queryTitle: inputFilterRef.current?.value,
+      query: inputFilterRef.current?.value,
       tags: getFilterTags(),
+      tags_match: getValues().tagsMatchingStrategy,
     };
     props.applyFilters(filters);
   }
@@ -55,20 +67,35 @@ function DebateFilters(props: Props) {
         header={<p className={styles.tagsHeader}
         >
           Tags
-        </p>}>
+        </p>}
+      >
         <div className={styles.tagsContainer}>
           <Tags
             ref={tagFiltersRef}
             debateTags={props.debateTags}
           />
 
-          <button
-            onClick={applyFilters}
-            className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
-            type="button"
-          >
-            Apply filters
-          </button>
+          <div className={styles.tagsMatchingStrategiesContainer}>
+            <div className={styles.radioGroup}>
+              <label className={``} htmlFor="all">All</label>
+              <input {...register('tagsMatchingStrategy')} type="radio" id="all" value="all" />
+            </div>
+
+            <div className={styles.radioGroup}>
+              <label className={``} htmlFor="any">Any</label>
+              <input {...register('tagsMatchingStrategy')} type="radio" id="any" value="any" />
+            </div>
+          </div>
+
+          <div className={styles.buttons}>
+            <button
+              onClick={applyFilters}
+              className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+              type="button"
+            >
+              Apply filters
+            </button>
+          </div>
         </div>
       </SimpleCollapse>
     </>

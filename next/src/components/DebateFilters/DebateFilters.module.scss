@@ -1,7 +1,31 @@
-.tagsHeader {
+.tagsMatchingStrategiesContainer {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding-inline-start: .1rem;
+}
 
+.tagsHeader {
+  color: var(--cl-secondary-shade-1);
+  font-size: 1rem;
 }
 
 .tagsContainer {
-  
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+
+.radioGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+
+  &>label {
+    background: var(--cl-secondary-tint-2);
+    color: var(--cl-secondary-shade-1);
+    padding: 2px 9px;
+    line-height: 1;
+    border-radius: 4px;
+  }
 }

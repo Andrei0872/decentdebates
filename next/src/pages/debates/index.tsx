@@ -46,7 +46,7 @@ function Debates(props: Props) {
   const createDebateTagsRef = useRef<TagsRef | null>(null);
 
   const onApplyFilters = (filters: AppliedDebateFilters) => {
-    fetchDebatesWithFilters({ query: filters.queryTitle, tags: filters.tags })
+    fetchDebatesWithFilters(filters)
       .then(debates => setDebates(debates));
   }
 
@@ -103,7 +103,6 @@ function Debates(props: Props) {
     <Layout>
       <div className={styles.container}>
         <section className={styles.filtersContainer}>
-
           <DebateFilters
             applyFilters={onApplyFilters}
             debateTags={debateTags}

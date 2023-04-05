@@ -1,6 +1,7 @@
 import { ArgumentType, DebateArgument } from "@/store/slices/debates.slice";
 import { api } from ".";
 import { CurrentDebate } from '@/store/slices/debates.slice';
+import { AppliedDebateFilters } from "@/components/DebateFilters/DebateFilters";
 
 const ROOT_PATH = '/debates';
 
@@ -68,15 +69,12 @@ export const createDebate = (data: CreateDebateData): Promise<{ message: string 
     .then(r => r.data);
 }
 
-export interface RawDebateFilters {
-  query?: string;
-  tags?: string[];
-}
 export interface DebateFilters {
   queryStr?: string;
   tags?: string;
+  tags_match?: string;
 }
-export const fetchDebatesWithFilters = (filters: RawDebateFilters) => {
+export const fetchDebatesWithFilters = (filters: AppliedDebateFilters) => {
   const queryParams: DebateFilters = {};
 
   if (filters.query) {
@@ -85,6 +83,10 @@ export const fetchDebatesWithFilters = (filters: RawDebateFilters) => {
 
   if (filters.tags) {
     queryParams.tags = filters.tags.join(',');
+  }
+
+  if (filters.tags_match) {
+    queryParams.tags_match = filters.tags_match;
   }
 
   const encodedQueryParams = btoa(JSON.stringify(queryParams));
