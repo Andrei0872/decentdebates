@@ -8,6 +8,7 @@ interface Props {
   expandOnClick?: boolean;
 
   click?: () => void;
+  expandChange?: (isExpanded: boolean) => void;
 }
 
 function SimpleCollapse(props: Props) {
@@ -23,12 +24,17 @@ function SimpleCollapse(props: Props) {
     props.click?.();
   }
 
+  const handleExpandChange = () => {
+    setIsOpen(!isOpen);
+    props.expandChange?.(!isOpen);
+  }
+
   return (
     <div onClick={onContainerClick} className={styles.container}>
       <div className={`${styles.header} ${shouldExpandOnClick ? styles.expandOnClick : ''}`}>
         {props.header}
 
-        <button className={styles.triggerButton} onClick={() => setIsOpen(!isOpen)} type='button'>
+        <button className={styles.triggerButton} onClick={handleExpandChange} type='button'>
           <Icon icon={`${isOpen ? "chevron-up" : "chevron-down"}`} />
         </button>
       </div>
