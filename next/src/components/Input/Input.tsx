@@ -26,10 +26,10 @@ function Input(props: Props) {
       type="text"
       placeholder='Search...'
       {...props.inputProps}
-      {...props.register}
       onChange={onChangeDebounced}
       className={`${styles.input} ${props.inputProps?.className ?? ''}`}
       ref={props.inputRef ?? null}
+      {...props.register}
     />
   )
 }
