@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import buttonStyles from '@/styles/shared/button.module.scss';
 import Tags, { TagsRef } from "@/components/Tags/Tags";
 import { createDebate, CreateDebateData, fetchDebatesWithFilters } from "@/utils/api/debate";
+import SimpleCollapse from "@/components/SimpleCollapse/SimpleCollapse";
 
 const TAGS = [{ id: 1, name: 'tag1' }, { id: 2, name: 'tag2' }, { id: 3, name: 'tag3' }];
 
@@ -44,9 +45,11 @@ function Debates(props: Props) {
   const router = useRouter();
 
   const createDebateTagsRef = useRef<TagsRef | null>(null);
+  const tagFiltersRef = useRef<TagsRef | null>(null);
+  const inputFilterRef = useRef<HTMLInputElement | null>(null);
 
   const onSearchInputChange = async (value: string) => {
-    fetchDebatesWithFilters({ query: value })
+    fetchDebatesWithFilters({ query: value, tags: getFilterTagsRaw() })
       .then(debates => setDebates(debates));
   }
 
@@ -92,8 +95,33 @@ function Debates(props: Props) {
       });
   }
 
+  const getFilterTagsRaw = () => {
+    if (!tagFiltersRef.current) {
+      return undefined;
+    }
+
+    const { tags } = tagFiltersRef.current.getSelectedTags();
+    if (!tags.length) {
+      return undefined;
+    }
+
+    return tags.map(t => t.id.toString());
+  }
+
+  const applyDebateTags = () => {
+    if (!inputFilterRef.current) {
+      return;
+    }
+
+    fetchDebatesWithFilters({ query: inputFilterRef.current.value, tags: getFilterTagsRaw() })
+      .then(debates => setDebates(debates));
+  }
+
   const debateTags = useMemo(() => {
-    return debates.flatMap(d => d.tags);
+    const allTags = debates.flatMap(d => d.tags);
+
+    const uniqueTagIds = new Set();
+    return allTags.filter(t => uniqueTagIds.has(t.id) ? false : (uniqueTagIds.add(t.id), true));
   }, []);
 
   return (
@@ -101,16 +129,33 @@ function Debates(props: Props) {
       <div className={styles.container}>
         <section className={styles.search}>
           <div className={styles.input}>
-            <Input inputProps={{ placeholder: "Search by title..." }} onChange={onSearchInputChange} />
+            <Input
+              inputRef={inputFilterRef}
+              inputProps={{ placeholder: "Search by title..." }}
+              onChange={onSearchInputChange}
+            />
           </div>
 
-          <Tags debateTags={TAGS} />
-          {/* <div className={styles.tags}>
-            tags
-            <button type="button">
-              Apply
-            </button>
-          </div> */}
+          <SimpleCollapse
+            header={<p className={styles.tagsHeader}
+            >
+              Tags
+            </p>}>
+            <div className={styles.tagsContainer}>
+              <Tags
+                ref={tagFiltersRef}
+                debateTags={debateTags}
+              />
+
+              <button
+                onClick={applyDebateTags}
+                className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
+                type="button"
+              >
+                Apply filters
+              </button>
+            </div>
+          </SimpleCollapse>
 
         </section>
 
