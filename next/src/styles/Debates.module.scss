@@ -7,7 +7,7 @@
   gap: 2rem;
 }
 
-.search {
+.filtersContainer {
   width: min(400px, 60vw);
   margin-top: 3rem;
   display: flex;
@@ -61,12 +61,4 @@
 
 .createDebateTitle[class] {
   font-size: 1.8rem;
-}
-
-.tagsHeader {
-
-}
-
-.tagsContainer {
-  
 }

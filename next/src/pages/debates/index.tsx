@@ -13,8 +13,7 @@ import buttonStyles from '@/styles/shared/button.module.scss';
 import Tags, { TagsRef } from "@/components/Tags/Tags";
 import { createDebate, CreateDebateData, fetchDebatesWithFilters } from "@/utils/api/debate";
 import SimpleCollapse from "@/components/SimpleCollapse/SimpleCollapse";
-
-const TAGS = [{ id: 1, name: 'tag1' }, { id: 2, name: 'tag2' }, { id: 3, name: 'tag3' }];
+import DebateFilters, { AppliedDebateFilters } from "@/components/DebateFilters/DebateFilters";
 
 interface Props {
   debates: Debate[];
@@ -45,11 +44,9 @@ function Debates(props: Props) {
   const router = useRouter();
 
   const createDebateTagsRef = useRef<TagsRef | null>(null);
-  const tagFiltersRef = useRef<TagsRef | null>(null);
-  const inputFilterRef = useRef<HTMLInputElement | null>(null);
 
-  const onSearchInputChange = async (value: string) => {
-    fetchDebatesWithFilters({ query: value, tags: getFilterTagsRaw() })
+  const onApplyFilters = (filters: AppliedDebateFilters) => {
+    fetchDebatesWithFilters({ query: filters.queryTitle, tags: filters.tags })
       .then(debates => setDebates(debates));
   }
 
@@ -95,28 +92,6 @@ function Debates(props: Props) {
       });
   }
 
-  const getFilterTagsRaw = () => {
-    if (!tagFiltersRef.current) {
-      return undefined;
-    }
-
-    const { tags } = tagFiltersRef.current.getSelectedTags();
-    if (!tags.length) {
-      return undefined;
-    }
-
-    return tags.map(t => t.id.toString());
-  }
-
-  const applyDebateTags = () => {
-    if (!inputFilterRef.current) {
-      return;
-    }
-
-    fetchDebatesWithFilters({ query: inputFilterRef.current.value, tags: getFilterTagsRaw() })
-      .then(debates => setDebates(debates));
-  }
-
   const debateTags = useMemo(() => {
     const allTags = debates.flatMap(d => d.tags);
 
@@ -127,36 +102,12 @@ function Debates(props: Props) {
   return (
     <Layout>
       <div className={styles.container}>
-        <section className={styles.search}>
-          <div className={styles.input}>
-            <Input
-              inputRef={inputFilterRef}
-              inputProps={{ placeholder: "Search by title..." }}
-              onChange={onSearchInputChange}
-            />
-          </div>
+        <section className={styles.filtersContainer}>
 
-          <SimpleCollapse
-            header={<p className={styles.tagsHeader}
-            >
-              Tags
-            </p>}>
-            <div className={styles.tagsContainer}>
-              <Tags
-                ref={tagFiltersRef}
-                debateTags={debateTags}
-              />
-
-              <button
-                onClick={applyDebateTags}
-                className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined}`}
-                type="button"
-              >
-                Apply filters
-              </button>
-            </div>
-          </SimpleCollapse>
-
+          <DebateFilters
+            applyFilters={onApplyFilters}
+            debateTags={debateTags}
+          />
         </section>
 
         <section className={styles.debatesContainer}>
@@ -196,7 +147,7 @@ function Debates(props: Props) {
             <Tags
               ref={createDebateTagsRef}
               canCreateTags={true}
-              debateTags={TAGS}
+              debateTags={debateTags}
             />
 
             <div>
