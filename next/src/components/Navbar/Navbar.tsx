@@ -68,7 +68,7 @@ function Navbar() {
 
   const router = useRouter();
 
-  const logout = () => {
+  const logoutOrLogIn = () => {
     dispatch(setCurrentUser(null));
     router.push('/');
   }
@@ -77,8 +77,14 @@ function Navbar() {
   return (
     <ul className={navStyles.navbar}>
       {navbarItemsMap[navbarItemsKey]}
-      <li onClick={logout} className={navStyles.navbarItem}>
-        <span>Log out</span>
+      <li onClick={logoutOrLogIn} className={navStyles.navbarItem}>
+        {
+          !!user ? (
+            <span>Log out</span>
+          ) : (
+            <span>Log in</span>
+          )
+        }
       </li>
     </ul>
   )
