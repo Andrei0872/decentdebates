@@ -14,6 +14,8 @@ import Tags, { TagsRef } from "@/components/Tags/Tags";
 import { createDebate, CreateDebateData, fetchDebatesWithFilters } from "@/utils/api/debate";
 import SimpleCollapse from "@/components/SimpleCollapse/SimpleCollapse";
 import DebateFilters, { AppliedDebateFilters } from "@/components/DebateFilters/DebateFilters";
+import { useAppSelector } from "@/utils/hooks/store";
+import { selectCurrentUser } from "@/store/slices/user.slice";
 
 interface Props {
   debates: Debate[];
@@ -42,6 +44,8 @@ function Debates(props: Props) {
 
   const toasterRef = useRef<Toaster>(null);
   const router = useRouter();
+
+  const user = useAppSelector(selectCurrentUser);
 
   const createDebateTagsRef = useRef<TagsRef | null>(null);
 
@@ -110,13 +114,17 @@ function Debates(props: Props) {
         </section>
 
         <section className={styles.debatesContainer}>
-          <button
-            className={`${styles.createDebateBtn} ${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.contained}`}
-            type="button"
-            onClick={startDebate}
-          >
-            Start a debate
-          </button>
+          {
+            !!user ? (
+              <button
+                className={`${styles.createDebateBtn} ${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.contained}`}
+                type="button"
+                onClick={startDebate}
+              >
+                Start a debate
+              </button>
+            ) : null
+          }
 
           <ul className={styles.debates}>
             {
