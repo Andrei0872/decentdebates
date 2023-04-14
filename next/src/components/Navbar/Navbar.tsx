@@ -2,6 +2,7 @@ import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/use
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import NotificationWidget from '../Notification/NotificationWidget';
 import navStyles from './Navbar.module.scss';
 
 function AuthenticatedUserNavItems() {
@@ -19,6 +20,9 @@ function AuthenticatedUserNavItems() {
       <li className={navStyles.navbarItem}>
         <Link href='/contribute'>Contribute</Link>
       </li>
+      <li className={navStyles.navbarItem}>
+        <NotificationWidget />
+      </li>
     </>
   )
 }
@@ -28,6 +32,9 @@ function ModeratorNavItems() {
     <>
       <li className={navStyles.navbarItem}>
         <Link href='/activity'>Activity</Link>
+      </li>
+      <li className={navStyles.navbarItem}>
+        <NotificationWidget />
       </li>
     </>
   )
@@ -50,7 +57,13 @@ function UnauthenticatedUserNavItems() {
 }
 
 function AdminNavItems() {
-  return null;
+  return (
+    <>
+      <li className={navStyles.navbarItem}>
+        <NotificationWidget />
+      </li>
+    </>
+  );
 }
 
 const UNAUTHENTICATED_USER_KEY = 'unauthenticatedUser';

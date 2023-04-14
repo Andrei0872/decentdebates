@@ -1,0 +1,19 @@
+.bellContainer {
+  position: relative;
+}
+
+.notificationsCount {
+  position: absolute;
+  top: 0;
+  transform: translateY(-50%) translateX(-50%);
+  left: 95%;
+  background: var(--cl-accent-3);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 10px;
+  padding: 1px 3px;
+  font-size: 0.8rem;
+}
