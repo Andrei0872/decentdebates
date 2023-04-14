@@ -9,7 +9,7 @@ import styles from './NotificationWidget.module.scss'
 function NotificationWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number | null>(null);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
   useEffect(() => {
@@ -17,7 +17,11 @@ function NotificationWidget() {
 
     const onMessage = (ev: MessageEvent) => {
       const data = JSON.parse(ev.data);
-      setUnreadNotificationsCount(unreadNotificationsCount + data.unreadCount);
+      const nextCount = (unreadNotificationsCount ?? 0) + data.unreadCount;
+
+      // Setting it to null so that we can fetch it the first time
+      // when there are no unread notifications.
+      setUnreadNotificationsCount(!nextCount ? null : nextCount);
     };
     notifSource.addEventListener('message', onMessage);
 
@@ -37,11 +41,13 @@ function NotificationWidget() {
     setIsOpen(nextState);
 
     if (!nextState) {
-      setNotifications(notifications.map(n => ({ ...n, isMerelyRead: false })));
+      setTimeout(() => {
+        setNotifications(notifications.map(n => ({ ...n, isMerelyRead: false })));
+      }, 100);
       return;
     }
 
-    const shouldFetchNotifications = unreadNotificationsCount > 0;
+    const shouldFetchNotifications = unreadNotificationsCount === null || unreadNotificationsCount > 0;
     if (!shouldFetchNotifications) {
       return;
     }
