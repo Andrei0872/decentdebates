@@ -181,5 +181,6 @@ export async function seed(knex: Knex): Promise<void> {
     // ===== NOTIFICATIONS =====
     await knex("notification").insert([
         { title: 'New comment on argument', content: notificationText, recipient_id: user.id, event: 'ARGUMENT', is_read: false, },
+        { title: 'New comment on debate', content: notificationText, recipient_id: user.id, event: 'DEBATE', is_read: false, },
     ]);
 };

@@ -17,3 +17,39 @@
   padding: 1px 3px;
   font-size: 0.8rem;
 }
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cl-neutral-1);
+  border-radius: 7px;
+  margin-block-start: .2rem;
+  padding-inline-start: .1rem;
+
+  --gap-amount: .4rem;
+  gap: var(--gap-amount);
+}
+
+.notificationItem {
+  padding-inline: .3rem;
+  padding-block-end: calc(var(--gap-amount));
+
+  &:first-child {
+    padding-block-start: calc(var(--gap-amount));
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--cl-neutral-1);
+  }
+}
+
+.argumentEditorContainer {
+  border: none;
+  min-height: 0;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+.notificationTitle {
+  color: var(--cl-secondary-shade-1);
+}
