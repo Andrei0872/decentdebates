@@ -2,15 +2,30 @@ import { Notification } from "@/types/notification";
 import { fetchNotifications } from "@/utils/api/notification";
 import { Icon, Menu, MenuDivider, MenuItem, Spinner, SpinnerSize } from "@blueprintjs/core"
 import { Popover2 } from "@blueprintjs/popover2"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RichEditor from "../RichEditor/RichEditor";
 import styles from './NotificationWidget.module.scss'
 
 function NotificationWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number | null>(null);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+
+  useEffect(() => {
+    const notifSource = new EventSource(`${process.env.NEXT_PUBLIC_API_SERVER_URL}/notification/count`, { withCredentials: true });
+
+    const onMessage = (ev: MessageEvent) => {
+      const data = JSON.parse(ev.data);
+      setUnreadNotificationsCount(unreadNotificationsCount + data.unreadCount);
+    };
+    notifSource.addEventListener('message', onMessage);
+
+    return () => {
+      notifSource!.close();
+      notifSource!.removeEventListener('message', onMessage);
+    }
+  }, []);
 
   const handleInteraction = (nextState: boolean) => {
     // `Popover2`'s `componentDidUpdate` will cause this function to be called again.
@@ -25,7 +40,7 @@ function NotificationWidget() {
       return;
     }
 
-    const shouldFetchNotifications = unreadNotificationsCount === null || unreadNotificationsCount > 0;
+    const shouldFetchNotifications = unreadNotificationsCount > 0;
     if (!shouldFetchNotifications) {
       return;
     }
@@ -33,6 +48,7 @@ function NotificationWidget() {
     setIsLoadingNotifications(true);
     fetchNotifications()
       .then(r => {
+        setUnreadNotificationsCount(0);
         setNotifications(r.notifications);
         setIsLoadingNotifications(false);
       });
@@ -82,7 +98,11 @@ function NotificationWidget() {
         renderTarget={({ isOpen, ref, ...targetProps }) => (
           <span {...targetProps} className={`${styles.bellContainer} ${targetProps.className}`} ref={ref}>
             <Icon icon="notifications" />
-            <span className={styles.notificationsCount}>9+</span>
+            {
+              unreadNotificationsCount ? (
+                <span className={styles.notificationsCount}>{unreadNotificationsCount}</span>
+              ) : null
+            }
           </span>
         )}
         isOpen={isOpen}
