@@ -12,4 +12,5 @@ export interface Notification {
   recipientId: number;
   notificationEvent: NotificationEvents;
   isRead: boolean;
+  isMerelyRead: boolean;
 }

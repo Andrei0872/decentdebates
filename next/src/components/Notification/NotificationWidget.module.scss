@@ -26,6 +26,8 @@
   margin-block-start: .2rem;
   padding-inline-start: .1rem;
   background-color: #fff;
+  max-height: 27vh;
+  overflow-y: auto;
 
   --gap-amount: .4rem;
   gap: var(--gap-amount);
@@ -53,4 +55,8 @@
 
 .notificationTitle {
   color: var(--cl-secondary-shade-1);
+}
+
+.isMerelyRead {
+  background-color: var(--cl-secondary-tint-2);
 }

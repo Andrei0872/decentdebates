@@ -37,6 +37,7 @@ function NotificationWidget() {
     setIsOpen(nextState);
 
     if (!nextState) {
+      setNotifications(notifications.map(n => ({ ...n, isMerelyRead: false })));
       return;
     }
 
@@ -82,7 +83,7 @@ function NotificationWidget() {
               ) : (
                 notifications.map(n => (
                   <li
-                    className={styles.notificationItem}
+                    className={`${styles.notificationItem} ${n.isMerelyRead ? styles.isMerelyRead : ''}`}
                     key={n.id}
                   >
                     <div className={styles.notificationHeader}>
