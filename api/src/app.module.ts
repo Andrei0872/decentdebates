@@ -13,6 +13,7 @@ import { DebatesModule } from './entities/debates/debates.module';
 import { ModeratorModule } from './entities/moderator/moderator.module';
 import { ReviewModule } from './entities/review/review.module';
 import { CommentModule } from './entities/comment/comment.module';
+import { NotificationModule } from './entities/notification/notification.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CommentModule } from './entities/comment/comment.module';
     ModeratorModule,
     ReviewModule,
     CommentModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
