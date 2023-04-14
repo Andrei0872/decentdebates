@@ -1,7 +1,7 @@
 -- Convention: associative tables are prefixed with `assoc_*`.
 
 CREATE TYPE user_role AS ENUM ('USER', 'MODERATOR', 'ADMIN');
-CREATE TYPE notification_event AS ENUM ('ARGUMENT', 'TICKET', 'DEBATE', 'SUGGESTION');
+CREATE TYPE notification_event AS ENUM ('ARGUMENT', 'DEBATE', 'SUGGESTION');
 create type argument_type as enum ('PRO', 'CON');
 create type board_list_type as enum ('PENDING', 'IN REVIEW', 'CANCELED', 'ACCEPTED');
 
@@ -17,11 +17,12 @@ CREATE TABLE "user" (
 CREATE TABLE notification (
   id serial primary key,
   title varchar(40) not null,
-  content varchar(100) not null,
+  content text not null,
   recipient_id int not null,
   event notification_event not null,
+  is_read boolean default false,
 
-  constraint fk_user_recipient_id foreign key(recipient_id) references "user"(id)
+  constraint fk_user_recipient_id foreign key(recipient_id) references "user"(id) on delete cascade
 );
 
 CREATE TABLE suggestion (

@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 import * as bcrypt from 'bcrypt';
-import { longText } from "../fixtures";
+import { longText, notificationText } from "../fixtures";
 
 export async function seed(knex: Knex): Promise<void> {
     await knex("ticket").del();
@@ -10,6 +10,7 @@ export async function seed(knex: Knex): Promise<void> {
     await knex("debate_tag").del();
     await knex("argument").del();
     await knex("ticket_comment").del();
+    await knex("notification").del();
 
     const [user, ...moderators] = await knex("user").insert([
         {
@@ -176,5 +177,9 @@ export async function seed(knex: Knex): Promise<void> {
         { ticket_id: ticketsIds[7].id, content: longText, commenter_id: moderators[0].id },
         { ticket_id: ticketsIds[7].id, content: longText, commenter_id: moderators[0].id },
     ]);
-};
 
+    // ===== NOTIFICATIONS =====
+    await knex("notification").insert([
+        { title: 'New comment on argument', content: notificationText, recipient_id: user.id, event: 'ARGUMENT', is_read: false, },
+    ]);
+};
