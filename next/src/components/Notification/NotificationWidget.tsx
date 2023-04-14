@@ -17,11 +17,13 @@ function NotificationWidget() {
 
     const onMessage = (ev: MessageEvent) => {
       const data = JSON.parse(ev.data);
-      const nextCount = (unreadNotificationsCount ?? 0) + data.unreadCount;
+      setUnreadNotificationsCount(unreadNotificationsCount => {
+        const nextCount = (unreadNotificationsCount ?? 0) + data.unreadCount;
 
-      // Setting it to null so that we can fetch it the first time
-      // when there are no unread notifications.
-      setUnreadNotificationsCount(!nextCount ? null : nextCount);
+        // Setting it to null so that we can fetch it the first time
+        // when there are no unread notifications.
+        return !nextCount ? null : nextCount;
+      });
     };
     notifSource.addEventListener('message', onMessage);
 
