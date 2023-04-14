@@ -51,7 +51,6 @@ export class DebatesController {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
       )
-
   }
 
   @SetMetadata('skipAuth', true)

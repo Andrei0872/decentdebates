@@ -60,3 +60,11 @@
 .isMerelyRead {
   background-color: var(--cl-secondary-tint-2);
 }
+
+.noNotifications {
+  background-color: #fff;
+  text-align: center;
+  border: 1px solid var(--cl-neutral-1);
+  padding: .6rem;
+  border-radius: 6px;
+}

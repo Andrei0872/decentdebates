@@ -79,28 +79,30 @@ function NotificationWidget() {
           }
         }}
         content={
-          <ul className={styles.notificationsList} key="menu">
-            {
-              isLoadingNotifications ? (
-                <Spinner
-                  className={styles.loadingSpinner}
-                  size={SpinnerSize.STANDARD}
-                />
-              ) : (
-                notifications.map(n => (
-                  <li
-                    className={`${styles.notificationItem} ${n.isMerelyRead ? styles.isMerelyRead : ''}`}
-                    key={n.id}
-                  >
-                    <div className={styles.notificationHeader}>
-                      <h4 className={styles.notificationTitle}>{n.title}</h4>
-                    </div>
-                    <RichEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: n.content }} />
-                  </li>
-                ))
-              )
-            }
-          </ul>
+          isLoadingNotifications ? (
+            <Spinner
+              className={styles.loadingSpinner}
+              size={SpinnerSize.STANDARD}
+            />
+          ) : (
+            notifications.length ? (
+              <ul className={styles.notificationsList} key="menu">
+                {
+                  notifications.map(n => (
+                    <li
+                      className={`${styles.notificationItem} ${n.isMerelyRead ? styles.isMerelyRead : ''}`}
+                      key={n.id}
+                    >
+                      <div className={styles.notificationHeader}>
+                        <h4 className={styles.notificationTitle}>{n.title}</h4>
+                      </div>
+                      <RichEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: n.content }} />
+                    </li>
+                  ))
+                }
+              </ul>
+            ) : <p className={styles.noNotifications}>No notifications.</p>
+          )
         }
         renderTarget={({ isOpen, ref, ...targetProps }) => (
           <span {...targetProps} className={`${styles.bellContainer} ${targetProps.className}`} ref={ref}>
