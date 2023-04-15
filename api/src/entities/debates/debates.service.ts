@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
-import { DebateTicketCreated } from './debate.events';
+import { ArgumentTicketCreated, DebateTicketCreated } from './debate.events';
 import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDebateData, UpdateDraftData } from './debates.model';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -243,6 +243,11 @@ export class DebatesService {
       const { rows: [{ id: argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
 
       await client.query('COMMIT');
+
+      this.eventEmitter.emitAsync(
+        ArgumentTicketCreated.EVENT_NAME,
+        new ArgumentTicketCreated(ticketId, argumentData.argumentDetails.title),
+      );
     } catch (err) {
       console.log(err.message);
       await client.query('ROLLBACK');

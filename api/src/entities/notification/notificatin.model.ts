@@ -16,3 +16,8 @@ export interface Notification {
 export type NewNotification = Omit<Notification, 'id'>;
 
 export type NewGenericModeratorNotification = Omit<Notification, 'id' | 'recipientId'>;
+
+export interface NotificationEvent {
+  getContent(): Promise<string>;
+  getTitle(): string;
+}

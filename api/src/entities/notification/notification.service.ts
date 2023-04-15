@@ -2,7 +2,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
-import { DebateTicketCreated } from '../debates/debate.events';
+import { ArgumentTicketCreated, DebateTicketCreated } from '../debates/debate.events';
 import { UserCookieData } from '../user/user.model';
 import { NewGenericModeratorNotification, Notification, NotificationEvents } from './notificatin.model';
 import { NotificationsReadEvent } from './notification.events';
@@ -26,10 +26,23 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
       this.addGenericModeratorNotifications(newNotif)
         .catch();
     });
+
+    this.eventEmitter.on(ArgumentTicketCreated.EVENT_NAME, async (ev: ArgumentTicketCreated) => {
+      const newNotif: NewGenericModeratorNotification = {
+        content: await ev.getContent(),
+        title: ev.getTitle(),
+        isRead: false,
+        notificationEvent: NotificationEvents.ARGUMENT,
+      };
+
+      this.addGenericModeratorNotifications(newNotif)
+        .catch();
+    });
   }
 
   onModuleDestroy() {
     this.eventEmitter.removeAllListeners(DebateTicketCreated.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(ArgumentTicketCreated.EVENT_NAME);
   }
 
   async getAll(user: UserCookieData): Promise<Notification[]> {

@@ -1,8 +1,8 @@
 import { Controller, Get, HttpException, HttpStatus, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
-import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, Observable, Subject, takeUntil, tap } from 'rxjs';
-import { DebateTicketCreated } from '../debates/debate.events';
+import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { ArgumentTicketCreated, DebateTicketCreated } from '../debates/debate.events';
 import { UserCookieData, UserRoles } from '../user/user.model';
 import { NotificationsReadEvent } from './notification.events';
 import { NotificationService } from './notification.service';
@@ -46,21 +46,10 @@ export class NotificationController {
   notificationCount(@Req() req: Request): Observable<MessageEvent> {
     const user = (req as any).session.user as UserCookieData;
 
-    let notifSource = new Subject<MessageEvent>();
-
     const clientDisconnected$ = fromEventPattern(
       handler => req.on('close', handler),
       handler => req.off('close', handler),
     );
-
-    const debateTicketCreated$ = fromEventPattern<MessageEvent>(
-      handler => this.eventEmitter.on(DebateTicketCreated.EVENT_NAME, handler),
-      handler => this.eventEmitter.off(DebateTicketCreated.EVENT_NAME, handler),
-    ).pipe(
-      filter(() => user.role === UserRoles.MODERATOR)
-    );
-
-    // TODO: provide observables based on user role.
 
     return concat(
       from(this.notificationService.getUnreadCount(user))
@@ -68,7 +57,7 @@ export class NotificationController {
           map(count => ({ data: { unreadCount: +count } }))
         ),
       merge(
-        debateTicketCreated$
+        ...this.getListenersBasedOnUserRole(user.role)
       ).pipe(
         map(() => ({ data: { unreadCount: 1 } })),
       )
@@ -80,4 +69,28 @@ export class NotificationController {
     )
   }
 
+  private getListenersBasedOnUserRole(userRole: UserRoles): Array<Observable<any>> {
+    switch (userRole) {
+      case UserRoles.MODERATOR: {
+        const debateTicketCreated$ = fromEventPattern<MessageEvent>(
+          handler => this.eventEmitter.on(DebateTicketCreated.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(DebateTicketCreated.EVENT_NAME, handler),
+        );
+
+        const argumentTicketCreated$ = fromEventPattern<MessageEvent>(
+          handler => this.eventEmitter.on(ArgumentTicketCreated.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(ArgumentTicketCreated.EVENT_NAME, handler),
+        );
+
+        return [
+          debateTicketCreated$,
+          argumentTicketCreated$,
+        ];
+      }
+
+      default: {
+        return [NEVER]
+      }
+    }
+  }
 }
