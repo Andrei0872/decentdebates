@@ -150,7 +150,7 @@ export class DebatesService {
 
       this.eventEmitter.emitAsync(
         DebateTicketCreated.EVENT_NAME,
-        new DebateTicketCreated(ticketId),
+        new DebateTicketCreated(ticketId, debateData.title),
       );
     } catch (err) {
       console.log(err.message);
