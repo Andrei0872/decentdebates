@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
+import { DebateTicketCreated } from './debate.events';
 import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDebateData, UpdateDraftData } from './debates.model';
 import { CreateDebateDTO } from './dtos/create-debate.dto';
 
@@ -30,7 +32,10 @@ const PENDING_BOARD_LIST = 'PENDING';
 
 @Injectable()
 export class DebatesService {
-  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+  constructor(
+    @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
+    private eventEmitter: EventEmitter2,
+  ) { }
 
   async getAll(filters?: Filters): Promise<Debate[]> {
     const client = await this.pool.connect();
@@ -142,6 +147,11 @@ export class DebatesService {
       await client.query(assocDebateTagSql, assocDebateTagValues);
 
       await client.query('COMMIT');
+
+      this.eventEmitter.emitAsync(
+        DebateTicketCreated.EVENT_NAME,
+        new DebateTicketCreated(ticketId),
+      );
     } catch (err) {
       console.log(err.message);
       await client.query('ROLLBACK');

@@ -1,8 +1,9 @@
 import { Controller, Get, HttpException, HttpStatus, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
-import { catchError, concat, forkJoin, from, map, Observable, Subject, tap } from 'rxjs';
-import { UserCookieData } from '../user/user.model';
+import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, Observable, Subject, takeUntil, tap } from 'rxjs';
+import { DebateTicketCreated } from '../debates/debate.events';
+import { UserCookieData, UserRoles } from '../user/user.model';
 import { NotificationsReadEvent } from './notification.events';
 import { NotificationService } from './notification.service';
 
@@ -45,15 +46,38 @@ export class NotificationController {
   notificationCount(@Req() req: Request): Observable<MessageEvent> {
     const user = (req as any).session.user as UserCookieData;
 
-    const notifSource = new Subject<MessageEvent>();
+    let notifSource = new Subject<MessageEvent>();
+
+    const clientDisconnected$ = fromEventPattern(
+      handler => req.on('close', handler),
+      handler => req.off('close', handler),
+    );
+
+    const debateTicketCreated$ = fromEventPattern<MessageEvent>(
+      handler => this.eventEmitter.on(DebateTicketCreated.EVENT_NAME, handler),
+      handler => this.eventEmitter.off(DebateTicketCreated.EVENT_NAME, handler),
+    ).pipe(
+      filter(() => user.role === UserRoles.MODERATOR)
+    );
+
+    // TODO: provide observables based on user role.
 
     return concat(
       from(this.notificationService.getUnreadCount(user))
         .pipe(
           map(count => ({ data: { unreadCount: +count } }))
         ),
-      notifSource
-    );
+      merge(
+        debateTicketCreated$
+      ).pipe(
+        map(() => ({ data: { unreadCount: 1 } })),
+      )
+    ).pipe(
+      finalize(() => {
+        console.log('fin!');
+      }),
+      takeUntil(clientDisconnected$)
+    )
   }
 
 }

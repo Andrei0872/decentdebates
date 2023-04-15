@@ -1,7 +1,7 @@
 export enum NotificationEvents {
-  ARGUMENT,
-  DEBATE,
-  SUGGESTION,
+  ARGUMENT = 'ARGUMENT',
+  DEBATE = 'DEBATE',
+  SUGGESTION = 'SUGGESTION',
 }
 
 export interface Notification {
@@ -12,3 +12,7 @@ export interface Notification {
   notificationEvent: NotificationEvents;
   isRead: boolean;
 }
+
+export type NewNotification = Omit<Notification, 'id'>;
+
+export type NewGenericModeratorNotification = Omit<Notification, 'id' | 'recipientId'>;
