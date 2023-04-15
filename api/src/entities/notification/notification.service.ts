@@ -42,7 +42,8 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
         event "notificationEvent",
         is_read "isRead"
       from notification
-      where recipient_id = $1;
+      where recipient_id = $1
+      order by id desc
     `;
     const values = [user.id];
 
