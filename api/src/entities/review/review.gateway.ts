@@ -80,6 +80,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           insertedComment.commentId,
           user,
           payload.debateTitle,
+          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
         )
       );
 

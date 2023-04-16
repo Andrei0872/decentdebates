@@ -278,7 +278,7 @@ function Debate() {
       return;
     }
 
-    socket?.emit('comment/debate:create', { comment, debateTitle: debate?.title, });
+    socket?.emit('comment/debate:create', { comment, debateTitle: debate?.title, assignedToId: debate?.assignedToId, userId: debate?.userId });
   }
 
   const startEditingComment = (comment: IComment) => {

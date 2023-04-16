@@ -15,6 +15,7 @@ export interface ArgumentAsModerator {
   boardList: string;
   counterargumentToTitle: string;
   username: string;
+  assignedToId: number;
 }
 
 export interface DebateAsModerator extends Debate {
@@ -68,6 +69,8 @@ export interface UpdateReviewDebateData {
 
 export interface CommentPayload {
   comment: string;
+  userId: number;
+  assignedToId: number;
 }
 
 export interface DebateCommentPayload extends CommentPayload {

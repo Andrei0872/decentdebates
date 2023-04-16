@@ -88,7 +88,9 @@ export class NotificationController {
           handler => this.eventEmitter.off(DebateReviewNewComment.EVENT_NAME, handler),
         ).pipe(
           // A moderator receives a notification only from a user.
-          filter(ev => ev.user.role === UserRoles.USER)
+          filter(ev => {
+            return ev.user.role === UserRoles.USER && ev.recipientId === user.id
+          })
         );
 
         return [
@@ -104,7 +106,9 @@ export class NotificationController {
           handler => this.eventEmitter.off(DebateReviewNewComment.EVENT_NAME, handler),
         ).pipe(
           // A user receives a notification only from a moderator.
-          filter(ev => ev.user.role === UserRoles.MODERATOR)
+          filter(ev => {
+            return ev.user.role === UserRoles.MODERATOR && ev.recipientId === user.id;
+          })
         );
 
         return [

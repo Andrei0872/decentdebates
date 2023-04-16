@@ -5,4 +5,5 @@ export interface Debate {
   modifiedAt: string;
   username: string;
   userId: number;
+  assignedToId: number;
 }

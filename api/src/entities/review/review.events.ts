@@ -10,6 +10,7 @@ export class DebateReviewNewComment implements NotificationEvent {
     public readonly commentId: number,
     public readonly user: UserCookieData,
     public readonly debateTitle: string,
+    public readonly recipientId: number,
   ) { }
 
   static EVENT_NAME = 'debate.review.comment:created';

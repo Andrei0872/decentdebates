@@ -116,7 +116,8 @@ export class ReviewService {
         dt."tags",
         t.board_list "boardList",
         t.id "ticketId",
-        dt."tagsIds"
+        dt."tagsIds",
+        t.assigned_to "assignedToId"
       from debate d
       join "user" u
         on u.id = d.created_by
@@ -166,7 +167,9 @@ export class ReviewService {
         dt."tags",
         t.board_list "boardList",
         t.id "ticketId",
-        dt."tagsIds"
+        dt."tagsIds",
+        t.assigned_to "assignedToId",
+        t.created_by "userId"
       from debate d
       join debates_tags dt
         on dt."debateId" = d.id
