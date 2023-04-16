@@ -65,3 +65,11 @@ export interface UpdateReviewDebateData {
   debateId: number;
   title: string;
 }
+
+export interface CommentPayload {
+  comment: string;
+}
+
+export interface DebateCommentPayload extends CommentPayload {
+  debateTitle: string;
+}

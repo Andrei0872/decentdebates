@@ -272,15 +272,13 @@ function Debate() {
   }
 
   const addComment = () => {
-    console.log('Adding comment.');
-
     const comment = editableCommentRef.current?.getContent();
     if (!comment) {
       // TODO: some validation + informational message.
       return;
     }
 
-    socket?.emit('comment/debate:create', { comment });
+    socket?.emit('comment/debate:create', { comment, debateTitle: debate?.title, });
   }
 
   const startEditingComment = (comment: IComment) => {

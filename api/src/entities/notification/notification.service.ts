@@ -3,8 +3,9 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { ArgumentTicketCreated, DebateTicketCreated } from '../debates/debate.events';
+import { DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData } from '../user/user.model';
-import { NewGenericModeratorNotification, Notification, NotificationEvents } from './notificatin.model';
+import { NewGenericModeratorNotification, NewNotificationToOtherTicketParticipant, Notification, NotificationEvents } from './notificatin.model';
 import { NotificationsReadEvent } from './notification.events';
 
 @Injectable()
@@ -38,11 +39,28 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
       this.addGenericModeratorNotifications(newNotif)
         .catch();
     });
+
+    this.eventEmitter.on(DebateReviewNewComment.EVENT_NAME, async (ev: DebateReviewNewComment) => {
+      const notif: NewNotificationToOtherTicketParticipant = {
+        content: await ev.getContent(),
+        title: ev.getTitle(),
+        isRead: false,
+        notificationEvent: NotificationEvents.DEBATE,
+      };
+
+      this.addNotificationToOtherTicketParticipant(
+        ev.user.id,
+        ev.ticketId,
+        notif
+      )
+        .catch();
+    });
   }
 
   onModuleDestroy() {
     this.eventEmitter.removeAllListeners(DebateTicketCreated.EVENT_NAME);
     this.eventEmitter.removeAllListeners(ArgumentTicketCreated.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(DebateReviewNewComment.EVENT_NAME);
   }
 
   async getAll(user: UserCookieData): Promise<Notification[]> {
@@ -124,7 +142,39 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     }
   }
 
-  async addNotification() { }
+  async addNotificationToOtherTicketParticipant(senderId: number, ticketId: number, notif: NewNotificationToOtherTicketParticipant) {
+    const sqlStl = `
+      insert into notification(title, content, recipient_id, event)
+      select distinct
+        $1,
+        $2,
+        case
+          when t.assigned_to = $3 then t.created_by
+          when t.created_by = $4 then t.assigned_to
+        end "recipient_id",
+        $5::notification_event
+      from ticket t
+      where t.id = $6;
+    `;
+    const values = [
+      notif.title,
+      notif.content,
+      senderId,
+      senderId,
+      notif.notificationEvent,
+      ticketId
+    ];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStl, values);
+    } catch (err) {
+      console.error(err.message);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
 
   // Adding the same notification to all moderators.
   // Cases: a new ticket has been created - all moderators should be

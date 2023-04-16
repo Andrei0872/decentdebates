@@ -1,6 +1,6 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
+import { CommentPayload, DebateCommentPayload, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -9,6 +9,8 @@ import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
 import { config } from 'src/config';
 import { DebatesService } from '../debates/debates.service';
 import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
+import { DebateReviewNewComment, } from './review.events';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const PORT = 3002;
 
@@ -23,6 +25,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private reviewService: ReviewService,
     private commentService: CommentService,
     private debatesService: DebatesService,
+    private eventEmitter: EventEmitter2,
   ) { }
 
   afterInit(server: any) {
@@ -50,7 +53,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('comment/debate:create')
-  async handleDebateCommentCreate(socket: Socket, payload: any): Promise<WsResponse> {
+  async handleDebateCommentCreate(socket: Socket, payload: DebateCommentPayload): Promise<WsResponse> {
     try {
       const content = payload.comment;
       if (!content) {
@@ -69,6 +72,16 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit('comment/debate:create', { insertedComment });
+
+      this.eventEmitter.emitAsync(
+        DebateReviewNewComment.EVENT_NAME,
+        new DebateReviewNewComment(
+          ticketId,
+          insertedComment.commentId,
+          user,
+          payload.debateTitle,
+        )
+      );
 
       return {
         event: 'comment/debate:create',
