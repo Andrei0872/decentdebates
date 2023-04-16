@@ -53,7 +53,7 @@ export interface UserActivityArgument {
 export type UserActivity = UserActivityDebate | UserActivityArgument;
 
 export type PublicUser = Omit<User, 'password'>;
-export type UserCookieData = Pick<User, 'id' | 'role'>;
+export type UserCookieData = Pick<User, 'id' | 'role' | 'username'>;
 
 export const getPublicUser = (u: User): PublicUser => {
   const { password, ...rest } = u;
