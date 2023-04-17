@@ -97,4 +97,6 @@ export interface ArgumentReviewUpdated {
   ticketId: number;
   debateTitle: string;
   argumentTitle: string;
+  userId: number;
+  assignedToId: number;
 }

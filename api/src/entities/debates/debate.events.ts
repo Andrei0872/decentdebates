@@ -123,6 +123,7 @@ export class ArgumentUpdated implements NotificationEvent {
     public readonly user: UserCookieData,
     public readonly debateTitle: string,
     public readonly argumentTitle: string,
+    public readonly recipientId: number,
   ) { }
 
   static EVENT_NAME = 'argument:update';

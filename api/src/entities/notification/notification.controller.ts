@@ -106,7 +106,6 @@ export class NotificationController {
           handler => this.eventEmitter.on(DebateTitleUpdated.EVENT_NAME, handler),
           handler => this.eventEmitter.off(DebateTitleUpdated.EVENT_NAME, handler),
         ).pipe(
-          // A user receives a notification only from a moderator.
           filter(ev => {
             return ev.user.role === UserRoles.USER && ev.recipientId === user.id;
           })
@@ -115,6 +114,10 @@ export class NotificationController {
         const argumentReviewUpdated$ = fromEventPattern<ArgumentUpdated>(
           handler => this.eventEmitter.on(ArgumentUpdated.EVENT_NAME, handler),
           handler => this.eventEmitter.off(ArgumentUpdated.EVENT_NAME, handler),
+        ).pipe(
+          filter(ev => {
+            return ev.user.role === UserRoles.USER && ev.recipientId === user.id;
+          })
         );
 
         return [

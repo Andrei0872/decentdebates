@@ -471,6 +471,8 @@ function Argument() {
         ticketId: argument.ticketId,
         debateTitle: argument.debateTitle,
         argumentTitle: argument.argumentTitle,
+        userId: argument.userId,
+        assignedToId: argument.assignedToId,
       },
       (responseMessage: string) => {
         if (responseMessage === 'OK') {
