@@ -1,6 +1,6 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { ArgumentCommentPayload, CommentPayload, DebateCommentPayload, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
+import { ArgumentCommentPayload, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -11,6 +11,7 @@ import { DebatesService } from '../debates/debates.service';
 import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
 import { ArgumentReviewNewComment, DebateReviewNewComment, } from './review.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DebateTitleUpdated } from '../debates/debate.events';
 
 const PORT = 3002;
 
@@ -216,7 +217,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('debate:update')
-  async handleDebateUpdate(socket: Socket, payload: { data: UpdateReviewDebateData }): Promise<string> {
+  async handleDebateUpdate(socket: Socket, payload: DebateReviewUpdated): Promise<string> {
     try {
       if (!payload.data) {
         throw new WsException(`Debate data is missing.`);
@@ -238,6 +239,16 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit('debate:update', payload.data);
+
+      this.eventEmitter.emitAsync(
+        DebateTitleUpdated.EVENT_NAME,
+        new DebateTitleUpdated(
+          payload.ticketId,
+          user,
+          payload.oldTitle,
+          payload.data.title,
+        )
+      );
 
       return 'OK';
     } catch (err) {

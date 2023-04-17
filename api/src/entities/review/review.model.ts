@@ -83,3 +83,9 @@ export interface ArgumentCommentPayload extends CommentPayload {
   debateTitle: string;
   argumentTitle: string;
 }
+
+export interface DebateReviewUpdated {
+  data: UpdateReviewDebateData;
+  oldTitle: string;
+  ticketId: number;
+}

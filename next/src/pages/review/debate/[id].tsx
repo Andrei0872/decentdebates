@@ -337,7 +337,11 @@ function Debate() {
 
     socket?.emit(
       'debate:update',
-      { data: { ...data, debateId: debate?.id } },
+      {
+        data: { ...data, debateId: debate?.id },
+        oldTitle: debate.title,
+        ticketId: debate.ticketId,
+      },
       (responseMessage: string) => {
         if (responseMessage !== 'OK') {
           return;
