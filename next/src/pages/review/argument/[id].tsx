@@ -383,7 +383,13 @@ function Argument() {
       return;
     }
 
-    socket?.emit('comment/argument:create', { comment });
+    socket?.emit('comment/argument:create', {
+      comment,
+      debateTitle: argument?.debateTitle,
+      argumentTitle: argument?.argumentTitle,
+      assignedToId: argument?.assignedToId,
+      userId: argument?.userId,
+    });
   }
 
   const startEditingComment = (comment: IComment) => {

@@ -40,3 +40,47 @@ export class DebateReviewNewComment implements NotificationEvent {
     return 'New comment!';
   }
 }
+
+export class ArgumentReviewNewComment implements NotificationEvent {
+  constructor(
+    public readonly ticketId: number,
+    public readonly commentId: number,
+    public readonly user: UserCookieData,
+    public readonly debateTitle: string,
+    public readonly argumentTitle: string,
+    public readonly recipientId: number,
+  ) { }
+
+  static EVENT_NAME = 'argument.review.comment:created';
+
+  getContent(): Promise<string> {
+    return richEditor.insertNodes(() => {
+      const usernameText = $createTextNode(this.user.username);
+      usernameText.setFormat('bold');
+
+      const argTitleText = $createTextNode(this.argumentTitle);
+      argTitleText.setFormat('italic');
+      const linkHref = new LinkNode(`/review/argument/${this.ticketId}`);
+      linkHref.append(argTitleText);
+
+      const debateTitle = $createTextNode(this.debateTitle);
+      debateTitle.setFormat('italic');
+
+      const p = $createParagraphNode();
+      p.append(
+        usernameText,
+        $createTextNode(' commented on '),
+        linkHref,
+        $createTextNode(' in the debate entitled '),
+        debateTitle,
+        $createTextNode('.'),
+      );
+
+      return [p];
+    }).getContent();
+  }
+
+  getTitle(): string {
+    return 'New comment!';
+  }
+}

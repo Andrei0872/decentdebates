@@ -65,7 +65,8 @@ export class ReviewService {
         d.title "debateTitle",
         t.board_list "boardList",
         aCounterarg.title "counterargumentToTitle",
-        u.username
+        u.username,
+        t.assigned_to "assignedToId"
       from ticket t
       join argument a
         on a.ticket_id = t.id
@@ -208,7 +209,9 @@ export class ReviewService {
         t.board_list "boardList",
         aCounterarg.title "counterargumentToTitle",
         u.username "moderatorUsername",
-        a.id "argumentId"
+        a.id "argumentId",
+        t.assigned_to "assignedToId",
+        t.created_by "userId"
       from ticket t
       join argument a
         on a.ticket_id = t.id

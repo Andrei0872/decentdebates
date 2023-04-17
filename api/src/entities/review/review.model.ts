@@ -54,6 +54,8 @@ export interface ArgumentAsUser {
   counterargumentToTitle: string;
   moderatorUsername: string;
   argumentId: string;
+  assignedToId: number;
+  userId: number;
 }
 
 export interface UpdateReviewArgumentData {
@@ -75,4 +77,9 @@ export interface CommentPayload {
 
 export interface DebateCommentPayload extends CommentPayload {
   debateTitle: string;
+}
+
+export interface ArgumentCommentPayload extends CommentPayload {
+  debateTitle: string;
+  argumentTitle: string;
 }

@@ -28,6 +28,7 @@
   background-color: #fff;
   max-height: 27vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
 
   --gap-amount: .4rem;
   gap: var(--gap-amount);
@@ -51,6 +52,9 @@
   min-height: 0;
   font-size: 0.8rem;
   padding: 0;
+  word-break: break-all;
+  max-width: 350px;
+  line-height: 14px;
 }
 
 .notificationTitle {

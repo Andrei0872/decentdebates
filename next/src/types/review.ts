@@ -21,6 +21,7 @@ export interface ArgumentAsModerator {
   boardList: string;
   counterargumentToTitle: string;
   username: string;
+  assignedToId: number;
 }
 
 export interface DebateAsModerator extends Debate {
@@ -58,6 +59,8 @@ export interface ArgumentAsUser {
   counterargumentToTitle: string;
   moderatorUsername: string;
   argumentId: string;
+  assignedToId: number;
+  userId: number;
 }
 
 export interface UpdateArgumentData {

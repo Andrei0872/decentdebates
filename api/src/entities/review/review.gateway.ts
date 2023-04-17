@@ -1,6 +1,6 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { CommentPayload, DebateCommentPayload, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
+import { ArgumentCommentPayload, CommentPayload, DebateCommentPayload, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -9,7 +9,7 @@ import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
 import { config } from 'src/config';
 import { DebatesService } from '../debates/debates.service';
 import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
-import { DebateReviewNewComment, } from './review.events';
+import { ArgumentReviewNewComment, DebateReviewNewComment, } from './review.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const PORT = 3002;
@@ -117,7 +117,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('comment/argument:create')
-  async handleArgumentCommentCreate(socket: Socket, payload: any): Promise<WsResponse> {
+  async handleArgumentCommentCreate(socket: Socket, payload: ArgumentCommentPayload): Promise<WsResponse> {
     try {
       const content = payload.comment;
       if (!content) {
@@ -136,6 +136,18 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit('comment/argument:create', { insertedComment });
+
+      this.eventEmitter.emitAsync(
+        ArgumentReviewNewComment.EVENT_NAME,
+        new ArgumentReviewNewComment(
+          ticketId,
+          insertedComment.commentId,
+          user,
+          payload.debateTitle,
+          payload.argumentTitle,
+          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
+        )
+      );
 
       return {
         event: 'comment/argument:create',

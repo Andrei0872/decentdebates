@@ -3,7 +3,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
 import { ArgumentTicketCreated, DebateTicketCreated } from '../debates/debate.events';
-import { DebateReviewNewComment } from '../review/review.events';
+import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData, UserRoles } from '../user/user.model';
 import { NotificationsReadEvent } from './notification.events';
 import { NotificationService } from './notification.service';
@@ -93,10 +93,20 @@ export class NotificationController {
           })
         );
 
+        const argumentReviewNewComment$ = fromEventPattern<ArgumentReviewNewComment>(
+          handler => this.eventEmitter.on(ArgumentReviewNewComment.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(ArgumentReviewNewComment.EVENT_NAME, handler),
+        ).pipe(
+          filter(ev => {
+            return ev.user.role === UserRoles.USER && ev.recipientId === user.id
+          })
+        );
+
         return [
           debateTicketCreated$,
           argumentTicketCreated$,
           debateReviewNewComment$,
+          argumentReviewNewComment$,
         ];
       }
 
@@ -111,8 +121,19 @@ export class NotificationController {
           })
         );
 
+        const argumentReviewNewComment$ = fromEventPattern<ArgumentReviewNewComment>(
+          handler => this.eventEmitter.on(ArgumentReviewNewComment.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(ArgumentReviewNewComment.EVENT_NAME, handler),
+        ).pipe(
+          // A user receives a notification only from a moderator.
+          filter(ev => {
+            return ev.user.role === UserRoles.MODERATOR && ev.recipientId === user.id;
+          })
+        );
+
         return [
           debateReviewNewComment$,
+          argumentReviewNewComment$,
         ];
       }
 

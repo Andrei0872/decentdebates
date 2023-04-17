@@ -3,7 +3,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
 import { ArgumentTicketCreated, DebateTicketCreated } from '../debates/debate.events';
-import { DebateReviewNewComment } from '../review/review.events';
+import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData } from '../user/user.model';
 import { NewGenericModeratorNotification, NewNotificationToOtherTicketParticipant, Notification, NotificationEvents } from './notificatin.model';
 import { NotificationsReadEvent } from './notification.events';
@@ -46,6 +46,22 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
         title: ev.getTitle(),
         isRead: false,
         notificationEvent: NotificationEvents.DEBATE,
+      };
+
+      this.addNotificationToOtherTicketParticipant(
+        ev.user.id,
+        ev.ticketId,
+        notif
+      )
+        .catch();
+    });
+
+    this.eventEmitter.on(ArgumentReviewNewComment.EVENT_NAME, async (ev: ArgumentReviewNewComment) => {
+      const notif: NewNotificationToOtherTicketParticipant = {
+        content: await ev.getContent(),
+        title: ev.getTitle(),
+        isRead: false,
+        notificationEvent: NotificationEvents.ARGUMENT,
       };
 
       this.addNotificationToOtherTicketParticipant(
