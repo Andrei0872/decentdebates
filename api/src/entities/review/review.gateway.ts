@@ -1,6 +1,6 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { ArgumentCommentPayload, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
+import { ArgumentCommentPayload, ArgumentReviewUpdated, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -11,7 +11,7 @@ import { DebatesService } from '../debates/debates.service';
 import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
 import { ArgumentReviewNewComment, DebateReviewNewComment, } from './review.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DebateTitleUpdated } from '../debates/debate.events';
+import { ArgumentUpdated, DebateTitleUpdated } from '../debates/debate.events';
 
 const PORT = 3002;
 
@@ -183,7 +183,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('argument:update')
-  async handleArgumentUpdate(socket: Socket, payload: { data: UpdateReviewArgumentData }): Promise<string> {
+  async handleArgumentUpdate(socket: Socket, payload: ArgumentReviewUpdated): Promise<string> {
     try {
       if (!payload.data) {
         throw new WsException(`Argument data is missing.`);
@@ -208,6 +208,16 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit('argument:update', payload.data);
+
+      this.eventEmitter.emitAsync(
+        ArgumentUpdated.EVENT_NAME,
+        new ArgumentUpdated(
+          payload.ticketId,
+          user,
+          payload.debateTitle,
+          payload.argumentTitle
+        ),
+      );
 
       return 'OK';
     } catch (err) {

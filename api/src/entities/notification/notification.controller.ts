@@ -2,7 +2,7 @@ import { Controller, Get, HttpException, HttpStatus, MessageEvent, Query, Req, R
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
-import { ArgumentTicketCreated, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
+import { ArgumentTicketCreated, ArgumentUpdated, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
 import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData, UserRoles } from '../user/user.model';
 import { NotificationsReadEvent } from './notification.events';
@@ -107,12 +107,18 @@ export class NotificationController {
           handler => this.eventEmitter.off(DebateTitleUpdated.EVENT_NAME, handler),
         );
 
+        const argumentReviewUpdated$ = fromEventPattern<ArgumentUpdated>(
+          handler => this.eventEmitter.on(ArgumentUpdated.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(ArgumentUpdated.EVENT_NAME, handler),
+        );
+
         return [
           debateTicketCreated$,
           argumentTicketCreated$,
           debateReviewNewComment$,
           argumentReviewNewComment$,
           debateReviewUpdated$,
+          argumentReviewUpdated$,
         ];
       }
 

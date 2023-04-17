@@ -466,7 +466,12 @@ function Argument() {
 
     socket?.emit(
       'argument:update',
-      { data: { ...data, argumentId: argument.argumentId } },
+      {
+        data: { ...data, argumentId: argument.argumentId },
+        ticketId: argument.ticketId,
+        debateTitle: argument.debateTitle,
+        argumentTitle: argument.argumentTitle,
+      },
       (responseMessage: string) => {
         if (responseMessage === 'OK') {
           setArgument({

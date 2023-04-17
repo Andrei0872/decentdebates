@@ -89,3 +89,10 @@ export interface DebateReviewUpdated {
   oldTitle: string;
   ticketId: number;
 }
+
+export interface ArgumentReviewUpdated {
+  data: UpdateReviewArgumentData;
+  ticketId: number;
+  debateTitle: string;
+  argumentTitle: string;
+}

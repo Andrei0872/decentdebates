@@ -115,3 +115,46 @@ export class DebateTitleUpdated implements NotificationEvent {
     return 'Debate updated!'
   }
 }
+
+export class ArgumentUpdated implements NotificationEvent {
+  constructor(
+    public readonly ticketId: number,
+    public readonly user: UserCookieData,
+    public readonly debateTitle: string,
+    public readonly argumentTitle: string,
+  ) { }
+
+  static EVENT_NAME = 'argument:update';
+
+  getContent(): Promise<string> {
+    // 'X updated Y in the debate entitled Z'.
+    return richEditor.insertNodes(() => {
+      const usernameText = $createTextNode(this.user.username);
+      usernameText.setFormat('bold');
+
+      const debateTitle = $createTextNode(this.debateTitle);
+      debateTitle.setFormat('italic');
+
+      const argumentTitleText = $createTextNode(this.argumentTitle);
+      argumentTitleText.setFormat('italic');
+      const linkHref = new LinkNode(`/review/argument/${this.ticketId}`);
+      linkHref.append(argumentTitleText);
+
+      const p = $createParagraphNode();
+      p.append(
+        usernameText,
+        $createTextNode(' updated '),
+        linkHref,
+        $createTextNode(' in the debate entitled '),
+        debateTitle,
+        $createTextNode('.'),
+      );
+
+      return [p];
+    }).getContent();
+  }
+
+  getTitle(): string {
+    return 'Argument updated!'
+  }
+}

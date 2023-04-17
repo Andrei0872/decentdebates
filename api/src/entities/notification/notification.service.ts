@@ -2,7 +2,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
-import { ArgumentTicketCreated, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
+import { ArgumentTicketCreated, ArgumentUpdated, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
 import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData } from '../user/user.model';
 import { NewGenericModeratorNotification, NewNotificationToOtherTicketParticipant, Notification, NotificationEvents } from './notificatin.model';
@@ -78,6 +78,22 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
         title: ev.getTitle(),
         isRead: false,
         notificationEvent: NotificationEvents.DEBATE,
+      };
+
+      this.addNotificationToOtherTicketParticipant(
+        ev.user.id,
+        ev.ticketId,
+        notif
+      )
+        .catch();
+    });
+
+    this.eventEmitter.on(ArgumentUpdated.EVENT_NAME, async (ev: ArgumentUpdated) => {
+      const notif: NewNotificationToOtherTicketParticipant = {
+        content: await ev.getContent(),
+        title: ev.getTitle(),
+        isRead: false,
+        notificationEvent: NotificationEvents.ARGUMENT,
       };
 
       this.addNotificationToOtherTicketParticipant(
@@ -174,6 +190,9 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     }
   }
 
+  // The logic here is that a ticket creates a 'connection' between
+  // a user and a moderator. So, by having the `senderId` and a `ticketId`,
+  // we can determine the other participant, and that will the recipient.
   async addNotificationToOtherTicketParticipant(senderId: number, ticketId: number, notif: NewNotificationToOtherTicketParticipant) {
     const sqlStl = `
       insert into notification(title, content, recipient_id, event)
