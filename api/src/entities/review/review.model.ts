@@ -88,6 +88,8 @@ export interface DebateReviewUpdated {
   data: UpdateReviewDebateData;
   oldTitle: string;
   ticketId: number;
+  userId: number;
+  assignedToId: number;
 }
 
 export interface ArgumentReviewUpdated {

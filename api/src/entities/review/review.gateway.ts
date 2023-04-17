@@ -257,6 +257,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           user,
           payload.oldTitle,
           payload.data.title,
+          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
         )
       );
 

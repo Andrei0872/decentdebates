@@ -79,6 +79,7 @@ export class DebateTitleUpdated implements NotificationEvent {
     public readonly user: UserCookieData,
     public readonly oldTitle: string,
     public readonly newTitle: string,
+    public readonly recipientId: number,
   ) { }
 
   static EVENT_NAME = 'debate/title:update';

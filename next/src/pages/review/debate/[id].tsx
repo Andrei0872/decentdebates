@@ -341,6 +341,8 @@ function Debate() {
         data: { ...data, debateId: debate?.id },
         oldTitle: debate.title,
         ticketId: debate.ticketId,
+        userId: debate.userId,
+        assignedToId: debate.assignedToId,
       },
       (responseMessage: string) => {
         if (responseMessage !== 'OK') {
