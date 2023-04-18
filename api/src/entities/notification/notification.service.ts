@@ -2,7 +2,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
-import { ArgumentTicketCreated, ArgumentUpdated, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
+import { ArgumentTicketCreated, ArgumentUpdated, DebateTicketApproved, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
 import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData } from '../user/user.model';
 import { NewGenericModeratorNotification, NewNotificationToOtherTicketParticipant, Notification, NotificationEvents } from './notificatin.model';
@@ -103,12 +103,32 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
       )
         .catch();
     });
+
+    this.eventEmitter.on(DebateTicketApproved.EVENT_NAME, async (ev: DebateTicketApproved) => {
+      const notif: NewNotificationToOtherTicketParticipant = {
+        content: await ev.getContent(),
+        title: ev.getTitle(),
+        isRead: false,
+        notificationEvent: NotificationEvents.DEBATE,
+      };
+
+      this.addNotificationToOtherTicketParticipant(
+        ev.senderId,
+        ev.ticketId,
+        notif
+      )
+        .catch();
+    });
   }
 
   onModuleDestroy() {
     this.eventEmitter.removeAllListeners(DebateTicketCreated.EVENT_NAME);
     this.eventEmitter.removeAllListeners(ArgumentTicketCreated.EVENT_NAME);
     this.eventEmitter.removeAllListeners(DebateReviewNewComment.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(ArgumentReviewNewComment.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(DebateTitleUpdated.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(ArgumentUpdated.EVENT_NAME);
+    this.eventEmitter.removeAllListeners(DebateTicketApproved.EVENT_NAME);
   }
 
   async getAll(user: UserCookieData): Promise<Notification[]> {

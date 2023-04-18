@@ -33,6 +33,7 @@ export interface ModeratorActivityBase {
 export interface ModeratorActivityDebate extends ModeratorActivityBase, DebateAsModerator {
   ticketLabel: CardLabels.DEBATE;
   tags: Tag[];
+  debateId: number;
 }
 
 export interface ModeratorActivityArgument extends ModeratorActivityBase {

@@ -7,7 +7,9 @@ import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, 
 
 @Injectable()
 export class ModeratorService {
-  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+  constructor(
+    @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
+  ) { }
 
   async getDebateCards(): Promise<ModeratorActivityDebate[]> {
     const sqlStr = `
@@ -36,7 +38,8 @@ export class ModeratorService {
           when d.id is not null then 'debate'
         end "ticketLabel",
         dts."tags",
-        dts."tagsIds"
+        dts."tagsIds",
+        d.id "debateId"
       from ticket t
       right join debate d
         on d.ticket_id = t.id
@@ -148,7 +151,8 @@ export class ModeratorService {
       update ticket 
       set
         board_list = 'ACCEPTED'
-      where id = $1 and assigned_to = $2;
+      where id = $1 and assigned_to = $2
+      returning created_by;
     `;
     const values = [
       ticketId,

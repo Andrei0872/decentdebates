@@ -160,3 +160,36 @@ export class ArgumentUpdated implements NotificationEvent {
     return 'Argument updated!'
   }
 }
+
+export class DebateTicketApproved implements NotificationEvent {
+  constructor(
+    public readonly ticketId: number,
+    public readonly debateId: number,
+    public readonly debateTitle: string,
+    public readonly recipientId: number,
+    public readonly senderId: number,
+  ) { }
+
+  static EVENT_NAME = 'debate/ticket:approved';
+
+  getContent(): Promise<string> {
+    return richEditor.insertNodes(() => {
+      const debateTitleText = $createTextNode(this.debateTitle);
+      debateTitleText.setFormat('italic');
+      const linkHref = new LinkNode(`/debates/${this.debateId}`);
+      linkHref.append(debateTitleText);
+
+      const p = $createParagraphNode();
+      p.append(
+        linkHref,
+        $createTextNode(' has been published!'),
+      );
+
+      return [p];
+    }).getContent();
+  }
+
+  getTitle(): string {
+    return 'Debate published!';
+  }
+}

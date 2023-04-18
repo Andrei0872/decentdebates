@@ -11,7 +11,7 @@ import { useRouter } from "next/router";
 import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, Position, Toaster } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
-import { approveTicket, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
+import { approveDebate, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
 import { fetchDebateAsModerator } from "@/utils/api/review";
 import { Popover2 } from "@blueprintjs/popover2";
 import tagStyles from '@/styles/shared/debate-tag.module.scss';
@@ -270,7 +270,11 @@ function Activity() {
   }
 
   const onApproveTicket = (updatedBoardList: BoardLists, card: ModeratorActivity) => {
-    approveTicket(card.ticketId.toString())
+    const approveTicketPromise = card.ticketLabel === CardLabels.DEBATE
+      ? approveDebate(card.ticketId.toString(), { debateTitle: card.ticketTitle, debateId: card.debateId })
+      : Promise.reject();
+    
+    approveTicketPromise
       .then(r => {
         const { message } = r;
         toasterRef.current?.show({

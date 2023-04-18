@@ -1,10 +1,13 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Req, Res, UseGuards } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, tap, throwError } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { DebateTicketApproved } from '../debates/debate.events';
 import { DebatesService } from '../debates/debates.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
+import { ApproveDebateDTO } from './dtos/approve-debate.dto';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { UpdateTicketData } from './moderator.model';
 import { ModeratorService } from './moderator.service';
@@ -16,6 +19,7 @@ export class ModeratorController {
   constructor(
     private moderatorService: ModeratorService,
     private debatesService: DebatesService,
+    private eventEmitter: EventEmitter2,
   ) { }
 
   @Get('/activity')
@@ -104,18 +108,39 @@ export class ModeratorController {
       )
   }
 
-  @Patch('/approve/ticket/:ticketId')
-  async approveTicket(@Req() req: Request, @Res() res: Response, @Param('ticketId') ticketId: string) {
+  @Patch('/approve/debate/:ticketId')
+  async approveDebate(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('ticketId') ticketId: string,
+    @Body() body: ApproveDebateDTO,
+  ) {
     const user = (req as any).session.user as UserCookieData;
 
     return from(this.moderatorService.approveTicket(user, ticketId))
       .pipe(
         tap(res => {
           if (!res.rowCount) {
-            throw new Error('Wrong attempt to update the ticket.');
+            throw new Error('Wrong attempt to update the debate.');
           }
         }),
-        map(() => res.status(HttpStatus.OK).json({ message: 'The ticket has been approved.' })),
+        tap({
+          next: (res) => {
+            const { rows: [{ created_by: recipientId }] } = res;
+            
+            this.eventEmitter.emitAsync(
+              DebateTicketApproved.EVENT_NAME,
+              new DebateTicketApproved(
+                +ticketId,
+                body.debateId,
+                body.debateTitle,
+                recipientId,
+                user.id,
+              ),
+            );
+          },
+        }),
+        map(() => res.status(HttpStatus.OK).json({ message: 'The debate has been approved.' })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })
