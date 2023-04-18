@@ -4,9 +4,10 @@ import { Request, Response } from 'express';
 import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, tap, throwError } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
-import { DebateTicketApproved } from '../debates/debate.events';
+import { ArgumentTicketApproved, DebateTicketApproved } from '../debates/debate.events';
 import { DebatesService } from '../debates/debates.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
+import { ApproveArgumentDTO } from './dtos/approve-argument.dto';
 import { ApproveDebateDTO } from './dtos/approve-debate.dto';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { UpdateTicketData } from './moderator.model';
@@ -141,6 +142,47 @@ export class ModeratorController {
           },
         }),
         map(() => res.status(HttpStatus.OK).json({ message: 'The debate has been approved.' })),
+        catchError((err) => {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        })
+      )
+  }
+
+  @Patch('/approve/argument/:ticketId')
+  async approveArgument(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('ticketId') ticketId: string,
+    @Body() body: ApproveArgumentDTO,
+  ) {
+    const user = (req as any).session.user as UserCookieData;
+
+    return from(this.moderatorService.approveTicket(user, ticketId))
+      .pipe(
+        tap(res => {
+          if (!res.rowCount) {
+            throw new Error('Wrong attempt to update the argument.');
+          }
+        }),
+        tap({
+          next: (res) => {
+            const { rows: [{ created_by: recipientId }] } = res;
+            
+            this.eventEmitter.emitAsync(
+              ArgumentTicketApproved.EVENT_NAME,
+              new ArgumentTicketApproved(
+                +ticketId,
+                body.debateId,
+                body.debateTitle,
+                body.argumentId,
+                body.argumentTitle,
+                recipientId,
+                user.id,
+              ),
+            );
+          },
+        }),
+        map(() => res.status(HttpStatus.OK).json({ message: 'The argument has been approved.' })),
         catchError((err) => {
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         })

@@ -2,7 +2,7 @@ import { Controller, Get, HttpException, HttpStatus, MessageEvent, Query, Req, R
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
-import { ArgumentTicketCreated, ArgumentUpdated, DebateTicketApproved, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
+import { ArgumentTicketApproved, ArgumentTicketCreated, ArgumentUpdated, DebateTicketApproved, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
 import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData, UserRoles } from '../user/user.model';
 import { NotificationsReadEvent } from './notification.events';
@@ -158,10 +158,18 @@ export class NotificationController {
           filter(ev => ev.recipientId === user.id)
         );
 
+        const argumentTicketApproved$ = fromEventPattern<ArgumentTicketApproved>(
+          handler => this.eventEmitter.on(ArgumentTicketApproved.EVENT_NAME, handler),
+          handler => this.eventEmitter.off(ArgumentTicketApproved.EVENT_NAME, handler),
+        ).pipe(
+          filter(ev => ev.recipientId === user.id)
+        );
+
         return [
           debateReviewNewComment$,
           argumentReviewNewComment$,
           debateTicketApproved$,
+          argumentTicketApproved$,
         ];
       }
 

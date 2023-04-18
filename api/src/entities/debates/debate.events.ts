@@ -193,3 +193,44 @@ export class DebateTicketApproved implements NotificationEvent {
     return 'Debate published!';
   }
 }
+
+export class ArgumentTicketApproved implements NotificationEvent {
+  constructor(
+    public readonly ticketId: number,
+    public readonly debateId: number,
+    public readonly debateTitle: string,
+    public readonly argumentId: number,
+    public readonly argumentTitle: string,
+    public readonly recipientId: number,
+    public readonly senderId: number,
+  ) { }
+
+  static EVENT_NAME = 'argument/ticket:approved';
+
+  getContent(): Promise<string> {
+    // 'The argument X has been published in Y'.
+    return richEditor.insertNodes(() => {
+      const argumentTitleText = $createTextNode(this.argumentTitle);
+      argumentTitleText.setFormat('italic');
+      
+      const debateTitleText = $createTextNode(this.debateTitle);
+      debateTitleText.setFormat('italic');
+      const linkHref = new LinkNode(`/debates/${this.debateId}`);
+      linkHref.append(debateTitleText);
+
+      const p = $createParagraphNode();
+      p.append(
+        $createTextNode('The argument '),
+        argumentTitleText,
+        $createTextNode(' has been published in '),
+        linkHref,
+      );
+
+      return [p];
+    }).getContent();
+  }
+
+  getTitle(): string {
+    return 'Argument published!';
+  }
+}

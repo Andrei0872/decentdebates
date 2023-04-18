@@ -22,3 +22,17 @@ export const approveDebate = (ticketId: string, debateData: ApproveDebateData) =
   )
     .then(r => r.data);
 }
+
+interface ApproveArgumentData {
+  debateId: number;
+  debateTitle: string;
+  argumentId: number;
+  argumentTitle: string;
+}
+export const approveArgument = (ticketId: string, argumentData: ApproveArgumentData) => {
+  return api.patch(
+    `/moderator/approve/argument/${ticketId}`,
+    argumentData
+  )
+    .then(r => r.data);
+}
