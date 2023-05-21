@@ -176,7 +176,11 @@ function DebatePage(props: Props) {
     return (
       <Menu key="menu">
         <MenuDivider title="Actions" />
-        <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
+        {
+          isAuthenticatedUser ? (
+            <MenuItem onClick={() => addCounterargument(arg)} icon="add-to-artifact" text="Add counterargument" />
+          ) : null
+        }
         <MenuItem disabled={shouldDisableCounterargsButton} onClick={() => inspectCounterargumentsOf(arg)} icon="eye-open" text="See the counterarguments" />
       </Menu>
     )
