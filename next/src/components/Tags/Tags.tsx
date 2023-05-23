@@ -2,7 +2,7 @@ import { Tag } from '@/types/tag'
 import styles from './Tags.module.scss'
 import { ItemPredicate, ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
 import { MenuItem2 } from '@blueprintjs/popover2'
-import React, { ForwardedRef, ReactNode, useImperativeHandle, useMemo, useState } from 'react';
+import React, { ForwardedRef, KeyboardEvent, ReactNode, useImperativeHandle, useMemo, useState } from 'react';
 
 interface Props {
   debateTags: Tag[];
@@ -155,8 +155,14 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
     return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
   }, [selectedTagsIds]);
 
+  const handleKeyDown = (ev: KeyboardEvent<HTMLDivElement>) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+    }
+  }
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onKeyDown={handleKeyDown}>
       <MultiSelect2<Tag>
         items={debateTags}
         itemRenderer={itemRenderer}
