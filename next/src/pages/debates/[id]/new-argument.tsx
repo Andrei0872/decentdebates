@@ -12,7 +12,7 @@ import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, submitDraft, updateDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
-import { selectCurrentUser } from '@/store/slices/user.slice';
+import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 import buttonStyles from '@/styles/shared/button.module.scss';
 import SimpleCollapse from '@/components/SimpleCollapse/SimpleCollapse';
@@ -177,6 +177,12 @@ function NewArgument() {
         }, 1500);
       })
       .catch((err) => {
+        if (err?.response.status === 401) {
+          dispatch(setCurrentUser(null));
+          router.push('/');
+          return;
+        }
+
         const message = err.response.data.message;
 
         toasterRef.current?.show({
