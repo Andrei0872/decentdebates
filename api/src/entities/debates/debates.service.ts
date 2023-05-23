@@ -543,11 +543,12 @@ export class DebatesService {
 
   async updateArgument(data: UpdateArgumentData) {
     const sqlStr = `
-      update argument
+      update argument a
       set
         title = $1,
         content = $2
-      where id = $3 and created_by = $4;
+      from ticket t
+      where a.id = $3 and a.created_by = $4 and t.board_list != 'ACCEPTED' and a.ticket_id = t.id;
     `;
     const values = [
       data.argumentData.title,

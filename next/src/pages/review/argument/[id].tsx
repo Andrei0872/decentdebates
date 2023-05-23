@@ -18,6 +18,7 @@ import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
 import buttonStyles from '@/styles/shared/button.module.scss';
+import { BoardLists } from '@/dtos/moderator/get-activity.dto';
 
 interface ModeratorArgumentContentProps {
   argumentData: ArgumentAsModerator;
@@ -96,6 +97,8 @@ function UserArgumentContent(props: UserArgumentContentProps) {
   const [argumentModifiedFields, setArgumentModifiedFields] = useState<ArgumentModifiedFields>({ argumentTitle: argumentData.argumentTitle });
 
   const argumentRef = useRef<ExportContentRefData | null>(null);
+
+  const canEditArgument = argumentData && argumentData.boardList !== BoardLists.ACCEPTED;
 
   const toggleEditOrSave = () => {
     const editor = argumentRef.current?.getEditor();
@@ -208,30 +211,34 @@ function UserArgumentContent(props: UserArgumentContentProps) {
         ) : <div className={styles.argNoModerator}>No moderator assigned.</div>
       }
 
-      <div className={styles.userArgEditButtons}>
-        <button
-          className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
-          onClick={toggleEditOrSave}
-          type='button'
-        >
-          {
-            !isEditMode ? ('Edit Argument') : ('Save Changes')
-          }
-        </button>
-
-        {
-          isEditMode ? (
-
+      {
+        canEditArgument ? (
+          <div className={styles.userArgEditButtons}>
             <button
-              className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
-              onClick={cancelChanges}
+              className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
+              onClick={toggleEditOrSave}
               type='button'
             >
-              Cancel Changes
+              {
+                !isEditMode ? ('Edit Argument') : ('Save Changes')
+              }
             </button>
-          ) : null
-        }
-      </div>
+
+            {
+              isEditMode ? (
+
+                <button
+                  className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+                  onClick={cancelChanges}
+                  type='button'
+                >
+                  Cancel Changes
+                </button>
+              ) : null
+            }
+          </div>
+        ) : null
+      }
     </div>
   );
 }
@@ -262,6 +269,9 @@ function Argument() {
 
   const editableCommentRef = useRef<CommentRef | null>(null);
   const toasterRef = useRef<Toaster>(null);
+
+  const canEditArgument = argument && argument.boardList !== BoardLists.ACCEPTED;
+  const canAddComments = canEditArgument;
 
   useEffect(() => {
     if (!user) {
@@ -590,26 +600,35 @@ function Argument() {
                   </div>
                 ))
               }
-              <Comment
-                ref={r => {
-                  if (!editingCommentId) {
-                    editableCommentRef.current = r;
-                  }
-                }}
-                isEditable={true}
-              />
+
+              {
+                canAddComments ? (
+                  <Comment
+                    ref={r => {
+                      if (!editingCommentId) {
+                        editableCommentRef.current = r;
+                      }
+                    }}
+                    isEditable={true}
+                  />
+                ) : null
+              }
             </CommentsLayout.CommentsList>
 
-            <div className={styles.commentButtons}>
-              <button
-                className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
-                disabled={!!editingCommentId}
-                type='button'
-                onClick={addComment}
-              >
-                Add Comment
-              </button>
-            </div>
+            {
+              canAddComments ? (
+                <div className={styles.commentButtons}>
+                  <button
+                    className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                    disabled={!!editingCommentId}
+                    type='button'
+                    onClick={addComment}
+                  >
+                    Add Comment
+                  </button>
+                </div>
+              ) : null
+            }
 
           </CommentsLayout>
         </div>
