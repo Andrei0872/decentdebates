@@ -320,7 +320,7 @@ function Activity() {
                 header={
                   <div className={styles.headerContent}>
                     <p className={styles.boardTitle}>{b.boardList}</p>
-                    <p className={styles.boardItemsCount}>10</p>
+                    <p className={styles.boardItemsCount}>{b.cards.length}</p>
                   </div>
                 }
                 cards={
