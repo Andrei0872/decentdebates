@@ -9,7 +9,8 @@ import buttonStyles from '@/styles/shared/button.module.scss';
 interface Props {
   debateArgumentData: DebateArgument;
 
-  readArgument?: (argId: number | null) => void;
+  readArgument?: (argId: number) => void;
+  collapseArgument?: (argId: number) => void;
   isExpanded?: boolean;
   additionalActions?: JSX.Element;
 }
@@ -19,10 +20,11 @@ function DebateArgument(props: Props) {
     debateArgumentData,
     isExpanded,
     additionalActions,
-    readArgument
+    readArgument,
+    collapseArgument,
   } = props;
 
-  const isAbleToExpand = !!readArgument;
+  const isAbleToExpand = !!readArgument && !!collapseArgument;
 
   return (
     <div className={styles.argument}>
@@ -48,7 +50,7 @@ function DebateArgument(props: Props) {
       </div>
 
       {
-        isExpanded ? (
+        isExpanded && debateArgumentData.content ? (
           <div className={styles.body}>
             <RichEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: debateArgumentData.content }} />
           </div>
@@ -75,7 +77,7 @@ function DebateArgument(props: Props) {
                   </button>
                 ) : (
                   <button
-                    onClick={() => readArgument(null)}
+                    onClick={() => collapseArgument(debateArgumentData.argumentId)}
                     type='button'
                     className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
                   >

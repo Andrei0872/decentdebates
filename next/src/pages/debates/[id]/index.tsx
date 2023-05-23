@@ -5,7 +5,7 @@ import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
 import { Callout, Icon, Menu, MenuDivider, MenuItem, Boundary, BreadcrumbProps } from '@blueprintjs/core';
 import { wrapper } from '@/store';
-import { ArgumentType, CurrentDebate, DebateArgument, selectCrtExpandedArgument, selectCurrentDebate, setCrtExpandedArgument, setCurrentDebate } from '@/store/slices/debates.slice';
+import { ArgumentType, CurrentDebate, DebateArgument, selectExpandedArgumentsIDs, selectCurrentDebate, setCurrentDebate, removeExpandedArgumentID, addExpandedArgumentID } from '@/store/slices/debates.slice';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
@@ -24,15 +24,15 @@ function DebatePage(props: Props) {
   const crtDebate = useAppSelector(selectCurrentDebate);
   const { metadata, args } = crtDebate!;
 
-  const [crtReadArgumentId, setCrtReadArgumentId] = useState<number | null>(null);
   const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
   const [counterargumentsOfArgId, setCounterargumentsOfArgId] = useState<number | null>(null);
   const [counterargumentsOfArgHistory, setCounterargumentsOfArgHistory] = useState<number[]>([]);
+  const [detailedArgs, setDetailedArgs] = useState(args);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const crtExpandedArg = useAppSelector(selectCrtExpandedArgument);
+  const expandedArgumentsIDsArray = useAppSelector(selectExpandedArgumentsIDs);
   const crtUser = useAppSelector(selectCurrentUser);
 
   useEffect(() => {
@@ -61,13 +61,9 @@ function DebatePage(props: Props) {
     }
   }, []);
 
-  const detailedArgs = useMemo(() => {
-    if (!crtExpandedArg) {
-      return args;
-    }
-
-    return args.map(a => +a.argumentId === +crtExpandedArg.id ? ({ ...a, content: crtExpandedArg.content }) : a);
-  }, [crtExpandedArg?.id]);
+  const expandedArgumentsIDs = useMemo(() => {
+    return new Set(expandedArgumentsIDsArray);
+  }, [expandedArgumentsIDsArray]);
 
   const inspectedCounterargsOfArgument = useMemo(() => {
     if (!counterargumentsOfArgId) {
@@ -87,7 +83,7 @@ function DebatePage(props: Props) {
     }
 
     return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId, crtExpandedArg?.id]);
+  }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
 
   const cons = useMemo(() => {
     if (!counterargumentsOfArgId) {
@@ -99,7 +95,7 @@ function DebatePage(props: Props) {
     }
 
     return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId, crtExpandedArg?.id]);
+  }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
 
   const historyBreadcrumbItems: BreadcrumbProps[] = useMemo(() => {
     // O(n^2), but it's fine for now.
@@ -118,10 +114,12 @@ function DebatePage(props: Props) {
     });
   }, [counterargumentsOfArgHistory]);
 
-  const onReadArgument = (argId: number | null) => {
-    if (!argId) {
-      dispatch(setCrtExpandedArgument(undefined));
-      setCrtReadArgumentId(argId);
+  const onCollapseArgument = (argId: number) => {
+    dispatch(removeExpandedArgumentID({ id: argId }));
+  }
+
+  const onReadArgument = (argId: number) => {
+    if (expandedArgumentsIDs.has(argId)) {
       return;
     }
 
@@ -130,8 +128,8 @@ function DebatePage(props: Props) {
     const debateId = +router.query.id!;
     fetchArgument(debateId, argId)
       .then(arg => {
-        dispatch(setCrtExpandedArgument({ id: argId, content: arg.content! }));
-        setCrtReadArgumentId(argId);
+        dispatch(addExpandedArgumentID({ id: argId }));
+        setDetailedArgs(detailedArgs.map(a => a.argumentId !== argId ? a : ({ ...a, content: arg.content })));
         setIsReadArgumentLoading(false);
       });
   }
@@ -263,11 +261,12 @@ function DebatePage(props: Props) {
             {
               pros.length ? (
                 pros.map(p => (
-                  <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
+                  <li className={`${styles.argument} ${expandedArgumentsIDs.has(p.argumentId) ? styles.isBeingRead : ''}`} key={p.argumentId}>
                     <DebateArgumentCard
                       additionalActions={renderAdditionalActions(p)}
-                      isExpanded={p.argumentId === crtReadArgumentId}
+                      isExpanded={expandedArgumentsIDs.has(p.argumentId)}
                       readArgument={onReadArgument}
+                      collapseArgument={onCollapseArgument}
                       debateArgumentData={p}
                     />
                   </li>
@@ -280,11 +279,12 @@ function DebatePage(props: Props) {
             {
               cons.length ? (
                 cons.map(p => (
-                  <li className={`${styles.argument} ${p.argumentId === crtReadArgumentId ? styles.isBeingRead : ''}`} key={p.argumentId}>
+                  <li className={`${styles.argument} ${expandedArgumentsIDs.has(p.argumentId) ? styles.isBeingRead : ''}`} key={p.argumentId}>
                     <DebateArgumentCard
                       additionalActions={renderAdditionalActions(p)}
-                      isExpanded={p.argumentId === crtReadArgumentId}
+                      isExpanded={expandedArgumentsIDs.has(p.argumentId)}
                       readArgument={onReadArgument}
+                      collapseArgument={onCollapseArgument}
                       debateArgumentData={p}
                     />
                   </li>

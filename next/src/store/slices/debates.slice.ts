@@ -38,15 +38,10 @@ export interface DebateArgument {
   counterarguments?: number[] | null;
 }
 
-interface ExpandedArgument {
-  id: number;
-  content: string;
-}
-
 export interface CurrentDebate {
   args: DebateArgument[];
   metadata: DebateMetadata;
-  crtExpandedArgument?: ExpandedArgument;
+  expandedArgumentsIDs?: number[];
 }
 
 export interface DebatesState {
@@ -68,13 +63,27 @@ export const debatesSlice = createSlice({
     },
     setCurrentDebate (state, action: PayloadAction<CurrentDebate | null>) {
       state.crtDebate = action.payload;
+      if (state.crtDebate) {
+        state.crtDebate.expandedArgumentsIDs = [];
+      }
     },
-    setCrtExpandedArgument (state, action: PayloadAction<ExpandedArgument | undefined>) {
-      if (!state.crtDebate) {
+    addExpandedArgumentID (state, action: PayloadAction<{ id: number }>) {
+      if (!state.crtDebate?.expandedArgumentsIDs) {
         return;
       }
 
-      state.crtDebate.crtExpandedArgument = action.payload;
+      state.crtDebate.expandedArgumentsIDs = [
+        ...state.crtDebate.expandedArgumentsIDs,
+        action.payload.id,
+      ]
+    },
+    removeExpandedArgumentID (state, action: PayloadAction<{ id: number }>) {
+      if (!state.crtDebate?.expandedArgumentsIDs) {
+        return;
+      }
+
+      state.crtDebate.expandedArgumentsIDs = state.crtDebate.expandedArgumentsIDs
+        .filter(id => id !== action.payload.id);
     },
   },
   extraReducers: {
@@ -87,7 +96,7 @@ export const debatesSlice = createSlice({
   },
 });
 
-export const { setDebates, setCurrentDebate, setCrtExpandedArgument } = debatesSlice.actions;
+export const { setDebates, setCurrentDebate, addExpandedArgumentID, removeExpandedArgumentID } = debatesSlice.actions;
 
 export const selectCurrentDebate = (state: RootState) => state.debates.crtDebate;
-export const selectCrtExpandedArgument = (state: RootState) => state.debates.crtDebate?.crtExpandedArgument;
+export const selectExpandedArgumentsIDs = (state: RootState) => state.debates.crtDebate?.expandedArgumentsIDs;
