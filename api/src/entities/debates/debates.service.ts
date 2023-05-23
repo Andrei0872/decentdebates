@@ -571,10 +571,11 @@ export class DebatesService {
 
   async updateDebate(data: UpdateDebateData) {
     const sqlStr = `
-      update debate
+      update debate d
       set
         title = $1
-      where id = $2 and created_by = $3;
+      from ticket t
+      where d.id = $2 and d.created_by = $3 and t.id = d.ticket_id and t.board_list != 'ACCEPTED';
     `;
     const values = [
       data.title,

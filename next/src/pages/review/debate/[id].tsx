@@ -18,6 +18,7 @@ import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
 import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
 import buttonStyles from '@/styles/shared/button.module.scss';
 import tagStyles from '@/styles/shared/debate-tag.module.scss';
+import { BoardLists } from '@/dtos/moderator/get-activity.dto';
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
@@ -53,6 +54,8 @@ function UserDebateContent(props: UserDebateContentProps) {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [debateModifiedFields, setDebateModifiedFields] = useState<DebateModifiedFields>({ title: undefined });
+
+  const canEditArgument = debateData && debateData.boardList !== BoardLists.ACCEPTED;
 
   const toggleEditOrSave = () => {
     if (!isEditMode) {
@@ -109,29 +112,33 @@ function UserDebateContent(props: UserDebateContentProps) {
         ) : null
       }
 
-      <div className={styles.userArgEditButtons}>
-        <button
-          className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
-          onClick={toggleEditOrSave}
-          type='button'
-        >
-          {
-            !isEditMode ? ('Edit title') : ('Save Changes')
-          }
-        </button>
-
-        {
-          isEditMode ? (
+      {
+        canEditArgument ? (
+          <div className={styles.userArgEditButtons}>
             <button
-              className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
-              onClick={cancelChanges}
+              className={`${buttonStyles.button} ${isEditMode ? buttonStyles.success : buttonStyles.warning} ${buttonStyles.contained}`}
+              onClick={toggleEditOrSave}
               type='button'
             >
-              Cancel Changes
+              {
+                !isEditMode ? ('Edit title') : ('Save Changes')
+              }
             </button>
-          ) : null
-        }
-      </div>
+
+            {
+              isEditMode ? (
+                <button
+                  className={`${buttonStyles.button} ${buttonStyles.danger} ${buttonStyles.contained}`}
+                  onClick={cancelChanges}
+                  type='button'
+                >
+                  Cancel Changes
+                </button>
+              ) : null
+            }
+          </div>
+        ) : null
+      }
     </div>
   )
 }
@@ -159,6 +166,9 @@ function Debate() {
   const editableCommentRef = useRef<CommentRef | null>(null);
   const toasterRef = useRef<Toaster>(null);
 
+  const canEditArgument = debate && debate.boardList !== BoardLists.ACCEPTED;
+  const canAddComments = canEditArgument;
+
   useEffect(() => {
     if (!user) {
       router.push('/');
@@ -177,9 +187,7 @@ function Debate() {
     });
 
     socket.on('error', err => {
-      if (err.reason === 'Unauthenticated') {
-        router.push('/');
-      }
+      router.push('/');
     });
 
     socket.on('disconnect', () => {
@@ -459,26 +467,35 @@ function Debate() {
               </div>
             ))
           }
-          <Comment
-            ref={r => {
-              if (!editingCommentId) {
-                editableCommentRef.current = r;
-              }
-            }}
-            isEditable={true}
-          />
+
+          {
+            canAddComments ? (
+              <Comment
+                ref={r => {
+                  if (!editingCommentId) {
+                    editableCommentRef.current = r;
+                  }
+                }}
+                isEditable={true}
+              />
+            ) : null
+          }
         </CommentsLayout.CommentsList>
 
-        <div className={styles.commentButtons}>
-          <button
-            className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
-            disabled={!!editingCommentId}
-            type='button'
-            onClick={addComment}
-          >
-            Add Comment
-          </button>
-        </div>
+        {
+          canAddComments ? (
+            <div className={styles.commentButtons}>
+              <button
+                className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
+                disabled={!!editingCommentId}
+                type='button'
+                onClick={addComment}
+              >
+                Add Comment
+              </button>
+            </div>
+          ) : null
+        }
       </CommentsLayout>
 
       <Toaster {...toasterOptions} ref={toasterRef} />
