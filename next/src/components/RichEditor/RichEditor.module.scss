@@ -71,8 +71,15 @@
   user-select: none;
   display: inline-block;
   pointer-events: none;
+
+  top: var(--v-padding);
+  left: var(--h-padding);
 }
 
 .inner {
+  --v-padding: .3rem;
+  --h-padding: .5rem;
+
   position: relative;
+  padding: var(--v-padding) var(--h-padding);
 }

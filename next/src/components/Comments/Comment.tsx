@@ -4,6 +4,7 @@ import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins
 import RichEditor from '../RichEditor/RichEditor';
 import styles from './Comment.module.scss'
 import { $getRoot, LexicalEditor } from 'lexical'
+import richEditorStyles from '../RichEditor/RichEditor.module.scss';
 
 interface Props {
   commentData?: IComment;
@@ -13,7 +14,7 @@ interface Props {
 }
 
 function CommentPlaceholder() {
-  return <div className={styles.placeholder}>Add your comment here...</div>;
+  return <div className={`${richEditorStyles.placeholder} ${styles.placeholder}`}>Add your comment here...</div>;
 }
 
 export interface CommentRef {
