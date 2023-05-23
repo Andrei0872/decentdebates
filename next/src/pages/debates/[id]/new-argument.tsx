@@ -173,6 +173,11 @@ function NewArgument() {
         }
 
         setTimeout(() => {
+          if (isUpdatingDraft) {
+            router.push('/my-activity');
+            return;
+          }
+          
           router.push(`/debates/${crtDebate?.metadata.debateId!}`);
         }, 1500);
       })
