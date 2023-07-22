@@ -1,5 +1,7 @@
 # Decent Debates
 
+_More about this project, including the movations behind it and some demo pictures, can be found [here](https://andreigatej.dev/projects/decentdebates/)._
+
 - [Decent Debates](#decent-debates)
   - [Setting up](#setting-up)
     - [The root `.env` file](#the-root-env-file)
