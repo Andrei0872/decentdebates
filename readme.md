@@ -9,6 +9,7 @@
     - [Dealing with DB schema changes](#dealing-with-db-schema-changes)
     - [Seeding the database](#seeding-the-database)
   - [My Research](#my-research)
+  - [UML](#uml)
 
 
 ## Setting up
@@ -90,3 +91,7 @@ I came up with many questions while working on this project:
 * [JWT vs Sessions](https://hollow-soccer-dbb.notion.site/JWT-vs-Sessions-10068cc24cb0490cbeb4a30a06297ed7)
 * [Why I decided not to use an ORM](https://hollow-soccer-dbb.notion.site/Why-I-decided-not-to-use-an-ORM-08b79f90900648a4a702c63d0bee030d)
 * [Should business logic be kept in the database layer(e.g. stored procedures) or in the business layer? ](https://hollow-soccer-dbb.notion.site/Should-business-logic-be-kept-in-the-database-layer-e-g-stored-procedures-or-in-the-business-layer-c333c61162d34dc986d40a6c7d7049c9)
+
+## UML
+
+![UML](images/uml.png)
