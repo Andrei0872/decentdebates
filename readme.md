@@ -46,18 +46,22 @@ cp .env.example .env
 1. Install dependencies
 
     ```bash
-    # Ensure you're in the root folder.
     pnpm install
     ```
 
 2. Start everything
 
     ```bash
-    # Ensure you're in the root folder.
     pnpm run dev
     ```
 
-    This starts Docker in detached mode and then starts the client and API dev servers from the root workspace.
+    This invokes `docker compose` in detached mode and then starts the client and API dev servers.
+
+3. To inspect the service logs:
+
+    ```bash
+    docker compose logs -f
+    ```
 
 ---
 
