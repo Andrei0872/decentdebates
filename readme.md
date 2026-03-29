@@ -16,6 +16,11 @@ _More about this project, including the movations behind it and some demo pictur
 
 ## Setting up
 
+### Prerequisites
+
+* `pnpm`
+* `docker`
+
 ### The root `.env` file
 
 These variables are going to be used to configure the local Postgres instance.
@@ -38,36 +43,25 @@ cp .env.example .env
 
 ## Spinning up the application
 
-1. Start the containers
+1. Install dependencies
 
     ```bash
     # Ensure you're in the root folder.
-    docker-compose up
+    pnpm install
     ```
 
-2. Start the Next.js application
+2. Start everything
 
     ```bash
-    cd next
-    npm run dev
+    # Ensure you're in the root folder.
+    pnpm run dev
     ```
 
-    You can also run in debug mode by selecting the Next.js configuration before starting up the debugging process.
-
-3. Start the Nest.js application
-
-    ```bash
-    # From the root folder.
-    cd api
-
-    npm run start:dev
-    ```
-
-    You can also run in debug mode by selecting the Nest.js configuration before starting up the debugging process.
+    This starts Docker in detached mode and then starts the client and API dev servers from the root workspace.
 
 ---
 
-## Working on the application
+## Developing
 
 ### Dealing with DB schema changes
 
@@ -81,7 +75,7 @@ docker compose down -v && docker compose up
 
 ```bash
 # Ensure you're in the `api` folder.
-npx knex seed:run
+pnpm exec knex seed:run
 ```
 
 ---
