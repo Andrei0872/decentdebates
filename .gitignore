@@ -1,7 +1,8 @@
-.env
+packages/db/.env
 
 node_modules
 .pnpm-store
 .turbo
-api/node_modules
-client/node_modules
+apps/api/node_modules
+apps/client/node_modules
+packages/db/node_modules

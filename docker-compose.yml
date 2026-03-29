@@ -15,7 +15,7 @@ services:
       retries: 20
     volumes:
       - database_decent_debates_dev:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d/
+      - ./packages/db:/docker-entrypoint-initdb.d/
     networks:
       - decent_debates_dev
     ports:

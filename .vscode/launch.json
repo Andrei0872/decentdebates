@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "cwd": "${workspaceFolder}/api",
+      "cwd": "${workspaceFolder}/apps/api",
       "name": "NestJS debugging + set-up process",
       "type": "node",
       "request": "launch",
@@ -13,7 +13,7 @@
       ]
     },
     {
-      "cwd": "${workspaceFolder}/client",
+      "cwd": "${workspaceFolder}/apps/client",
       "name": "Next.js debugging + set-up process",
       "type": "node",
       "request": "launch",
