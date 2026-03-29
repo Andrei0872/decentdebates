@@ -1,4 +1,5 @@
 packages/db/.env
+apps/api/.env
 
 node_modules
 .pnpm-store
