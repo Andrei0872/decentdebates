@@ -4,7 +4,7 @@ _More about this project, including the movations behind it and some demo pictur
 
 - [Decent Debates](#decent-debates)
   - [Setting up](#setting-up)
-    - [The root `.env` file](#the-root-env-file)
+    - [The DB `.env` file](#the-db-env-file)
     - [The `api` `.env` file](#the-api-env-file)
   - [Spinning up the application](#spinning-up-the-application)
   - [Working on the application](#working-on-the-application)
@@ -21,21 +21,21 @@ _More about this project, including the movations behind it and some demo pictur
 * `pnpm`
 * `docker`
 
-### The root `.env` file
+### The DB `.env` file
 
 These variables are going to be used to configure the local Postgres instance.
 
 ```bash
-# Ensure you're in the root folder.
+# Ensure you're in the `packages/db` folder.
 cp .env.example .env
 ```
 
 ### The `api` `.env` file
 
-Here the cookie secret should be provided.
+Here, the cookie secret should be provided.
 
 ```bash
-# Ensure you're in the `api` directory.
+# Ensure you're in the `apps/api` directory.
 cp .env.example .env
 ```
 
@@ -55,12 +55,12 @@ cp .env.example .env
     pnpm run dev
     ```
 
-    This invokes `docker compose` in detached mode and then starts the client and API dev servers.
+    This invokes `docker compose`, builds shared packages, and then starts the client and API dev servers.
 
 3. To inspect the service logs:
 
     ```bash
-    docker compose logs -f
+    pnpm run db:logs
     ```
 
 ---
@@ -72,14 +72,21 @@ cp .env.example .env
 Quickly _reload_ the Postgres instance with the new changes:
 
 ```bash
-docker compose down -v && docker compose up
+pnpm run db:reset
 ```
 
 ### Seeding the database
 
 ```bash
-# Ensure you're in the `api` folder.
-pnpm exec knex seed:run
+# Ensure you're in the root folder.
+# Note: you can invoke this while `pnpm run dev` is running.
+pnpm run seed
+```
+
+To run one specific seed file:
+
+```bash
+pnpm run seed:file -- 03_debates.js
 ```
 
 ---
@@ -94,4 +101,4 @@ I came up with many questions while working on this project:
 
 ## UML
 
-![UML](images/uml.png)
+![UML](docs/images/uml.png)
