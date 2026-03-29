@@ -1,0 +1,24 @@
+{
+  "name": "decentdebates",
+  "private": true,
+  "packageManager": "pnpm@10.7.1",
+  "scripts": {
+    "dev": "docker compose up -d && corepack pnpm --recursive --parallel --filter api --filter client run dev",
+    "dev:apps": "corepack pnpm --recursive --parallel --filter api --filter client run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@parcel/watcher",
+      "bcrypt",
+      "unrs-resolver"
+    ]
+  }
+}
