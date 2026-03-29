@@ -79,6 +79,7 @@ pnpm run db:reset
 
 ```bash
 # Ensure you're in the root folder.
+# Note: you can invoke this while `pnpm run dev` is running.
 pnpm run seed
 ```
 
