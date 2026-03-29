@@ -101,4 +101,4 @@ I came up with many questions while working on this project:
 
 ## UML
 
-![UML](images/uml.png)
+![UML](docs/images/uml.png)
