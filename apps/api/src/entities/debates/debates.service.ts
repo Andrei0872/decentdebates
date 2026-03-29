@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
 import { ArgumentTicketCreated, DebateTicketCreated } from './debate.events';

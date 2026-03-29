@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { redisStore } from 'src/middlewares/session.middleware';
 import { UserCookieData } from '../user/user.model';
 import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { ArgumentAsModerator, ArgumentAsUser, DebateAsModerator, DebateAsUser } from './review.model';
 
 const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');

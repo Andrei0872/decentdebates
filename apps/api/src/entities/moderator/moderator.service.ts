@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { UserCookieData } from '../user/user.model';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';

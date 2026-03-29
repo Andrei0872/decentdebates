@@ -10,7 +10,7 @@ From the repo root:
 pnpm run dev
 ```
 
-To run only the API server:
+To run only the API server after the DB package has been built:
 
 ```bash
 pnpm --filter api run dev

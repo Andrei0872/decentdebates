@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from 'src/db/db.module';
+import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { UserService } from 'src/entities/user/user.service';
 import { RegisterUserDTO } from '../entities/user/dtos/register-user.dto';
 import * as bcrypt from 'bcrypt';
