@@ -6,18 +6,18 @@
       "name": "NestJS debugging + set-up process",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "run",
         "start:debug"
       ]
     },
     {
-      "cwd": "${workspaceFolder}/next",
+      "cwd": "${workspaceFolder}/client",
       "name": "Next.js debugging + set-up process",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
         "run",
         "dev"

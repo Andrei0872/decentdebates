@@ -1,4 +1,7 @@
 .env
 
+node_modules
+.pnpm-store
+.turbo
+api/node_modules
 client/node_modules
-server/node_modules
