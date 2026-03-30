@@ -1,4 +1,5 @@
 import { Tag } from "@/types/tag";
+import { ArgumentType, DebateArgument } from "@decentdebates/shared-types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import { RootState } from "..";
@@ -17,26 +18,8 @@ export interface DebateMetadata {
   debateId: number;
   debateTitle: string;
 }
-
-export enum ArgumentType {
-  PRO = 'PRO',
-  CON = 'CON',
-}
-
-export interface DebateArgument {
-  argumentId: number;
-  debateId: number;
-  debateTitle: string;
-  ticketId: number;
-  title: string;
-  content?: string;
-  createdById: number;
-  argumentType: ArgumentType;
-  createdAt: string;
-  username: string;
-  counterargumentTo?: number | null;
-  counterarguments?: number[] | null;
-}
+export { ArgumentType };
+export type { DebateArgument };
 
 export interface CurrentDebate {
   args: DebateArgument[];

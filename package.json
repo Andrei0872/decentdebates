@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.7.1",
   "scripts": {
     "dev": "docker compose --env-file packages/db/.env up -d && corepack pnpm run dev:apps",
-    "dev:apps": "corepack pnpm --filter @decentdebates/db run build && corepack pnpm --recursive --parallel --filter @decentdebates/db --filter api --filter client run dev",
+    "dev:apps": "corepack pnpm --filter @decentdebates/shared-types run build && corepack pnpm --filter @decentdebates/db run build && corepack pnpm --recursive --parallel --filter @decentdebates/shared-types --filter @decentdebates/db --filter api --filter client run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "docker:up": "docker compose --env-file packages/db/.env up -d",

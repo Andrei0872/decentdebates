@@ -1,8 +1,6 @@
-export enum UserRoles {
-  USER = 'USER',
-  MODERATOR = 'MODERATOR',
-  ADMIN = 'ADMIN',
-};
+import { ActivityTypes, CardTypes, PublicUser, UserRoles } from "@decentdebates/shared-types";
+
+export { ActivityTypes, CardTypes, PublicUser, UserRoles };
 
 export interface User {
   id: number;
@@ -11,16 +9,6 @@ export interface User {
   email: string;
   role: UserRoles;
 }
-
-export enum CardTypes {
-  DEBATE = 'debate',
-  ARGUMENT = 'argument',
-};
-
-export enum ActivityTypes {
-  SOLVED = 'SOLVED',
-  ONGOING = 'ONGOING',
-};
 
 export interface UserActivityDebate {
   ticketId: number;
@@ -52,7 +40,6 @@ export interface UserActivityArgument {
 
 export type UserActivity = UserActivityDebate | UserActivityArgument;
 
-export type PublicUser = Omit<User, 'password'>;
 export type UserCookieData = Pick<User, 'id' | 'role' | 'username'>;
 
 export const getPublicUser = (u: User): PublicUser => {

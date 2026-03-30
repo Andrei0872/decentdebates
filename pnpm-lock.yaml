@@ -17,6 +17,9 @@ importers:
       '@decentdebates/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@decentdebates/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@lexical/link':
         specifier: ^0.9.2
         version: 0.9.2(lexical@0.9.2)
@@ -162,6 +165,9 @@ importers:
       '@blueprintjs/select':
         specifier: ^4.9.12
         version: 4.9.24(@types/react@18.0.28)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@decentdebates/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@lexical/react':
         specifier: ^0.8.1
         version: 0.8.1(lexical@0.8.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(yjs@13.6.30)
@@ -254,6 +260,15 @@ importers:
       knex:
         specifier: ^2.4.2
         version: 2.5.1(pg@8.20.0)
+      rimraf:
+        specifier: ^3.0.2
+        version: 3.0.2
+      typescript:
+        specifier: ^4.7.4
+        version: 4.9.5
+
+  packages/shared-types:
+    devDependencies:
       rimraf:
         specifier: ^3.0.2
         version: 3.0.2

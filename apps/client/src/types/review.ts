@@ -1,3 +1,7 @@
+import {
+  ArgumentAsModerator as SharedArgumentAsModerator,
+  ArgumentAsUser as SharedArgumentAsUser,
+} from "@decentdebates/shared-types";
 import { BoardLists } from "@/dtos/moderator/get-activity.dto";
 import { Debate } from "./debate";
 import { Tag } from "./tag";
@@ -7,21 +11,8 @@ export enum ReviewItemType {
   USER,
 };
 
-export interface ArgumentAsModerator {
+export interface ArgumentAsModerator extends SharedArgumentAsModerator {
   reviewItemType: ReviewItemType.MODERATOR;
-
-  ticketId: number;
-  userId: number;
-  debateId: number;
-  argumentTitle: string;
-  argumentContent: string;
-  counterargumentToId: number;
-  argumentType: string;
-  debateTitle: string;
-  boardList: string;
-  counterargumentToTitle: string;
-  username: string;
-  assignedToId: number;
 }
 
 export interface DebateAsModerator extends Debate {
@@ -44,23 +35,8 @@ export interface DebateAsUser extends Debate {
   tags: Tag[];
 }
 
-export interface ArgumentAsUser {
+export interface ArgumentAsUser extends SharedArgumentAsUser {
   reviewItemType: ReviewItemType.USER;
-
-  ticketId: number;
-  moderatorId: number;
-  debateId: number;
-  argumentTitle: string;
-  argumentContent: string;
-  counterargumentToId: number;
-  argumentType: string;
-  debateTitle: string;
-  boardList: string;
-  counterargumentToTitle: string;
-  moderatorUsername: string;
-  argumentId: string;
-  assignedToId: number;
-  userId: number;
 }
 
 export interface UpdateArgumentData {

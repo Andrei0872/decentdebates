@@ -1,22 +1,9 @@
 import { IoAdapter } from "@nestjs/platform-socket.io";
+import { ArgumentAsModerator, ArgumentAsUser } from "@decentdebates/shared-types";
 import { Debate } from "../debates/debates.model";
 
 export type SocketIOServer = ReturnType<IoAdapter['create']>
-
-export interface ArgumentAsModerator {
-  ticketId: number;
-  userId: number;
-  debateId: number;
-  argumentTitle: string;
-  argumentContent: string;
-  counterargumentToId: number;
-  argumentType: string;
-  debateTitle: string;
-  boardList: string;
-  counterargumentToTitle: string;
-  username: string;
-  assignedToId: number;
-}
+export { ArgumentAsModerator, ArgumentAsUser };
 
 export interface DebateAsModerator extends Debate {
   ticketId: number;
@@ -39,23 +26,6 @@ export interface DebateAsUser extends Debate {
   // Raw values.
   tags: string;
   tagsIds: string;
-}
-
-export interface ArgumentAsUser {
-  ticketId: number;
-  moderatorId: number;
-  debateId: number;
-  argumentTitle: string;
-  argumentContent: string;
-  counterargumentToId: number;
-  argumentType: string;
-  debateTitle: string;
-  boardList: string;
-  counterargumentToTitle: string;
-  moderatorUsername: string;
-  argumentId: string;
-  assignedToId: number;
-  userId: number;
 }
 
 export interface UpdateReviewArgumentData {

@@ -1,3 +1,4 @@
+import { ArgumentType, DebateArgument } from "@decentdebates/shared-types";
 import { UserCookieData } from "../user/user.model";
 import { CreateArgumentDTO } from "./dtos/create-argument.dto";
 import { UpdateArgumentDTO } from "./dtos/update-argument.dto";
@@ -16,23 +17,7 @@ export interface Debate {
   tagsIds: string;
 }
 
-export enum ArgumentType {
-  PRO = 'PRO',
-  CON = 'CON',
-}
-
-export interface DebateArgument {
-  argumentId: number;
-  debateId: number;
-  debateTitle: string;
-  ticketId: number;
-  title: string;
-  createdById: number;
-  argumentType: ArgumentType;
-  createdAt: string;
-  username: string;
-  counterargumentTo: number;
-}
+export { ArgumentType, DebateArgument };
 
 export interface DetailedDebateArgument extends DebateArgument {
   content: string;
