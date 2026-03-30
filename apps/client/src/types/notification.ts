@@ -1,16 +1,7 @@
+import type { Notification as SharedNotification } from '@decentdebates/shared-types';
 
-export enum NotificationEvents {
-  ARGUMENT,
-  DEBATE,
-  SUGGESTION,
-}
+export { NotificationEvents } from '@decentdebates/shared-types';
 
-export interface Notification {
-  id: number;
-  title: string;
-  content: string;
-  recipientId: number;
-  notificationEvent: NotificationEvents;
-  isRead: boolean;
+export type Notification = SharedNotification & {
   isMerelyRead: boolean;
-}
+};

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { PublicUser, UserRoles } from '@decentdebates/shared-types';
 import { RootState } from '..';
 
 const LS_KEY = '@@user';
@@ -8,19 +9,10 @@ if (global.localStorage) {
   LSUser = JSON.parse(localStorage.getItem(LS_KEY) || null);
 }
 
-export enum UserRoles {
-  USER = "USER",
-  MODERATOR = "MODERATOR",
-  ADMIN = "ADMIN",
-};
+export { UserRoles };
 
 export interface UserState {
-  currentUser: {
-    id: number;
-    username: string;
-    email: string;
-    role: UserRoles,
-  } | null;
+  currentUser: PublicUser | null;
 }
 
 export type User = UserState['currentUser'];

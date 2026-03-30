@@ -1,11 +1,8 @@
+import { CardLabels } from "@decentdebates/shared-types";
 import { UpdateTicketDTO } from "./dtos/update-ticket.dto";
 
 
-export enum CardLabels {
-  DEBATE = 'debate',
-  ARGUMENT = 'argument',
-  REPORT = 'report',
-}
+export { CardLabels };
 
 export interface ModeratorActivityBase {
   ticketId: number;

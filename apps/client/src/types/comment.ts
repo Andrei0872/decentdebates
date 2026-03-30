@@ -1,13 +1,1 @@
-export interface Comment {
-  commentId: number;
-  content: string;
-  commenterId: number;
-  createdAt: string;
-  modifiedAt: string;
-  commenterUsername: string;
-}
-
-export interface UpdateCommentData {
-  commentId: number;
-  content: string;
-}
+export type { Comment, UpdateCommentData } from '@decentdebates/shared-types';

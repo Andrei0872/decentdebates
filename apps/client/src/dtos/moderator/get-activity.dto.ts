@@ -1,3 +1,4 @@
+import { CardLabels } from "@decentdebates/shared-types";
 import { DebateAsModerator } from "@/types/review";
 import { Tag } from "@/types/tag";
 import { ModeratorDebateResponse } from "@/utils/api/review";
@@ -16,11 +17,7 @@ const BOARD_LISTS_SORT_ORDER = {
   [BoardLists.CANCELED]: 3,
 }
 
-export enum CardLabels {
-  DEBATE = 'debate',
-  ARGUMENT = 'argument',
-  REPORT = 'report',
-}
+export { CardLabels };
 
 export interface ModeratorActivityBase {
   ticketId: number;

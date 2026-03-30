@@ -1,14 +1,7 @@
+import { ActivityTypes, CardTypes } from "@decentdebates/shared-types";
 import { Tag } from "./tag";
 
-export enum CardTypes {
-  DEBATE = 'debate',
-  ARGUMENT = 'argument',
-};
-
-export enum ActivityTypes {
-  SOLVED = 'SOLVED',
-  ONGOING = 'ONGOING',
-};
+export { ActivityTypes, CardTypes };
 
 export interface UserActivityDebate {
   ticketId: number;
