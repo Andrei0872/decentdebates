@@ -4,7 +4,7 @@ import { Socket } from 'socket.io';
 import { parse } from 'cookie'
 import * as cookieSignature from 'cookie-signature'
 import { ConfigService } from '@nestjs/config';
-import { redisStore } from 'src/middlewares/session.middleware';
+import { REDIS_STORE_TOKEN } from 'src/redis/redis.module';
 import { UserCookieData } from '../user/user.model';
 
 const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');
@@ -13,6 +13,7 @@ const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');
 export class ReviewService {
   constructor(
     private configService: ConfigService,
+    @Inject(REDIS_STORE_TOKEN) private redisStore: any,
   ) { }
 
   getUserFromSocket(socket: Socket): Promise<UserCookieData> {
@@ -38,7 +39,7 @@ export class ReviewService {
     }
 
     return new Promise((res, rej) => {
-      redisStore.get(sessionId, (err, sess) => {
+      this.redisStore.get(sessionId, (err, sess) => {
         if (err || !sess.user) {
           rej(UNAUTHENTICATED_ERR);
           return;

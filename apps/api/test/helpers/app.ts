@@ -2,10 +2,11 @@ import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import * as cors from 'cors';
 import type { Pool } from 'pg';
+import type { RedisClient } from 'redis';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { AppModule } from '../../src/app.module';
 import { config } from '../../src/config';
-import { redisClient } from '../../src/redis/redis.module';
+import { REDIS_CLIENT_TOKEN } from '../../src/redis/redis.module';
 import { SESSION_MIDDLEWARE_TOKEN } from '../../src/middlewares/session.middleware';
 import { loadTestEnv, resetTestDatabase } from './db';
 
@@ -41,15 +42,14 @@ export async function createTestApp(options?: { resetDb?: boolean }) {
 
 export async function closeTestApp(app: INestApplication) {
   const pool = app.get<Pool>(PG_PROVIDER_TOKEN, { strict: false });
+  const redisClient = app.get<RedisClient>(REDIS_CLIENT_TOKEN, { strict: false });
 
   await app.close();
 
   if (pool) {
     await pool.end();
   }
-}
 
-export async function closeRedisClient() {
   if ((redisClient as any)?.connected) {
     await new Promise<void>((resolve, reject) => {
       redisClient.quit((err) => {

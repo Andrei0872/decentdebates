@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request = require('supertest');
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import { closeRedisClient, closeTestApp, createTestApp } from '../helpers/app';
+import { closeTestApp, createTestApp } from '../helpers/app';
 import { SEEDED_USER_CREDENTIALS } from '../helpers/auth';
 
 describe('Auth (e2e)', () => {
@@ -15,7 +15,6 @@ describe('Auth (e2e)', () => {
     if (app) {
       await closeTestApp(app);
     }
-    await closeRedisClient();
   });
 
   it('logs in a seeded user and sets the session cookie', async () => {

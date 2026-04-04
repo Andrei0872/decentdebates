@@ -14,6 +14,7 @@ import { ReviewModule } from './entities/review/review.module';
 import { CommentModule } from './entities/comment/comment.module';
 import { NotificationModule } from './entities/notification/notification.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ReviewModule,
     CommentModule,
     NotificationModule,
+    RedisModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],

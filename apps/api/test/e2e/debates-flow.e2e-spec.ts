@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import request = require('supertest');
-import { closeRedisClient, closeTestApp, createTestApp } from '../helpers/app';
+import { closeTestApp, createTestApp } from '../helpers/app';
 import { loginAsSeededModerator, loginAsSeededUser } from '../helpers/auth';
 
 interface DebateTag {
@@ -38,8 +38,6 @@ describe('Debate flow (e2e)', () => {
     if (app) {
       await closeTestApp(app);
     }
-
-    await closeRedisClient();
   });
 
   it('creates, approves, and publishes a debate through the moderator workflow', async () => {

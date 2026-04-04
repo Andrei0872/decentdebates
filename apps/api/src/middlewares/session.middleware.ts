@@ -1,19 +1,14 @@
 import * as session from 'express-session';
-import * as connectRedis from 'connect-redis';
 import { FactoryProvider } from '@nestjs/common';
-import { redisClient } from 'src/redis/redis.module';
 import { ConfigService } from '@nestjs/config';
-
-const RedisStore = connectRedis(session);
+import { REDIS_STORE_TOKEN } from 'src/redis/redis.module';
 
 export const SESSION_MIDDLEWARE_TOKEN = '@SESSION_MIDDLEWARE_TOKEN';
-
-export const redisStore = new RedisStore({ client: redisClient });
 
 // TODO: use secrets properly.
 export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
   provide: SESSION_MIDDLEWARE_TOKEN,
-  useFactory: (cs: ConfigService) => {
+  useFactory: (cs: ConfigService, redisStore: session.Store) => {
     const sessionMiddleware = session({
       store: redisStore,
       secret: cs.get('COOKIE_SECRET'),
@@ -30,5 +25,5 @@ export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
     });
     return sessionMiddleware;
   },
-  inject: [ConfigService]
+  inject: [ConfigService, REDIS_STORE_TOKEN]
 }
