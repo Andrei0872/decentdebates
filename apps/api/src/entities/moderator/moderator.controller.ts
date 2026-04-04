@@ -61,7 +61,11 @@ export class ModeratorController {
         reduce((acc, crt) => [...acc, crt], []),
         map(r => res.status(HttpStatus.OK).json({ data: r })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -80,7 +84,11 @@ export class ModeratorController {
       .pipe(
         map(() => res.status(HttpStatus.NO_CONTENT).end()),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -93,7 +101,11 @@ export class ModeratorController {
         mergeAll(),
         map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -104,7 +116,11 @@ export class ModeratorController {
       .pipe(
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -143,7 +159,11 @@ export class ModeratorController {
         }),
         map(() => res.status(HttpStatus.OK).json({ message: 'The debate has been approved.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -184,7 +204,11 @@ export class ModeratorController {
         }),
         map(() => res.status(HttpStatus.OK).json({ message: 'The argument has been approved.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

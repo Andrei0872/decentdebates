@@ -83,7 +83,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the debates.');
     } finally {
       client.release();
@@ -153,7 +157,11 @@ export class DebatesService {
         new DebateTicketCreated(ticketId, debateData.title),
       );
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       await client.query('ROLLBACK');
       throw err;
     } finally {
@@ -203,7 +211,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the debate\'s information.');
     } finally {
       client.release();
@@ -249,7 +261,11 @@ export class DebatesService {
         new ArgumentTicketCreated(ticketId, argumentData.argumentDetails.title),
       );
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       await client.query('ROLLBACK');
       throw new Error('An error occurred while adding the argument to the debate.');
     } finally {
@@ -289,7 +305,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the debate\'s information.');
     } finally {
       client.release();
@@ -327,7 +347,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the debate\'s information.');
     } finally {
       client.release();
@@ -357,7 +381,11 @@ export class DebatesService {
     try {
       await client.query(sqlStr, values);
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while saving the argument as draft.');
     } finally {
       client.release();
@@ -398,7 +426,11 @@ export class DebatesService {
 
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while saving the argument as draft.');
     } finally {
       client.release();
@@ -435,7 +467,11 @@ export class DebatesService {
       }
 
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while updating the draft.');
     } finally {
       client.release();
@@ -485,7 +521,11 @@ export class DebatesService {
 
         await client.query('COMMIT');
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       await client.query('ROLLBACK');
       throw new Error('An error occurred while submitting the draft.');
     } finally {
@@ -534,7 +574,11 @@ export class DebatesService {
 
       return res.rows[0];
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       throw new Error('An error occurred while fetching the debate metadata.');
     } finally {
       client.release();
@@ -562,7 +606,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       throw new Error('An error occurred while updating the argument.');
     } finally {
       client.release();
@@ -588,7 +636,11 @@ export class DebatesService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       throw new Error('An error occurred while updating the debate.');
     } finally {
       client.release();

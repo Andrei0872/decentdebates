@@ -17,6 +17,15 @@ import { UpdateDraftDTO } from './dtos/update-draft.dto';
 export class DebatesController {
   constructor(private debatesService: DebatesService) { }
 
+  private getHttpErrorStatus(err: unknown) {
+    return typeof err === 'object'
+      && err !== null
+      && 'status' in err
+      && typeof err.status === 'number'
+      ? err.status
+      : HttpStatus.BAD_REQUEST;
+  }
+
   @SetMetadata('skipAuth', true)
   @Get('/')
   async getAll(@Res() res: Response, @Query('q', new DebatesQueryPipe()) filters: Filters) {
@@ -35,7 +44,7 @@ export class DebatesController {
         })),
         map((debates) => res.status(HttpStatus.OK).json({ data: debates })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -48,7 +57,7 @@ export class DebatesController {
       .pipe(
         map(data => res.status(HttpStatus.CREATED).json({ message: 'Debate successfully proposed.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -60,7 +69,10 @@ export class DebatesController {
       .pipe(
         map((data) => res.status(HttpStatus.OK).json({ data: data })),
         catchError((err) => {
-          throw new HttpException(err.message, err.status || HttpStatus.BAD_REQUEST);
+          throw new HttpException(
+            err instanceof Error ? err.message : String(err),
+            this.getHttpErrorStatus(err),
+          );
         })
       )
   }
@@ -73,7 +85,7 @@ export class DebatesController {
         mergeAll(),
         map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -94,7 +106,7 @@ export class DebatesController {
       .pipe(
         map((arg) => res.status(HttpStatus.CREATED).json({ message: 'The argument has been successfully created.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -118,7 +130,7 @@ export class DebatesController {
       .pipe(
         map((arg) => res.status(HttpStatus.CREATED).json({ message: 'Draft successfully saved.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -149,7 +161,10 @@ export class DebatesController {
         }),
         map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
-          throw new HttpException(err.message, err.status ?? HttpStatus.BAD_REQUEST);
+          throw new HttpException(
+            err instanceof Error ? err.message : String(err),
+            this.getHttpErrorStatus(err),
+          );
         })
       )
   }
@@ -169,7 +184,7 @@ export class DebatesController {
       .pipe(
         map(data => res.status(HttpStatus.OK).json({ message: 'Draft successfully updated.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -189,7 +204,7 @@ export class DebatesController {
       .pipe(
         map(data => res.status(HttpStatus.CREATED).json({ message: 'The draft has been submitted successfully.' })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

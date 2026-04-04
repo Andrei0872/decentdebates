@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
+import { ArgumentAsModerator, DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
 import { UpdateTicketDTO } from './dtos/update-ticket.dto';
 import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
@@ -108,6 +109,104 @@ export class ModeratorService {
     }
   }
 
+  async getArgumentAsModerator(user: UserCookieData, ticketId: string): Promise<ArgumentAsModerator> {
+    const sqlStr = `
+      select
+        t.id "ticketId",
+        t.created_by "userId",
+        a.debate_id "debateId",
+        a.title "argumentTitle",
+        a.content "argumentContent",
+        a.counterargument_to "counterargumentToId",
+        a.type "argumentType",
+        d.title "debateTitle",
+        t.board_list "boardList",
+        aCounterarg.title "counterargumentToTitle",
+        u.username,
+        t.assigned_to "assignedToId"
+      from ticket t
+      join argument a
+        on a.ticket_id = t.id
+      join debate d
+        on d.id = a.debate_id
+      join "user" u
+        on u.id = t.created_by
+      left join argument aCounterarg
+        on aCounterarg.id = a.counterargument_to
+      where t.id = $1 and a.is_draft = false and t.assigned_to = $2
+    `;
+    const values = [ticketId, user.id];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStr, values);
+      return res.rows[0];
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getDebateAsModerator(user: UserCookieData, ticketId: string): Promise<DebateAsModerator> {
+    const sqlStr = `
+      with debates_tags as (
+        select
+          d.id "debateId",
+          string_agg(dt.name, ',') "tags",
+          string_agg(dt.id::text, ',') "tagsIds"
+        from debate d
+        join assoc_debate_tag adt
+          on adt.debate_id = d.id
+        join debate_tag dt
+          on dt.id = adt.tag_id
+        group by d.id
+      )
+      select
+        d.id,
+        d.title,
+        d.ticket_id "ticketId",
+        d.created_at "createdAt",
+        d.modified_at "modifiedAt",
+        u.username,
+        u.id "userId",
+        dt."tags",
+        t.board_list "boardList",
+        t.id "ticketId",
+        dt."tagsIds",
+        t.assigned_to "assignedToId"
+      from debate d
+      join "user" u
+        on u.id = d.created_by
+      join debates_tags dt
+        on dt."debateId" = d.id
+      join ticket t
+        on d.ticket_id = t.id
+      where d.ticket_id = $1 and t.assigned_to = $2;
+    `;
+    const values = [ticketId, user.id];
+
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(sqlStr, values);
+      return res.rows[0];
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
+      throw new Error('An error occurred while fetching the debate.');
+    } finally {
+      client.release();
+    }
+  }
+
   async updateTicket(ticket: UpdateTicketData) {
     const sqlStr = `
       update ticket 
@@ -139,7 +238,11 @@ export class ModeratorService {
         throw new Error('Wrong attempt to update the ticket.');
       }
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();
@@ -165,7 +268,11 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();

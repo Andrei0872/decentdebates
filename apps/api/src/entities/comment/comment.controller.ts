@@ -18,7 +18,11 @@ export class CommentController {
       .pipe(
         map((comments) => res.status(HttpStatus.OK).json({ data: comments })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

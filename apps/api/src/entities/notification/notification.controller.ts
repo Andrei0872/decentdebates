@@ -38,7 +38,11 @@ export class NotificationController {
         }),
         map(r => res.status(HttpStatus.OK).json(r)),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

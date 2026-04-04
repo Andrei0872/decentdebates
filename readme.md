@@ -39,6 +39,8 @@ Here, the cookie secret should be provided.
 cp .env.example .env
 ```
 
+For backend test-specific overrides, you can also create `apps/api/.env.test` from `apps/api/.env.test.example`.
+
 ---
 
 ## Spinning up the application

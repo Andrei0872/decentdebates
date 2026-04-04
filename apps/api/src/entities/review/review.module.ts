@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CommentModule } from '../comment/comment.module';
+import { ModeratorModule } from '../moderator/moderator.module';
+import { UserModule } from '../user/user.module';
 import { ReviewGateway } from './review.gateway';
 import { ReviewService } from './review.service';
 import { ReviewController } from './review.controller';
@@ -7,7 +9,7 @@ import { DebatesModule } from '../debates/debates.module';
 
 @Module({
   providers: [ReviewGateway, ReviewService],
-  imports: [CommentModule, DebatesModule],
+  imports: [CommentModule, DebatesModule, UserModule, ModeratorModule],
   controllers: [ReviewController]
 })
 export class ReviewModule {}

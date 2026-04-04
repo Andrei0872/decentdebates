@@ -38,9 +38,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       const user = await this.reviewService.getUserFromSocket(socket);
       this.addUserToRoom(socket, user);
     } catch (err) {
-      console.error(err.message);
-
-      socket.emit('error', { reason: err.message });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(errorMessage);
+      socket.emit('error', { reason: errorMessage });
       socket.disconnect(true);
     }
   }
@@ -49,7 +49,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       this.removeUserFromRoom(socket);
     } catch (err) {
-      console.error(err.message);
+      console.error(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -90,7 +90,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket, err.message);
+      this.removeUserFromRoom(socket, err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -112,8 +112,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       return 'OK';
     } catch (err) {
-      console.error(err.message);
-      this.removeUserFromRoom(socket, err.message);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(errorMessage);
+      this.removeUserFromRoom(socket, errorMessage);
     }
   }
 
@@ -155,7 +156,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket, err.message);
+      this.removeUserFromRoom(socket, err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -177,8 +178,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       return 'OK';
     } catch (err) {
-      console.error(err.message);
-      this.removeUserFromRoom(socket, err.message);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(errorMessage);
+      this.removeUserFromRoom(socket, errorMessage);
     }
   }
 
@@ -222,8 +224,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       return 'OK';
     } catch (err) {
-      console.error(err.message);
-      this.removeUserFromRoom(socket, err.message);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(errorMessage);
+      this.removeUserFromRoom(socket, errorMessage);
     }
   }
 
@@ -264,8 +267,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       return 'OK';
     } catch (err) {
-      console.error(err.message);
-      this.removeUserFromRoom(socket, err.message);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(errorMessage);
+      this.removeUserFromRoom(socket, errorMessage);
     }
   }
 

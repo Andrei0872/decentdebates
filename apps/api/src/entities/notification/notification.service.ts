@@ -169,7 +169,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -191,7 +195,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
       return res.rows[0].unreadCount;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -220,7 +228,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
         throw new Error('No notifications updated.');
       }
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -257,7 +269,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     try {
       const res = await client.query(sqlStl, values);
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -289,7 +305,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     try {
       const res = await client.query(sqlStl, values);
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();

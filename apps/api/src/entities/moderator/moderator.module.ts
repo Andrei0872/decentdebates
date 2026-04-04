@@ -6,6 +6,7 @@ import { ModeratorService } from './moderator.service';
 @Module({
   controllers: [ModeratorController],
   providers: [ModeratorService],
+  exports: [ModeratorService],
   imports: [DebatesModule]
 })
 export class ModeratorModule { }
