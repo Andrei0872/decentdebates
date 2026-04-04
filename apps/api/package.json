@@ -17,11 +17,14 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:unit": "jest",
-    "test:integration": "corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && jest --config ./test/jest-integration.json --runInBand",
+    "test:integration": "corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && pnpm run test:integration:only",
+    "test:integration:only": "jest --config ./test/jest-integration.json --runInBand",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && jest --config ./test/jest-e2e.json --runInBand",
+    "test:e2e": "corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && pnpm run test:e2e:only",
+    "test:e2e:only": "jest --config ./test/jest-e2e.json --runInBand",
+    "test:all": "pnpm run test:unit && corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && pnpm run test:integration:only && pnpm run test:e2e:only"
   },
   "dependencies": {
     "@decentdebates/db": "workspace:*",
