@@ -142,7 +142,11 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -192,7 +196,11 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       throw new Error('An error occurred while fetching the debate.');
     } finally {
       client.release();
@@ -230,7 +238,11 @@ export class ModeratorService {
         throw new Error('Wrong attempt to update the ticket.');
       }
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();
@@ -256,7 +268,11 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();

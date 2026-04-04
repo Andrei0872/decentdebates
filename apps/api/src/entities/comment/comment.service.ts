@@ -55,7 +55,11 @@ export class CommentService {
 
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -92,7 +96,11 @@ export class CommentService {
 
       return res.rows;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the comments.');
     } finally {
       client.release();
@@ -119,7 +127,11 @@ export class CommentService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw new Error('An error occurred while fetching the comments.');
     } finally {
       client.release();
@@ -170,7 +182,11 @@ export class CommentService {
 
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();

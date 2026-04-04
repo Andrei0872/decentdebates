@@ -11,5 +11,9 @@ redisClient.on('connect', () => {
 });
 
 redisClient.on('error', (err) => {
-  console.error('Redis connection error:', err.message);
+  if (err instanceof Error) {
+    console.error('Redis connection error:', err.message);
+  } else {
+    console.error('Redis connection error:', err);
+  }
 });

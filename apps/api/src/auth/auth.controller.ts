@@ -23,7 +23,11 @@ export class AuthController {
           message: 'User successfully registered.'
         });
     } catch (err) {
-      throw new HttpException(err.message, 400);
+      if (err instanceof Error) {
+        throw new HttpException(err.message, 400);
+      }
+
+      throw new HttpException(String(err), 400);
     }
   }
 
@@ -40,7 +44,11 @@ export class AuthController {
           data: getPublicUser(user),
         })
     } catch (err) {
-      throw new HttpException(err.message, 400);
+      if (err instanceof Error) {
+        throw new HttpException(err.message, 400);
+      }
+
+      throw new HttpException(String(err), 400);
     }
   }
 }

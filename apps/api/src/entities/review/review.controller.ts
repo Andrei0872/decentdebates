@@ -31,7 +31,7 @@ export class ReviewController {
         }),
         map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -62,7 +62,7 @@ export class ReviewController {
         }),
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -93,7 +93,7 @@ export class ReviewController {
         }),
         map(debate => res.status(HttpStatus.OK).json({ debate })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }
@@ -113,7 +113,7 @@ export class ReviewController {
         }),
         map(data => res.status(HttpStatus.OK).json({ data })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

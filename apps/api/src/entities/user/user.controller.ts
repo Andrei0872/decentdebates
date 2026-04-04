@@ -35,7 +35,11 @@ export class UserController {
         reduce((acc, crt) => [...acc, crt], []),
         map(r => res.status(HttpStatus.OK).json({ data: r })),
         catchError((err) => {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          if (err instanceof Error) {
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
+
+          throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
         })
       )
   }

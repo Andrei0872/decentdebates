@@ -28,7 +28,11 @@ export class UserService {
 
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
@@ -196,7 +200,11 @@ export class UserService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      console.log(err.message);
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log(err);
+      }
       throw new Error('An error occurred while fetching the debate.');
     } finally {
       client.release();
@@ -238,7 +246,11 @@ export class UserService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      console.error(err.message);
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else {
+        console.error(err);
+      }
       throw err;
     } finally {
       client.release();
