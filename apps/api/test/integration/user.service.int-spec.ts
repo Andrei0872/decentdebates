@@ -3,6 +3,7 @@ import type { Pool } from 'pg';
 import { UserService } from '../../src/entities/user/user.service';
 import { applySchema, createTestPool, recreateTestDatabase } from '../helpers/db';
 import { createArgument, createDebate, createTag, createUser } from '../helpers/factories';
+import { getDebateTicketId } from '../helpers/queries';
 
 describe('UserService integration', () => {
   let service: UserService;
@@ -39,9 +40,7 @@ describe('UserService integration', () => {
       boardList: 'ACCEPTED',
       tagIds: [historyTagId],
     });
-    acceptedDebateTicketId = (
-      await pool.query<{ ticket_id: number }>('select ticket_id from debate where id = $1', [acceptedDebateId])
-    ).rows[0].ticket_id;
+    acceptedDebateTicketId = await getDebateTicketId(pool, acceptedDebateId);
 
     await createDebate(pool, {
       title: 'Ongoing debate',
