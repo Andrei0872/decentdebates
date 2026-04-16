@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
@@ -10,10 +10,16 @@ import { NotificationsReadEvent } from './notification.events';
 
 @Injectable()
 export class NotificationService implements OnModuleDestroy, OnModuleInit {
+  private readonly logger = new Logger(NotificationService.name);
+
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
     private eventEmitter: EventEmitter2
   ) { }
+
+  private logError(err: unknown) {
+    this.logger.error(err instanceof Error ? err.message : String(err));
+  }
 
   onModuleInit() {
     this.eventEmitter.on(DebateTicketCreated.EVENT_NAME, async (ev: DebateTicketCreated) => {
@@ -169,11 +175,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
       return res.rows;
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -195,11 +197,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
       return res.rows[0].unreadCount;
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -228,11 +226,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
         throw new Error('No notifications updated.');
       }
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -269,11 +263,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     try {
       const res = await client.query(sqlStl, values);
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -305,11 +295,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     try {
       const res = await client.query(sqlStl, values);
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();

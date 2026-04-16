@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { ArgumentAsModerator, DebateAsModerator } from '../review/review.model';
@@ -8,9 +8,15 @@ import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, 
 
 @Injectable()
 export class ModeratorService {
+  private readonly logger = new Logger(ModeratorService.name);
+
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
   ) { }
+
+  private logError(err: unknown) {
+    this.logger.error(err instanceof Error ? err.message : String(err));
+  }
 
   async getDebateCards(): Promise<ModeratorActivityDebate[]> {
     const sqlStr = `
@@ -60,7 +66,7 @@ export class ModeratorService {
 
       return res.rows;
     } catch (err) {
-      console.error(err);
+      this.logError(err);
       throw new Error('An error occurred while fetching the moderator\'s activity(debates).');
     } finally {
       client.release();
@@ -102,7 +108,7 @@ export class ModeratorService {
 
       return res.rows;
     } catch (err) {
-      console.error(err);
+      this.logError(err);
       throw new Error('An error occurred while fetching the moderator\'s activity(arguments).');
     } finally {
       client.release();
@@ -142,11 +148,7 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -196,11 +198,7 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      } else {
-        console.log(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while fetching the debate.');
     } finally {
       client.release();
@@ -238,11 +236,7 @@ export class ModeratorService {
         throw new Error('Wrong attempt to update the ticket.');
       }
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();
@@ -268,11 +262,7 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while updated the ticket.');
     } finally {
       client.release();

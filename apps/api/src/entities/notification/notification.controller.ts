@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Logger, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
 import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
@@ -10,6 +10,8 @@ import { NotificationService } from './notification.service';
 
 @Controller('notification')
 export class NotificationController {
+  private readonly logger = new Logger(NotificationController.name);
+
   constructor(
     private notificationService: NotificationService,
     private eventEmitter: EventEmitter2
@@ -68,7 +70,7 @@ export class NotificationController {
       )
     ).pipe(
       finalize(() => {
-        console.log('fin!');
+        this.logger.debug('Notification count SSE stream closed.');
       }),
       takeUntil(clientDisconnected$)
     )

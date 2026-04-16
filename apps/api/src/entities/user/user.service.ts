@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { ArgumentAsUser, DebateAsUser } from '../review/review.model';
@@ -10,7 +10,13 @@ const TABLE_COLUMNS = `(username, password, email, role)`;
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+
+  private logError(err: unknown) {
+    this.logger.error(err instanceof Error ? err.message : String(err));
+  }
 
   public async insertOne(registerUserDTO: RegisterUserDTO): Promise<User> {
     const client = await this.pool.connect();
@@ -28,11 +34,7 @@ export class UserService {
 
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -106,7 +108,7 @@ export class UserService {
 
       return res.rows;
     } catch (err) {
-      console.error(err);
+      this.logError(err);
       throw new Error('An error occurred while fetching the user\'s activity(debates).');
     } finally {
       client.release();
@@ -149,7 +151,7 @@ export class UserService {
 
       return res.rows;
     } catch (err) {
-      console.error(err);
+      this.logError(err);
       throw new Error('An error occurred while fetching the user\'s activity(arguments).');
     } finally {
       client.release();
@@ -200,11 +202,7 @@ export class UserService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      } else {
-        console.log(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while fetching the debate.');
     } finally {
       client.release();
@@ -246,11 +244,7 @@ export class UserService {
       const res = await client.query(sqlStr, values);
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();

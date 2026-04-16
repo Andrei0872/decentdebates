@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { UserCookieData } from '../user/user.model';
@@ -6,7 +6,13 @@ import { AddCommentData, Comment, UpdateCommentData } from './comment.model';
 
 @Injectable()
 export class CommentService {
+  private readonly logger = new Logger(CommentService.name);
+
   constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+
+  private logError(err: unknown) {
+    this.logger.error(err instanceof Error ? err.message : String(err));
+  }
 
   async addCommentToDebate(commentData: AddCommentData): Promise<Comment> {
     // Performing a conditional insert because we want to ensure
@@ -55,11 +61,7 @@ export class CommentService {
 
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();
@@ -96,11 +98,7 @@ export class CommentService {
 
       return res.rows;
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while fetching the comments.');
     } finally {
       client.release();
@@ -127,11 +125,7 @@ export class CommentService {
       const res = await client.query(sqlStr, values);
       return res;
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw new Error('An error occurred while fetching the comments.');
     } finally {
       client.release();
@@ -182,11 +176,7 @@ export class CommentService {
 
       return res.rows[0];
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
-      }
+      this.logError(err);
       throw err;
     } finally {
       client.release();

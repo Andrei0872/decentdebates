@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
 import { ArgumentCommentPayload, ArgumentReviewUpdated, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
@@ -12,11 +13,14 @@ import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
 import { ArgumentReviewNewComment, DebateReviewNewComment, } from './review.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArgumentUpdated, DebateTitleUpdated } from '../debates/debate.events';
+import { shouldEmitRoutineLogs } from 'src/logging';
 
 const PORT = 3002;
 
 @WebSocketGateway(PORT, { namespace: 'review', cors: { origin: config.CLIENT_URL, credentials: true }, cookie: true })
 export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  private readonly logger = new Logger(ReviewGateway.name);
+
   @WebSocketServer()
   server: SocketIOServer;
 
@@ -30,7 +34,9 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   ) { }
 
   afterInit(server: any) {
-    console.log(`Websocket server up & running on port ${PORT}.`);
+    if (shouldEmitRoutineLogs()) {
+      this.logger.log(`Websocket server up & running on port ${PORT}.`);
+    }
   }
 
   async handleConnection(socket: Socket, ...args: any[]) {
@@ -39,7 +45,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.addUserToRoom(socket, user);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(errorMessage);
+      this.logger.error(errorMessage);
       socket.emit('error', { reason: errorMessage });
       socket.disconnect(true);
     }
@@ -49,7 +55,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       this.removeUserFromRoom(socket);
     } catch (err) {
-      console.error(err instanceof Error ? err.message : String(err));
+      this.logger.error(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -113,7 +119,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(errorMessage);
+      this.logger.error(errorMessage);
       this.removeUserFromRoom(socket, errorMessage);
     }
   }
@@ -179,7 +185,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(errorMessage);
+      this.logger.error(errorMessage);
       this.removeUserFromRoom(socket, errorMessage);
     }
   }
@@ -225,7 +231,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(errorMessage);
+      this.logger.error(errorMessage);
       this.removeUserFromRoom(socket, errorMessage);
     }
   }
@@ -268,7 +274,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       return 'OK';
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(errorMessage);
+      this.logger.error(errorMessage);
       this.removeUserFromRoom(socket, errorMessage);
     }
   }

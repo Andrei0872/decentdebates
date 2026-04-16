@@ -1,11 +1,13 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SESSION_MIDDLEWARE_TOKEN } from './middlewares/session.middleware';
 import * as cors from 'cors';
 import { config } from './config'
+import { shouldEmitRoutineLogs } from './logging';
 
 const PORT = 3001;
+const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +26,10 @@ async function bootstrap() {
     credentials: true,
   }));
 
-  await app.listen(PORT, () => console.log(`Server up & running on PORT ${PORT}`));
+  await app.listen(PORT);
+
+  if (shouldEmitRoutineLogs()) {
+    logger.log(`Server up & running on PORT ${PORT}`);
+  }
 }
 bootstrap();
