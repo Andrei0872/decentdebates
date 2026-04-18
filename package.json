@@ -16,7 +16,7 @@
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file"
   },
   "devDependencies": {
-    "turbo": "^2.5.0"
+    "turbo": "^2.9.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
