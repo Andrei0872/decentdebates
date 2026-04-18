@@ -6,6 +6,7 @@ _More about this project, including the movations behind it and some demo pictur
   - [Setting up](#setting-up)
     - [The DB `.env` file](#the-db-env-file)
     - [The `api` `.env` file](#the-api-env-file)
+    - [The `client` `.env` files](#the-client-env-files)
   - [Spinning up the application](#spinning-up-the-application)
   - [Working on the application](#working-on-the-application)
     - [Dealing with DB schema changes](#dealing-with-db-schema-changes)
@@ -40,6 +41,18 @@ cp .env.example .env
 ```
 
 For backend test-specific overrides, you can also create `apps/api/.env.test` from `apps/api/.env.test.example`.
+
+### The `client` `.env` files
+
+```bash
+# Ensure you're in the `apps/client` directory.
+
+# Dev server URLs (defaults work out of the box for local dev).
+cp .env.development.example .env.development
+
+# E2E test credentials — fill in a valid username and password after copying.
+cp .env.test.local.example .env.test.local
+```
 
 ---
 
