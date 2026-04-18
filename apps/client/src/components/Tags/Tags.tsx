@@ -1,7 +1,7 @@
 import { Tag } from '@/types/tag'
 import styles from './Tags.module.scss'
 import { ItemPredicate, ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
-import { MenuItem2 } from '@blueprintjs/popover2'
+import { MenuItem } from '@blueprintjs/core';
 import React, { ForwardedRef, KeyboardEvent, ReactNode, useImperativeHandle, useMemo, useState } from 'react';
 
 interface Props {
@@ -46,7 +46,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
     }
 
     return (
-      <MenuItem2
+      <MenuItem
         onClick={props.handleClick}
         key={tag.id}
         text={tag.name}
@@ -134,7 +134,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
     handleClick: React.MouseEventHandler<HTMLElement>
   ) => {
     return (
-      <MenuItem2
+      <MenuItem
         icon="add"
         text={`Create "${query}"`}
         roleStructure="listoption"
@@ -184,7 +184,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
         itemPredicate={filterTag}
         resetOnSelect={true}
         itemsEqual={areTagsEqual}
-        noResults={<MenuItem2 disabled={true} text="No results." roleStructure="listoption" />}
+        noResults={<MenuItem disabled={true} text="No results." roleStructure="listoption" />}
         createNewItemFromQuery={canCreateTags ? createTag : undefined}
         createNewItemRenderer={canCreateTags ? renderCreatedTag : undefined}
         onClear={handleOnClear}

@@ -1,7 +1,6 @@
 import { Tag } from "@/types/tag";
 import { ArgumentType, DebateArgument } from "@decentdebates/shared-types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { HYDRATE } from "next-redux-wrapper";
 import { RootState } from "..";
 
 export interface Debate {
@@ -67,14 +66,6 @@ export const debatesSlice = createSlice({
 
       state.crtDebate.expandedArgumentsIDs = state.crtDebate.expandedArgumentsIDs
         .filter(id => id !== action.payload.id);
-    },
-  },
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
-      return {
-        ...state,
-        ...action.payload.debates
-      };
     },
   },
 });
