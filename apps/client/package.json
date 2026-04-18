@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@decentdebates/shared-types": "workspace:*",
@@ -35,6 +36,8 @@
     "typescript": "4.9.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "dotenv": "^16.0.0",
     "sass": "^1.58.1"
   }
 }

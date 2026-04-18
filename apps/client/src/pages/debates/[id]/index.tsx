@@ -224,7 +224,7 @@ function DebatePage(props: Props) {
         </section>
 
         <section className={styles.title}>
-          <h2>{metadata.debateTitle}</h2>
+          <h2 data-testid="debate-title">{metadata.debateTitle}</h2>
         </section>
 
         {

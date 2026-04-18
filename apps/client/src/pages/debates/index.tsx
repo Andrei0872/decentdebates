@@ -126,7 +126,7 @@ function Debates(props: Props) {
             ) : null
           }
 
-          <ul className={styles.debates}>
+          <ul data-testid="debates-list" className={styles.debates}>
             {
               debates?.length ? (
                 debates.map(d => (

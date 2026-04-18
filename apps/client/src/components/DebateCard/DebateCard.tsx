@@ -18,8 +18,8 @@ function DebateCard(props: Props) {
   const { cardData } = props;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.title}>{cardData.title}</div>
+    <div data-testid="debate-card" className={styles.container}>
+      <div data-testid="debate-card-title" className={styles.title}>{cardData.title}</div>
 
       <div className={styles.info}>
         <div className={styles.createdBy}>
