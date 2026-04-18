@@ -7,3 +7,4 @@ node_modules
 apps/api/node_modules
 apps/client/node_modules
 packages/db/node_modules
+apps/client/test-results
