@@ -1,3 +1,5 @@
+'use client';
+
 import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs/core';
 import styles from './DebateArgument.module.scss';
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
@@ -5,6 +7,7 @@ import styles from './DebateArgument.module.scss';
 import type { DebateArgument } from '@/store/slices/debates.slice';
 import RichEditor from '../RichEditor/RichEditor';
 import buttonStyles from '@/styles/shared/button.module.scss';
+import { useEffect, useState } from 'react';
 
 interface Props {
   debateArgumentData: DebateArgument;
@@ -24,6 +27,12 @@ function DebateArgument(props: Props) {
     collapseArgument,
   } = props;
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const isAbleToExpand = !!readArgument && !!collapseArgument;
 
   return (
@@ -31,22 +40,21 @@ function DebateArgument(props: Props) {
       <div className={styles.header}>
         <h3 className={styles.title}>{debateArgumentData.title}</h3>
         {
-          // TODO: fix hydration issue.
-          // additionalActions ? (
-          //   <div className={styles.actions}>
-          //     <Popover
-          //       interactionKind="click"
-          //       placement="right"
-          //       usePortal={false}
-          //       content={additionalActions}
-          //       renderTarget={({ isOpen, ref, ...targetProps }) => (
-          //         <span {...targetProps} ref={ref}>
-          //           <Icon icon="more" />
-          //         </span>
-          //       )}
-          //     />
-          //   </div>
-          // ) : null
+          additionalActions && isMounted ? (
+            <div className={styles.actions}>
+              <Popover
+                interactionKind="click"
+                placement="right"
+                usePortal={false}
+                content={additionalActions}
+                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                  <span {...targetProps} ref={ref}>
+                    <Icon icon="more" />
+                  </span>
+                )}
+              />
+            </div>
+          ) : null
         }
       </div>
 
