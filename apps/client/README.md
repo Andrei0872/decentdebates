@@ -8,6 +8,7 @@ This package contains the Next.js client for Decent Debates.
 |------|---------|---------|
 | `.env.development` | yes | API and WebSocket URLs for local dev |
 | `.env.test.local` | no | E2E test credentials (copy from `.env.test.local.example`) |
+| `.env.production.local` | no | API and WebSocket URLs for a local production build (copy from `.env.production.local.example`) |
 
 ### Setup
 
@@ -18,6 +19,9 @@ cp .env.development.example .env.development
 
 cp .env.test.local.example .env.test.local
 # Then fill in E2E_USERNAME and E2E_PASSWORD in .env.test.local
+
+cp .env.production.local.example .env.production.local
+# Then fill in the URLs in .env.production.local (used when running a local production build)
 ```
 
 ## Development
