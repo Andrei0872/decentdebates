@@ -1,13 +1,15 @@
+'use client';
+
 import Layout from '@/components/Layout/Layout'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import styles from '@/styles/NewArgument.module.scss';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon, IconSize, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
+import { Callout, Collapse, Icon, IconSize, Intent, OverlayToaster, Position, Spinner, SpinnerSize } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
-import { useRouter } from 'next/router';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, submitDraft, updateDraft } from '@/utils/api/debate';
@@ -31,9 +33,14 @@ const toasterOptions = {
   usePortal: true,
 };
 
-function NewArgument() {
+function NewArgumentContent() {
   const router = useRouter();
-  const { counterargumentId: counterargumentIdParam, id: debateId, draftId } = router.query;
+  const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+
+  const debateId = params.id;
+  const counterargumentIdParam = searchParams.get('counterargumentId');
+  const draftId = searchParams.get('draftId');
 
   const isCounterargumentExplicit = !!counterargumentIdParam;
 
@@ -51,9 +58,9 @@ function NewArgument() {
     defaultValues: {
       argType: ArgumentType.PRO,
       ...isCounterargumentExplicit && {
-        counterargumentId: +counterargumentIdParam,
+        counterargumentId: +counterargumentIdParam!,
         isCounterargument: true,
-        argType: getCorrespondingCounterargumentType(crtDebate?.args.find(a => +a.argumentId === +counterargumentIdParam))
+        argType: getCorrespondingCounterargumentType(crtDebate?.args.find(a => +a.argumentId === +counterargumentIdParam!))
       },
     },
   });
@@ -64,18 +71,14 @@ function NewArgument() {
   const [isArgumentEditorReady, setIsArgumentEditorReady] = useState(true);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
-
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   useEffect(() => {
     if (!crtUser) {
       router.push('/');
-      return () => { };
+      return;
     }
 
-    // It appears that setting the `useForm`'s default values is not enough.
-    // Nor setting the value without using a timeout.
-    // For now, resorting to this doesn't cause any troubles(yet!).
     if (isCounterargumentExplicit) {
       setTimeout(() => {
         setValue('counterargumentId', +counterargumentIdParam!);
@@ -84,19 +87,15 @@ function NewArgument() {
   }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return () => { };
-    }
-
     if (!debateId || Number.isNaN(+debateId)) {
       router.push('/debates');
-      return () => { };
+      return;
     }
 
     if (isDraft) {
       setIsArgumentEditorReady(false);
 
-      fetchDraft(+debateId, +draftId)
+      fetchDraft(+debateId, +draftId!)
         .then(r => {
           const { debate, draft } = r;
           dispatch(setCurrentDebate(getDebateDTO(debate)));
@@ -105,31 +104,28 @@ function NewArgument() {
             setTimeout(() => {
               setValue('counterargumentId', draft.counterargumentTo!);
             }, 0);
-
             setValue('isCounterargument', true);
           }
 
           setValue('argumentTitle', draft.title);
           setValue('argType', draft.argumentType);
-
           setPrefilledEditorContent(draft.content ?? null);
           setIsArgumentEditorReady(true);
         })
-        .catch(err => {
+        .catch(() => {
           router.push('/debates');
         });
-      return () => { };
+      return;
     }
 
     fetchDebateById(+debateId)
       .then(d => {
         dispatch(setCurrentDebate(getDebateDTO(d)));
       })
-      .catch(err => {
+      .catch(() => {
         router.push('/debates');
       });
-
-  }, [router.isReady]);
+  }, []);
 
   const onSubmit = (formData: CreateArgumentFormData, ev?: React.BaseSyntheticEvent) => {
     const submitter = (ev!.nativeEvent as SubmitEvent).submitter;
@@ -177,7 +173,6 @@ function NewArgument() {
             router.push('/my-activity');
             return;
           }
-          
           router.push(`/debates/${crtDebate?.metadata.debateId!}`);
         }, 1500);
       })
@@ -189,7 +184,6 @@ function NewArgument() {
         }
 
         const message = err.response.data.message;
-
         toasterRef.current?.show({
           icon: 'tick-circle',
           intent: Intent.DANGER,
@@ -197,8 +191,6 @@ function NewArgument() {
           timeout: 2000,
         });
 
-        // Not using the Toaster's `onDismiss` prop because it will show
-        // the below toaster twice.
         setTimeout(() => {
           toasterRef.current?.show({
             icon: 'tick-circle',
@@ -223,7 +215,6 @@ function NewArgument() {
     return crtDebate?.args.filter(arg => arg.argumentType !== argType);
   }, [argType, isPageReady]);
 
-
   useEffect(() => {
     setValue('counterargumentId', undefined);
   }, [argType]);
@@ -238,7 +229,6 @@ function NewArgument() {
     if (!counterargumentId) {
       return;
     }
-
     setCounterargument(null);
     if (isCounterargumentExpanded) {
       fetchArgument(crtDebate?.metadata.debateId!, counterargumentId)
@@ -267,12 +257,10 @@ function NewArgument() {
     if (!counterargumentId) {
       return null;
     }
-
     return crtDebate?.args.find(arg => +arg.argumentId === +counterargumentId);
   }, [counterargumentId]);
 
   const isUpdatingDraft = !!prefilledEditorContent;
-
   const isDraft = !!draftId && !Number.isNaN(+draftId);
 
   return (
@@ -290,26 +278,13 @@ function NewArgument() {
 
         <section className={styles.titleContainer}>
           <h2 className={styles.title}>
-            {
-              isDraft ? (
-                <>
-                  Updating a draft
-                </>
-              ) : (
-                <>
-                  Adding a new argument
-                </>
-              )
-            }
+            {isDraft ? <>Updating a draft</> : <>Adding a new argument</>}
           </h2>
         </section>
 
         {
           !isPageReady ? (
-            <Spinner
-              className={styles.loadingSpinner}
-              size={SpinnerSize.STANDARD}
-            />
+            <Spinner className={styles.loadingSpinner} size={SpinnerSize.STANDARD} />
           ) : (
             <>
               <Callout className={styles.debateInfo}>
@@ -326,7 +301,6 @@ function NewArgument() {
                       <label className={`${styles.argTypeLabel} ${styles.labelPRO}`} htmlFor="pro">Pro</label>
                       <input type="radio" id="pro" value="PRO" {...register('argType')} />
                     </div>
-
                     <div className={styles.radioGroup}>
                       <label className={`${styles.argTypeLabel} ${styles.labelCON}`} htmlFor="con">Con</label>
                       <input type="radio" id="con" value="CON" {...register('argType')} />
@@ -336,10 +310,7 @@ function NewArgument() {
                   <div className={styles.counterargumentCheck}>
                     <input className={styles.counterargumentCheckInput} id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
                     <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
-                      <label htmlFor='counterargumentCheck'>
-                        is counterargument for
-                      </label>
-
+                      <label htmlFor='counterargumentCheck'>is counterargument for</label>
                       <select className={styles.counterargumentSelectInput} {...register('counterargumentId')} disabled={!isCounterargument}>
                         <option value="">Select counterargument</option>
                         {
@@ -375,19 +346,14 @@ function NewArgument() {
                     isArgumentEditorReady ? (
                       <RichEditor
                         containerClassName={styles.argumentEditorContainer}
-                        additionalPlugins={
-                          <ExportContentPlugin ref={exportEditorContentRef} />
-                        }
+                        additionalPlugins={<ExportContentPlugin ref={exportEditorContentRef} />}
                         configOptions={prefilledEditorContent ? { editorState: prefilledEditorContent } : undefined}
                       />
                     ) : null
                   }
 
                   <div className={styles.argumentButtons}>
-                    <button
-                      className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`}
-                      type='submit'
-                    >
+                    <button className={`${buttonStyles.button} ${buttonStyles.success} ${buttonStyles.contained}`} type='submit'>
                       Submit
                     </button>
                     <button
@@ -404,10 +370,16 @@ function NewArgument() {
           )
         }
 
-        <Toaster {...toasterOptions} ref={toasterRef} />
+        <OverlayToaster {...toasterOptions} ref={toasterRef} />
       </div>
     </Layout>
   )
 }
 
-export default NewArgument
+export default function NewArgument() {
+  return (
+    <Suspense>
+      <NewArgumentContent />
+    </Suspense>
+  );
+}

@@ -1,8 +1,7 @@
 import Layout from '@/components/Layout/Layout'
-import React from 'react'
 import styles from '@/styles/About.module.scss'
 
-function About() {
+export default function About() {
   return (
     <Layout>
       <div className={styles.container}>
@@ -17,5 +16,3 @@ function About() {
     </Layout>
   )
 }
-
-export default About

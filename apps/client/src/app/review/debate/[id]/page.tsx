@@ -1,19 +1,18 @@
+'use client';
+
 import Comment, { CommentRef } from '@/components/Comments/Comment';
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
-import { selectPreviewedCard } from '@/store/slices/moderator.slice';
 import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
-import { useRouter } from 'next/router'
+import { useRouter, useParams } from 'next/navigation';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 
 import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
-import { fetchTicketComments, updateComment } from '@/utils/api/comment';
+import { fetchTicketComments } from '@/utils/api/comment';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
-import { Popover2 } from '@blueprintjs/popover2';
-import { EditableText, Icon, Intent, Menu, MenuDivider, MenuItem, Position, Toaster } from '@blueprintjs/core';
-import { EditorState } from 'lexical';
+import { Icon, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from '@blueprintjs/core';
 import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
 import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
 import buttonStyles from '@/styles/shared/button.module.scss';
@@ -152,8 +151,9 @@ const toasterOptions = {
 
 let socket: Socket | undefined;
 function Debate() {
-  const router = useRouter()
-  const { id: ticketId } = router.query
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const ticketId = params.id;
 
   const dispatch = useAppDispatch();
 
@@ -164,7 +164,7 @@ function Debate() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const canEditArgument = debate && debate.boardList !== BoardLists.ACCEPTED;
   const canAddComments = canEditArgument;
@@ -172,27 +172,23 @@ function Debate() {
   useEffect(() => {
     if (!user) {
       router.push('/');
+      return;
     }
+
+    (user.role === UserRoles.MODERATOR ? fetchDebateAsModerator : fetchDebateAsUser)(ticketId)
+      .then(r => setDebate(r.debate))
+      .catch(err => {
+        router.push('/');
+        dispatch(setCurrentUser(null));
+      });
   }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return () => { };
-    }
-
     socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
-
-    socket.on('connect', () => {
-      console.log('connect');
-    });
 
     socket.on('error', err => {
       router.push('/');
     });
-
-    socket.on('disconnect', () => {
-      console.log('disc');
-    })
 
     socket.on('comment/debate:create', (data: any) => {
       const { insertedComment } = data;
@@ -239,35 +235,14 @@ function Debate() {
       socket?.disconnect();
       socket = undefined;
     }
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return () => { };
-    }
-
-    if (!user) {
-      router.push('/');
-    }
-
-    (user!.role === UserRoles.MODERATOR ? fetchDebateAsModerator : fetchDebateAsUser)((ticketId as string))
-      .then(r => setDebate(r.debate))
-      .catch(err => {
-        router.push('/');
-        dispatch(setCurrentUser(null));
-      })
-  }, [router.isReady]);
-
-  useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-
-    fetchTicketComments((ticketId as string))
+    fetchTicketComments(ticketId)
       .then(comments => {
         setComments(comments);
       })
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
     if (editingCommentId) {
@@ -282,7 +257,6 @@ function Debate() {
   const addComment = () => {
     const comment = editableCommentRef.current?.getContent();
     if (!comment) {
-      // TODO: some validation + informational message.
       return;
     }
 
@@ -398,9 +372,8 @@ function Debate() {
         <CommentsLayout.CommentsList>
           {
             comments.map(c => (
-              <div>
+              <div key={c.commentId}>
                 <Comment
-                  key={c.commentId}
                   commentData={c}
                   isEditable={c.commentId === editingCommentId}
                   ref={r => {
@@ -422,7 +395,7 @@ function Debate() {
                         {
                           c.commenterId === user?.id ? (
                             <div className={styles.commentActionsContainer}>
-                              <Popover2
+                              <Popover
                                 interactionKind="click"
                                 placement="right"
                                 usePortal={false}
@@ -431,12 +404,11 @@ function Debate() {
                                     <MenuItem onClick={() => startEditingComment(c)} icon="edit" text="Edit comment" />
                                   </Menu>
                                 }
-                                renderTarget={({ isOpen, ref, ...targetProps }) => (
-                                  <span {...targetProps} ref={ref}>
-                                    <Icon className={styles.commentActionsIcon} icon="more" />
-                                  </span>
-                                )}
-                              />
+                              >
+                                <span>
+                                  <Icon className={styles.commentActionsIcon} icon="more" />
+                                </span>
+                              </Popover>
                             </div>
                           ) : null
                         }
@@ -498,7 +470,7 @@ function Debate() {
         }
       </CommentsLayout>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }

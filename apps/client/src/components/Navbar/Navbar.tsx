@@ -1,7 +1,9 @@
+'use client';
+
 import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import NotificationWidget from '../Notification/NotificationWidget';
 import navStyles from './Navbar.module.scss';
 

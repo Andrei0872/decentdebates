@@ -1,11 +1,12 @@
+'use client';
+
 import { Notification } from "@/types/notification";
 import { fetchNotifications } from "@/utils/api/notification";
-import { Icon, Menu, MenuDivider, MenuItem, Spinner, SpinnerSize } from "@blueprintjs/core"
-import { Popover2 } from "@blueprintjs/popover2"
+import { Icon, Menu, MenuDivider, MenuItem, Spinner, SpinnerSize, Popover } from "@blueprintjs/core"
 import { MouseEvent, useEffect, useState } from "react";
 import RichEditor from "../RichEditor/RichEditor";
 import styles from './NotificationWidget.module.scss'
-import { useRouter } from "next/router";
+import { useRouter } from 'next/navigation';
 
 function NotificationWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +38,7 @@ function NotificationWidget() {
   }, []);
 
   const handleInteraction = (nextState: boolean) => {
+    // TODO: review this (might be outdate).
     // `Popover2`'s `componentDidUpdate` will cause this function to be called again.
     // We resort to this check in order to prevent fetching notifications more than once.
     if (nextState === isOpen) {
@@ -86,7 +88,7 @@ function NotificationWidget() {
 
   return (
     <div>
-      <Popover2
+      <Popover
         interactionKind="click"
         placement="bottom"
         usePortal={true}

@@ -1,4 +1,6 @@
-import { BaseSyntheticEvent, MouseEventHandler, ReactElement, ReactNode, useEffect, useRef, useState } from "react";
+'use client';
+
+import { BaseSyntheticEvent, MouseEventHandler, Ref, ReactNode, useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
@@ -7,13 +9,11 @@ import { BoardData, BoardLists, ModeratorActivity, getActivityDTO, CardLabels, M
 import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
-import { useRouter } from "next/router";
-import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, Position, Toaster } from "@blueprintjs/core";
+import { useRouter } from "next/navigation";
+import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
 import { approveArgument, approveDebate, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
-import { fetchDebateAsModerator } from "@/utils/api/review";
-import { Popover2 } from "@blueprintjs/popover2";
 import tagStyles from '@/styles/shared/debate-tag.module.scss';
 
 enum DNDItemTypes {
@@ -35,7 +35,6 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = (props) => {
   const { header, cards } = props;
 
-  // TODO: should `board_list` be provided as deps ?
   const [{ isOver }, drop] = useDrop(() => ({
     accept: DNDItemTypes.CARD,
     drop: (item: DragItem, monitor) => {
@@ -47,7 +46,7 @@ const Board: React.FC<BoardProps> = (props) => {
   }));
 
   return (
-    <div className={styles.board} ref={drop}>
+    <div className={styles.board} ref={drop as unknown as Ref<HTMLDivElement>}>
       <div className={styles.boardHeader}>
         {header}
       </div>
@@ -90,20 +89,19 @@ const Card: React.FC<CardProps> = (props) => {
     props.approveTicket(cardData);
   }
 
-  const handleActionsClick = (ev: any, initialHandler: MouseEventHandler<any> | undefined) => {
+  const handleActionsClick = (ev: any) => {
     ev.stopPropagation();
-    initialHandler?.(ev);
   }
 
   return (
-    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag}>
+    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag as unknown as Ref<HTMLDivElement>}>
       <div className={styles.cardHeader}>
         <h4 className={styles.ticketLabel}>#{cardData.ticketLabel}</h4>
 
         {
           cardData.boardList === BoardLists.IN_REVIEW && hasRightsOnTicket ? (
             <div className={styles.cardActionsContainer}>
-              <Popover2
+              <Popover
                 interactionKind="click"
                 placement="right"
                 usePortal={false}
@@ -112,13 +110,11 @@ const Card: React.FC<CardProps> = (props) => {
                     <MenuItem onClick={approveItem} icon="tick-circle" text="Approve Ticket" />
                   </Menu>
                 }
-                renderTarget={({ isOpen, ref, ...targetProps }) => (
-                  <span {...targetProps} onClick={ev => handleActionsClick(ev, targetProps.onClick)} ref={ref}>
-                    <Icon className={styles.commentActionsIcon} icon="more" />
-                  </span>
-                )}
-                modifiers={{ arrow: { enabled: true } }}
-              />
+              >
+                <span onClick={handleActionsClick}>
+                  <Icon className={styles.commentActionsIcon} icon="more" />
+                </span>
+              </Popover>
             </div>
           ) : null
         }
@@ -186,7 +182,7 @@ function Activity() {
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
 
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const dispatch = useAppDispatch();
 
@@ -257,8 +253,6 @@ function Activity() {
           dispatch(setActivityPreviewedCardDebate({ ...cardData, ...debate }));
         });
     }
-
-    // dispatch(setActivityPreviewedCard(cardData));
   }
 
   const expandCardModal = () => {
@@ -273,7 +267,7 @@ function Activity() {
     const approveTicketPromise = card.ticketLabel === CardLabels.DEBATE
       ? approveDebate(card.ticketId.toString(), { debateTitle: card.ticketTitle, debateId: card.debateId })
       : approveArgument(card.ticketId.toString(), { debateTitle: card.debateTitle, debateId: card.debateId, argumentId: card.argumentId, argumentTitle: card.ticketTitle });
-    
+
     approveTicketPromise
       .then(r => {
         const { message } = r;
@@ -378,7 +372,7 @@ function Activity() {
         </DialogBody>
       </Dialog>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }

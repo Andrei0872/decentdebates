@@ -1,8 +1,8 @@
-import { Button, Icon, Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
-import { Classes, Popover2 } from '@blueprintjs/popover2';
+import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs/core';
 import styles from './DebateArgument.module.scss';
-import '@blueprintjs/popover2/src/blueprint-popover2.scss'
-import { DebateArgument } from '@/store/slices/debates.slice';
+// import '@blueprintjs/popover2/src/blueprint-popover2.scss'
+// import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+import type { DebateArgument } from '@/store/slices/debates.slice';
 import RichEditor from '../RichEditor/RichEditor';
 import buttonStyles from '@/styles/shared/button.module.scss';
 
@@ -31,21 +31,22 @@ function DebateArgument(props: Props) {
       <div className={styles.header}>
         <h3 className={styles.title}>{debateArgumentData.title}</h3>
         {
-          additionalActions ? (
-            <div className={styles.actions}>
-              <Popover2
-                interactionKind="click"
-                placement="right"
-                usePortal={false}
-                content={additionalActions}
-                renderTarget={({ isOpen, ref, ...targetProps }) => (
-                  <span {...targetProps} ref={ref}>
-                    <Icon icon="more" />
-                  </span>
-                )}
-              />
-            </div>
-          ) : null
+          // TODO: fix hydration issue.
+          // additionalActions ? (
+          //   <div className={styles.actions}>
+          //     <Popover
+          //       interactionKind="click"
+          //       placement="right"
+          //       usePortal={false}
+          //       content={additionalActions}
+          //       renderTarget={({ isOpen, ref, ...targetProps }) => (
+          //         <span {...targetProps} ref={ref}>
+          //           <Icon icon="more" />
+          //         </span>
+          //       )}
+          //     />
+          //   </div>
+          // ) : null
         }
       </div>
 

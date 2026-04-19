@@ -1,3 +1,5 @@
+'use client';
+
 import CardSlider from '@/components/CardSlider/CardSlider';
 import Layout from '@/components/Layout/Layout';
 import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
@@ -7,7 +9,7 @@ import styles from '@/styles/MyActivity.module.scss';
 import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument, UserActivityDebate } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
 import { Dialog, DialogBody, Icon, IconSize } from '@blueprintjs/core';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import buttonStyles from '@/styles/shared/button.module.scss';
 

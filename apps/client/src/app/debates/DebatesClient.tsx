@@ -1,25 +1,22 @@
-import { GetServerSideProps } from "next";
-import styles from '@/styles/Debates.module.scss';
-import Layout from "@/components/Layout/Layout";
-import { api } from '@/utils/api'
-import { Debate } from "@/store/slices/debates.slice";
-import DebateCard from "@/components/DebateCard/DebateCard";
-import Input from "@/components/Input/Input";
-import { useMemo, useRef, useState } from "react";
-import { Dialog, DialogBody, Intent, Position, Toaster, ToasterInstance, ToastProps } from '@blueprintjs/core';
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/router";
-import buttonStyles from '@/styles/shared/button.module.scss';
-import Tags, { TagsRef } from "@/components/Tags/Tags";
-import { createDebate, CreateDebateData, fetchDebatesWithFilters } from "@/utils/api/debate";
-import SimpleCollapse from "@/components/SimpleCollapse/SimpleCollapse";
-import DebateFilters, { AppliedDebateFilters } from "@/components/DebateFilters/DebateFilters";
-import { useAppSelector } from "@/utils/hooks/store";
-import { selectCurrentUser } from "@/store/slices/user.slice";
+'use client';
 
-interface Props {
-  debates: Debate[];
-}
+import styles from '@/styles/Debates.module.scss';
+import Layout from '@/components/Layout/Layout';
+import { Debate } from '@/store/slices/debates.slice';
+import DebateCard from '@/components/DebateCard/DebateCard';
+import Input from '@/components/Input/Input';
+import { useMemo, useRef, useState } from 'react';
+import { Dialog, DialogBody, Intent, OverlayToaster, Position } from '@blueprintjs/core';
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import buttonStyles from '@/styles/shared/button.module.scss';
+import Tags, { TagsRef } from '@/components/Tags/Tags';
+import { createDebate, CreateDebateData, fetchDebatesWithFilters } from '@/utils/api/debate';
+import SimpleCollapse from '@/components/SimpleCollapse/SimpleCollapse';
+import DebateFilters, { AppliedDebateFilters } from '@/components/DebateFilters/DebateFilters';
+import { useAppSelector } from '@/utils/hooks/store';
+import { selectCurrentUser } from '@/store/slices/user.slice';
+import { Tag } from '@/types/tag';
 
 interface NewDebateData {
   title: string;
@@ -32,7 +29,11 @@ const toasterOptions = {
   usePortal: true,
 };
 
-function Debates(props: Props) {
+interface Props {
+  debates: Debate[];
+}
+
+export function DebatesClient(props: Props) {
   const [debates, setDebates] = useState(props.debates);
   const [isDebateModalOpen, setIsDebateModalOpen] = useState(false);
 
@@ -42,7 +43,7 @@ function Debates(props: Props) {
     reset,
   } = useForm<NewDebateData>();
 
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
   const router = useRouter();
 
   const user = useAppSelector(selectCurrentUser);
@@ -55,7 +56,7 @@ function Debates(props: Props) {
   }
 
   const redirectToDebatePage = (debate: Debate) => {
-    router.push(`${router.asPath}/${debate.id}`);
+    router.push(`/debates/${debate.id}`);
   }
 
   const startDebate = () => {
@@ -71,11 +72,6 @@ function Debates(props: Props) {
       return;
     }
 
-    console.log(data);
-
-    console.log(createDebateTagsRef.current?.getSelectedTags());
-
-
     setIsDebateModalOpen(false);
     reset();
 
@@ -83,7 +79,7 @@ function Debates(props: Props) {
     const debateData: CreateDebateData = {
       title: data.title,
       createdTags,
-      tagsIds: tags.map(t => t.id),
+      tagsIds: tags.map((t: Tag) => t.id),
     };
     createDebate(debateData)
       .then(r => {
@@ -126,7 +122,7 @@ function Debates(props: Props) {
             ) : null
           }
 
-          <ul className={styles.debates}>
+          <ul data-testid="debates-list" className={styles.debates}>
             {
               debates?.length ? (
                 debates.map(d => (
@@ -170,25 +166,7 @@ function Debates(props: Props) {
         </DialogBody>
       </Dialog>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
-}
-
-export default Debates;
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const res = await api.get('/debates', {
-    withCredentials: true,
-    headers: {
-      cookie: context.req.headers.cookie,
-    },
-  });
-  const debates = res.data?.data;
-
-  return {
-    props: {
-      debates,
-    },
-  }
 }

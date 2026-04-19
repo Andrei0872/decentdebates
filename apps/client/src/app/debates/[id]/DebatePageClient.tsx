@@ -1,65 +1,45 @@
+'use client';
+
 import Layout from '@/components/Layout/Layout';
-import { api } from '@/utils/api';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from '@/styles/DebatePage.module.scss'
 import DebateArgumentCard from '@/components/DebateArgument/DebateArgument';
-import { Callout, Icon, Menu, MenuDivider, MenuItem, Boundary, BreadcrumbProps } from '@blueprintjs/core';
-import { wrapper } from '@/store';
+import { Callout, Icon, Menu, MenuDivider, MenuItem, Boundary, BreadcrumbProps, Breadcrumbs } from '@blueprintjs/core';
 import { ArgumentType, CurrentDebate, DebateArgument, selectExpandedArgumentsIDs, selectCurrentDebate, setCurrentDebate, removeExpandedArgumentID, addExpandedArgumentID } from '@/store/slices/debates.slice';
-import { useRouter } from 'next/router';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
-import { Breadcrumbs2 } from '@blueprintjs/popover2';
 import buttonStyles from '@/styles/shared/button.module.scss';
-
-const NEW_ARGUMENT_PAGE_REGEX = /\/debates\/\d+\/new-argument(\?counterargumentId=\d+)?/;
 
 interface Props {
   debateInfo: CurrentDebate;
 }
 
-function DebatePage(props: Props) {
+export function DebatePageClient({ debateInfo }: Props) {
   const crtDebate = useAppSelector(selectCurrentDebate);
-  const { metadata, args } = crtDebate!;
+  const dispatch = useAppDispatch();
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    dispatch(setCurrentDebate(getDebateDTO(debateInfo)));
+    return () => {
+      dispatch(setCurrentDebate(null));
+    };
+  }, []);
+
+  const { metadata, args } = crtDebate ?? debateInfo;
 
   const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
   const [counterargumentsOfArgId, setCounterargumentsOfArgId] = useState<number | null>(null);
   const [counterargumentsOfArgHistory, setCounterargumentsOfArgHistory] = useState<number[]>([]);
-  const [detailedArgs, setDetailedArgs] = useState(args);
-
-  const router = useRouter();
-  const dispatch = useAppDispatch();
+  const [detailedArgs, setDetailedArgs] = useState(args ?? []);
 
   const expandedArgumentsIDsArray = useAppSelector(selectExpandedArgumentsIDs);
   const crtUser = useAppSelector(selectCurrentUser);
-
-  useEffect(() => {
-    // Using this small `hack` because, if `dispatch()` is invoked when `routeChangeStart`
-    // occurs, it will cause the current component to re-render again. The reason for that
-    // is because this component is subscribed to the store via `useAppSelector`.
-    // By invoking `teardownFn` during the `destroy` hook, we ensure that there will be no more
-    // active subscriptions.
-    let teardownFn: (() => void) | null = null;
-
-    const handleRouteLeave = (url: string) => {
-      if (NEW_ARGUMENT_PAGE_REGEX.test(url)) {
-        return;
-      }
-
-      teardownFn = () => {
-        dispatch(setCurrentDebate(null));
-      };
-    };
-
-    router.events.on('routeChangeStart', handleRouteLeave);
-
-    return () => {
-      router.events.off('routeChangeStart', handleRouteLeave);
-      teardownFn?.();
-    }
-  }, []);
 
   const expandedArgumentsIDs = useMemo(() => {
     return new Set(expandedArgumentsIDsArray);
@@ -69,7 +49,6 @@ function DebatePage(props: Props) {
     if (!counterargumentsOfArgId) {
       return null;
     }
-
     return detailedArgs.find(a => +a.argumentId === +counterargumentsOfArgId);
   }, [counterargumentsOfArgId]);
 
@@ -77,11 +56,9 @@ function DebatePage(props: Props) {
     if (!counterargumentsOfArgId) {
       return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO);
     }
-
     if (inspectedCounterargsOfArgument?.argumentType === ArgumentType.PRO) {
       return [inspectedCounterargsOfArgument];
     }
-
     return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
   }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
 
@@ -89,26 +66,21 @@ function DebatePage(props: Props) {
     if (!counterargumentsOfArgId) {
       return detailedArgs.filter(a => a.argumentType === ArgumentType.CON);
     }
-
     if (inspectedCounterargsOfArgument?.argumentType === ArgumentType.CON) {
       return [inspectedCounterargsOfArgument];
     }
-
     return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
   }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
 
   const historyBreadcrumbItems: BreadcrumbProps[] = useMemo(() => {
-    // O(n^2), but it's fine for now.
     return counterargumentsOfArgHistory.map(id => {
       const arg = detailedArgs.find(arg => arg.argumentId === id)!;
-
       return {
         text: arg.title,
         icon: "comment",
         onClick: () => {
           inspectCounterargumentsOf(arg);
         },
-
         id: arg.argumentId,
       };
     });
@@ -122,10 +94,8 @@ function DebatePage(props: Props) {
     if (expandedArgumentsIDs.has(argId)) {
       return;
     }
-
     setIsReadArgumentLoading(true);
-
-    const debateId = +router.query.id!;
+    const debateId = +params.id!;
     fetchArgument(debateId, argId)
       .then(arg => {
         dispatch(addExpandedArgumentID({ id: argId }));
@@ -135,7 +105,7 @@ function DebatePage(props: Props) {
   }
 
   const redirectToNewArgumentPage = () => {
-    router.push(`${router.asPath}/new-argument`);
+    router.push(`${pathname}/new-argument`);
   }
 
   const redirectToDebates = () => {
@@ -143,7 +113,7 @@ function DebatePage(props: Props) {
   }
 
   const addCounterargument = (arg: DebateArgument) => {
-    router.push(`${router.asPath}/new-argument?counterargumentId=${arg.argumentId}`);
+    router.push(`${pathname}/new-argument?counterargumentId=${arg.argumentId}`);
   }
 
   const inspectCounterargumentsOf = (arg: DebateArgument) => {
@@ -151,9 +121,7 @@ function DebatePage(props: Props) {
     if (isSameArgumentInspected) {
       return;
     }
-
     setCounterargumentsOfArgId(arg.argumentId);
-
     const historyIdx = counterargumentsOfArgHistory.findIndex(id => id === arg.argumentId);
     const isPartOfHistory = historyIdx !== -1;
     if (isPartOfHistory) {
@@ -170,7 +138,6 @@ function DebatePage(props: Props) {
 
   const renderAdditionalActions = (arg: DebateArgument) => {
     const shouldDisableCounterargsButton = !arg.counterarguments?.length || arg.argumentId === counterargumentsOfArgId;
-
     return (
       <Menu key="menu">
         <MenuDivider title="Actions" />
@@ -186,6 +153,10 @@ function DebatePage(props: Props) {
 
   const isAuthenticatedUser = !!crtUser;
   const isInspectingCounterargumentsOfArg = !!inspectedCounterargsOfArgument;
+
+  if (!crtDebate && !debateInfo) {
+    return null;
+  }
 
   return (
     <Layout>
@@ -224,7 +195,7 @@ function DebatePage(props: Props) {
         </section>
 
         <section className={styles.title}>
-          <h2>{metadata.debateTitle}</h2>
+          <h2 data-testid="debate-title">{metadata.debateTitle}</h2>
         </section>
 
         {
@@ -234,12 +205,10 @@ function DebatePage(props: Props) {
                 <Callout className={styles.counterargumentsNotice}>
                   <div className={styles.counterargumentsHeader}>
                     <Icon icon="info-sign" />
-
                     <div className={styles.counterargumentsTitle}>
                       <h3>You're now in a thread of arguments and counterarguments.</h3>
                     </div>
                   </div>
-
                   <div className={styles.counterargumentsDisable}>
                     <i onClick={disableInspectCounterargumentsMode}><u>Click here to disable this mode.</u></i>
                   </div>
@@ -247,7 +216,7 @@ function DebatePage(props: Props) {
               </section>
 
               <section className={styles.counterargumentsHistory}>
-                <Breadcrumbs2
+                <Breadcrumbs
                   items={historyBreadcrumbItems}
                   overflowListProps={{ alwaysRenderOverflow: false, collapseFrom: Boundary.START }}
                 />
@@ -297,44 +266,3 @@ function DebatePage(props: Props) {
     </Layout>
   )
 }
-
-export default DebatePage
-
-export const getServerSideProps = wrapper.getServerSideProps(
-  store => async (context) => {
-    const { id: debateId } = context.params || {};
-
-    if (!debateId) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        }
-      }
-    }
-
-    const isIdNumber = Number.isNaN(+debateId) === false;
-    if (!isIdNumber) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        }
-      }
-    }
-
-    const res = await api.get(`/debates/${debateId}`, {
-      withCredentials: true,
-      headers: {
-        cookie: context.req.headers.cookie,
-      },
-    });
-    const debateInfo = res.data?.data;
-
-    store.dispatch(setCurrentDebate(getDebateDTO(debateInfo)));
-
-    return {
-      props: {}
-    }
-  }
-);

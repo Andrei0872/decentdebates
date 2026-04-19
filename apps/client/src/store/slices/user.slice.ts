@@ -18,7 +18,7 @@ export interface UserState {
 export type User = UserState['currentUser'];
 
 const initialState: UserState = {
-  currentUser: LSUser,
+  currentUser: null,
 };
 
 export const userSlice = createSlice({

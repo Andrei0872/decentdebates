@@ -1,19 +1,20 @@
+'use client';
+
 import CommentsLayout from '@/components/Comments/CommentsLayout';
 import Layout from '@/components/Layout/Layout';
 import { selectCurrentUser, setCurrentUser, UserRoles } from '@/store/slices/user.slice';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
-import { useRouter } from 'next/router'
+import { useRouter, useParams } from 'next/navigation';
 import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
-import { Callout, Icon, IconSize, Intent, Menu, MenuItem, Position, Toaster } from '@blueprintjs/core';
+import { Callout, Icon, IconSize, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from '@blueprintjs/core';
 import { fetchArgumentAsModerator, fetchArgumentAsUser } from '@/utils/api/review';
 import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType, UpdateArgumentData } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { DebateArgument } from '@/store/slices/debates.slice';
 import { fetchArgument } from '@/utils/api/debate';
-import { Popover2 } from '@blueprintjs/popover2';
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
@@ -254,13 +255,15 @@ const toasterOptions = {
 
 let socket: Socket | undefined;
 function Argument() {
-  const router = useRouter()
-  const { id: ticketId } = router.query
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const ticketId = params.id;
 
   const dispatch = useAppDispatch();
 
   const user = useAppSelector(selectCurrentUser);
 
+  const [windowWidth, setWindowWidth] = useState(0);
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
   const [argument, setArgument] = useState<ArgumentAsModerator | ArgumentAsUser | null>(null);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
@@ -268,52 +271,38 @@ function Argument() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const canEditArgument = argument && argument.boardList !== BoardLists.ACCEPTED;
   const canAddComments = canEditArgument;
 
   useEffect(() => {
-    if (!user) {
-      router.push('/');
-    }
+    setWindowWidth(window.innerWidth);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
+    if (!user) {
+      router.push('/');
       return;
     }
 
-    if (!user) {
-      router.push('/');
-    }
-
-    (user!.role === UserRoles.MODERATOR ? fetchArgumentAsModerator : fetchArgumentAsUser)((ticketId as string))
+    (user.role === UserRoles.MODERATOR ? fetchArgumentAsModerator : fetchArgumentAsUser)(ticketId)
       .then(arg => setArgument(arg))
       .catch(() => {
         router.push('/');
         dispatch(setCurrentUser(null));
       });
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return () => { };
-    }
-
     socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
-
-    socket.on('connect', () => {
-      console.log('connect');
-    });
 
     socket.on('error', err => {
       router.push('/');
     });
-
-    socket.on('disconnect', () => {
-      console.log('disc');
-    })
 
     socket.on('comment/argument:create', (data: any) => {
       const { insertedComment } = data;
@@ -335,8 +324,6 @@ function Argument() {
       ));
     })
 
-    // Only the user can update its own argument.
-    // Here is the moderator receiving the update.
     socket.on('argument:update', (updatedArg: UpdateArgumentData) => {
       toasterRef.current?.show({
         icon: 'tick-circle',
@@ -363,18 +350,14 @@ function Argument() {
       socket?.disconnect();
       socket = undefined;
     }
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-
-    fetchTicketComments((ticketId as string))
+    fetchTicketComments(ticketId)
       .then(comments => {
         setComments(comments);
       })
-  }, [router.isReady]);
+  }, []);
 
   useEffect(() => {
     if (editingCommentId) {
@@ -389,7 +372,6 @@ function Argument() {
   const addComment = () => {
     const comment = editableCommentRef.current?.getContent();
     if (!comment) {
-      // TODO: some validation + informational message.
       return;
     }
 
@@ -456,8 +438,6 @@ function Argument() {
       return;
     }
 
-    // TODO: might want to add a loading indicator.
-
     setShouldDisplayRightPanel(!shouldDisplayRightPanel);
 
     if (counterargument) {
@@ -468,7 +448,6 @@ function Argument() {
       .then(counterarg => setCounterargument(counterarg));
   }
 
-  // Only a user can update their own argument.
   const onUpdateArgument = (data: UpdateArgumentData) => {
     if (argument?.reviewItemType !== ReviewItemType.USER) {
       return;
@@ -506,7 +485,7 @@ function Argument() {
   return (
     <Layout>
       <div className={styles.panelsContainer}>
-        <div style={{ width: shouldDisplayRightPanel ? `${window.innerWidth - RIGHT_PANEL_WIDTH}px` : '100%' }} className={styles.leftPanel}>
+        <div style={{ width: shouldDisplayRightPanel ? `${windowWidth - RIGHT_PANEL_WIDTH}px` : '100%' }} className={styles.leftPanel}>
           <section className={styles.buttons}>
             <button
               className={`${buttonStyles.button} ${buttonStyles.secondary}`}
@@ -531,9 +510,8 @@ function Argument() {
             <CommentsLayout.CommentsList>
               {
                 comments.map(c => (
-                  <div>
+                  <div key={c.commentId}>
                     <Comment
-                      key={c.commentId}
                       commentData={c}
                       isEditable={c.commentId === editingCommentId}
                       ref={r => {
@@ -555,7 +533,7 @@ function Argument() {
                             {
                               c.commenterId === user?.id ? (
                                 <div className={styles.commentActionsContainer}>
-                                  <Popover2
+                                  <Popover
                                     interactionKind="click"
                                     placement="right"
                                     usePortal={false}
@@ -564,12 +542,11 @@ function Argument() {
                                         <MenuItem onClick={() => startEditingComment(c)} icon="edit" text="Edit comment" />
                                       </Menu>
                                     }
-                                    renderTarget={({ isOpen, ref, ...targetProps }) => (
-                                      <span {...targetProps} ref={ref}>
-                                        <Icon className={styles.commentActionsIcon} icon="more" />
-                                      </span>
-                                    )}
-                                  />
+                                  >
+                                    <span>
+                                      <Icon className={styles.commentActionsIcon} icon="more" />
+                                    </span>
+                                  </Popover>
                                 </div>
                               ) : null
                             }
@@ -660,7 +637,7 @@ function Argument() {
         </div>
       </div>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }
