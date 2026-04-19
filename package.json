@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@10.7.1",
   "scripts": {
-    "dev": "docker compose --env-file packages/db/.env up -d && corepack pnpm run dev:apps",
-    "dev:apps": "corepack pnpm --filter @decentdebates/shared-types run build && corepack pnpm --filter @decentdebates/db run build && corepack pnpm --recursive --parallel --filter @decentdebates/shared-types --filter @decentdebates/db --filter api --filter client run dev",
+    "dev": "corepack pnpm run docker:up && turbo run dev",
+    "dev:api": "corepack pnpm run docker:up && turbo run dev --filter api",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "docker:up": "docker compose --env-file packages/db/.env up -d",
@@ -13,7 +13,6 @@
     "db:logs": "docker compose --env-file packages/db/.env logs -f",
     "db:reset": "docker compose --env-file packages/db/.env down -v && docker compose --env-file packages/db/.env up -d",
     "seed": "corepack pnpm --filter @decentdebates/db run seed",
-    "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file"
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file",
     "start:prod:local": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod"
   },
