@@ -13,7 +13,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'corepack pnpm -C ../.. run dev',
+    command: 'corepack pnpm -C ../.. run start:prod:local',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
     timeout: 180_000,
