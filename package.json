@@ -14,6 +14,8 @@
     "db:reset": "docker compose --env-file packages/db/.env down -v && docker compose --env-file packages/db/.env up -d",
     "seed": "corepack pnpm --filter @decentdebates/db run seed",
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file"
+    "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file",
+    "start:prod:local": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod"
   },
   "devDependencies": {
     "turbo": "^2.9.6"
