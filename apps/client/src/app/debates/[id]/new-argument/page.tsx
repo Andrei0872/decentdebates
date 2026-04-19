@@ -6,7 +6,7 @@ import styles from '@/styles/NewArgument.module.scss';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon, IconSize, Intent, Position, Spinner, SpinnerSize, Toaster } from '@blueprintjs/core';
+import { Callout, Collapse, Icon, IconSize, Intent, OverlayToaster, Position, Spinner, SpinnerSize } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -71,7 +71,7 @@ function NewArgumentContent() {
   const [isArgumentEditorReady, setIsArgumentEditorReady] = useState(true);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   useEffect(() => {
     if (!crtUser) {
@@ -370,7 +370,7 @@ function NewArgumentContent() {
           )
         }
 
-        <Toaster {...toasterOptions} ref={toasterRef} />
+        <OverlayToaster {...toasterOptions} ref={toasterRef} />
       </div>
     </Layout>
   )

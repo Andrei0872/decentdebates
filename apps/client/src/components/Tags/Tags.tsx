@@ -52,7 +52,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
         text={tag.name}
         selected={isTagSelected(tag)}
         onFocus={props.handleFocus}
-        elementRef={props.ref}
+        ref={props.ref}
         roleStructure="listoption"
         shouldDismissPopover={false}
         className={`${styles.tagItem} ${createdTagsIds[tag.id] ? styles.createdItem : ''}`}

@@ -12,7 +12,7 @@ import styles from '@/styles/ReviewDebate.module.scss'
 import { io, Socket } from 'socket.io-client';
 import { fetchTicketComments } from '@/utils/api/comment';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
-import { Icon, Intent, Menu, MenuItem, Popover, Position, Toaster } from '@blueprintjs/core';
+import { Icon, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from '@blueprintjs/core';
 import { fetchDebateAsModerator, fetchDebateAsUser } from '@/utils/api/review';
 import { DebateAsModerator, DebateAsUser, ReviewItemType, UpdateDebateData } from '@/types/review';
 import buttonStyles from '@/styles/shared/button.module.scss';
@@ -164,7 +164,7 @@ function Debate() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const canEditArgument = debate && debate.boardList !== BoardLists.ACCEPTED;
   const canAddComments = canEditArgument;
@@ -470,7 +470,7 @@ function Debate() {
         }
       </CommentsLayout>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }

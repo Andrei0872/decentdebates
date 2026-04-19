@@ -6,7 +6,7 @@ import { Debate } from '@/store/slices/debates.slice';
 import DebateCard from '@/components/DebateCard/DebateCard';
 import Input from '@/components/Input/Input';
 import { useMemo, useRef, useState } from 'react';
-import { Dialog, DialogBody, Intent, OverlayToaster, Position, Toaster } from '@blueprintjs/core';
+import { Dialog, DialogBody, Intent, OverlayToaster, Position } from '@blueprintjs/core';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import buttonStyles from '@/styles/shared/button.module.scss';

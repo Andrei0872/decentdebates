@@ -2,7 +2,7 @@ import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs
 import styles from './DebateArgument.module.scss';
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 // import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-import { DebateArgument } from '@/store/slices/debates.slice';
+import type { DebateArgument } from '@/store/slices/debates.slice';
 import RichEditor from '../RichEditor/RichEditor';
 import buttonStyles from '@/styles/shared/button.module.scss';
 

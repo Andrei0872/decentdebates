@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseSyntheticEvent, MouseEventHandler, ReactNode, useEffect, useRef, useState } from "react";
+import { BaseSyntheticEvent, MouseEventHandler, Ref, ReactNode, useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
@@ -10,7 +10,7 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, Popover, Position, Toaster } from "@blueprintjs/core";
+import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
 import { approveArgument, approveDebate, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
@@ -46,7 +46,7 @@ const Board: React.FC<BoardProps> = (props) => {
   }));
 
   return (
-    <div className={styles.board} ref={drop}>
+    <div className={styles.board} ref={drop as unknown as Ref<HTMLDivElement>}>
       <div className={styles.boardHeader}>
         {header}
       </div>
@@ -94,7 +94,7 @@ const Card: React.FC<CardProps> = (props) => {
   }
 
   return (
-    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag}>
+    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag as unknown as Ref<HTMLDivElement>}>
       <div className={styles.cardHeader}>
         <h4 className={styles.ticketLabel}>#{cardData.ticketLabel}</h4>
 
@@ -182,7 +182,7 @@ function Activity() {
   const crtModerator = useAppSelector(selectCurrentUser);
   const router = useRouter();
 
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const dispatch = useAppDispatch();
 
@@ -372,7 +372,7 @@ function Activity() {
         </DialogBody>
       </Dialog>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }

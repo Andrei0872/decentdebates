@@ -9,7 +9,7 @@ import { BaseSyntheticEvent, useEffect, useRef, useState } from 'react';
 import { Comment as IComment, UpdateCommentData } from '@/types/comment';
 import styles from '@/styles/ReviewArgument.module.scss';
 import Comment, { CommentRef } from '@/components/Comments/Comment';
-import { Callout, Icon, IconSize, Intent, Menu, MenuItem, Popover, Position, Toaster } from '@blueprintjs/core';
+import { Callout, Icon, IconSize, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from '@blueprintjs/core';
 import { fetchArgumentAsModerator, fetchArgumentAsUser } from '@/utils/api/review';
 import { ArgumentAsModerator, ArgumentAsUser, ReviewItemType, UpdateArgumentData } from '@/types/review';
 import RichEditor from '@/components/RichEditor/RichEditor';
@@ -271,7 +271,7 @@ function Argument() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
 
   const editableCommentRef = useRef<CommentRef | null>(null);
-  const toasterRef = useRef<Toaster>(null);
+  const toasterRef = useRef<OverlayToaster>(null);
 
   const canEditArgument = argument && argument.boardList !== BoardLists.ACCEPTED;
   const canAddComments = canEditArgument;
@@ -637,7 +637,7 @@ function Argument() {
         </div>
       </div>
 
-      <Toaster {...toasterOptions} ref={toasterRef} />
+      <OverlayToaster {...toasterOptions} ref={toasterRef} />
     </Layout>
   )
 }
