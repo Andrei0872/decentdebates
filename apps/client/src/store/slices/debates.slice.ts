@@ -44,10 +44,7 @@ export const debatesSlice = createSlice({
       state.list = action.payload;
     },
     setCurrentDebate (state, action: PayloadAction<CurrentDebate | null>) {
-      state.crtDebate = action.payload;
-      if (state.crtDebate) {
-        state.crtDebate.expandedArgumentsIDs = [];
-      }
+      state.crtDebate = action.payload ? { ...action.payload, expandedArgumentsIDs: [] } : null;
     },
     addExpandedArgumentID (state, action: PayloadAction<{ id: number }>) {
       if (!state.crtDebate?.expandedArgumentsIDs) {
