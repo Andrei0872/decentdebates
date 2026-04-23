@@ -8,7 +8,9 @@
     "start": "next start",
     "start:prod": "next start",
     "lint": "next lint",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest"
   },
   "dependencies": {
     "@blueprintjs/core": "^6.12.0",
@@ -40,9 +42,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^16.0.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^16.2.4",
-    "sass": "^1.58.1"
+    "jsdom": "^29.0.2",
+    "sass": "^1.58.1",
+    "vitest": "^4.1.4"
   }
 }
