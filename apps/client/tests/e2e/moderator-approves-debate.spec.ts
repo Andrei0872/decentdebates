@@ -32,8 +32,17 @@ test.beforeAll(async ({ playwright }) => {
   });
   expect(userLoginRes.ok(), `user login failed: ${userLoginRes.status()}`).toBeTruthy();
 
+  const debatesRes = await userRequest.get(`${API_BASE}/debates`);
+  expect(debatesRes.ok(), `listing debates failed: ${debatesRes.status()}`).toBeTruthy();
+  const { data: publicDebates }: { data: Array<{ tags: Array<{ id: number; name: string }> }> } =
+    await debatesRes.json();
+  const historyTag = publicDebates
+    .flatMap(d => d.tags)
+    .find(t => t.name === 'history');
+  expect(historyTag, 'seeded "history" tag not found').toBeTruthy();
+
   const createRes = await userRequest.post(`${API_BASE}/debates`, {
-    data: { title: debateTitle, tagsIds: [], createdTags: ['e2e-testing'] },
+    data: { title: debateTitle, tagsIds: [historyTag!.id], createdTags: [] },
   });
   expect(createRes.ok(), `create debate failed: ${createRes.status()}`).toBeTruthy();
   await userRequest.dispose();
