@@ -10,7 +10,6 @@ import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { fetchArgument } from '@/utils/api/debate';
 import { selectCurrentUser } from '@/store/slices/user.slice';
-import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 import buttonStyles from '@/styles/shared/button.module.scss';
 
 interface Props {
@@ -25,11 +24,11 @@ export function DebatePageClient({ debateInfo }: Props) {
   const pathname = usePathname();
 
   useEffect(() => {
-    dispatch(setCurrentDebate(getDebateDTO(debateInfo)));
+    dispatch(setCurrentDebate(debateInfo));
     return () => {
       dispatch(setCurrentDebate(null));
     };
-  }, []);
+  }, [debateInfo, dispatch]);
 
   const { metadata, args } = crtDebate ?? debateInfo;
 

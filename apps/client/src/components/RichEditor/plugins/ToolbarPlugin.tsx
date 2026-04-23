@@ -490,7 +490,7 @@ export default function ToolbarPlugin() {
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
-          updateToolbar();
+          // updateToolbar();
         });
       }),
       editor.registerCommand(

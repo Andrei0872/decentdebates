@@ -162,7 +162,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
   }
 
   return (
-    <div className={styles.container} onKeyDown={handleKeyDown}>
+    <div className={styles.container} onKeyDown={handleKeyDown} suppressHydrationWarning>
       <MultiSelect2<Tag>
         items={debateTags}
         itemRenderer={itemRenderer}

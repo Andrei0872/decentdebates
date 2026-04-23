@@ -1,3 +1,5 @@
+'use client';
+
 import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs/core';
 import styles from './DebateArgument.module.scss';
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
@@ -31,22 +33,20 @@ function DebateArgument(props: Props) {
       <div className={styles.header}>
         <h3 className={styles.title}>{debateArgumentData.title}</h3>
         {
-          // TODO: fix hydration issue.
-          // additionalActions ? (
-          //   <div className={styles.actions}>
-          //     <Popover
-          //       interactionKind="click"
-          //       placement="right"
-          //       usePortal={false}
-          //       content={additionalActions}
-          //       renderTarget={({ isOpen, ref, ...targetProps }) => (
-          //         <span {...targetProps} ref={ref}>
-          //           <Icon icon="more" />
-          //         </span>
-          //       )}
-          //     />
-          //   </div>
-          // ) : null
+          additionalActions ? (
+            <div className={styles.actions}>
+              <Popover
+                interactionKind="click"
+                placement="right"
+                content={additionalActions}
+                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                  <span {...targetProps} ref={ref}>
+                    <Icon icon="more" />
+                  </span>
+                )}
+              />
+            </div>
+          ) : null
         }
       </div>
 

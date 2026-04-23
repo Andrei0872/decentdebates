@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { DebatePageClient } from './DebatePageClient';
 import { CurrentDebate } from '@/store/slices/debates.slice';
+import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -31,6 +32,8 @@ export default async function DebatePage({ params }: Props) {
   if (!debateInfo) {
     redirect('/');
   }
+
+  debateInfo = getDebateDTO(debateInfo);
 
   return <DebatePageClient debateInfo={debateInfo} />;
 }

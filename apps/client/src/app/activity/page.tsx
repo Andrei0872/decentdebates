@@ -89,12 +89,10 @@ const Card: React.FC<CardProps> = (props) => {
     props.approveTicket(cardData);
   }
 
-  const handleActionsClick = (ev: any) => {
-    ev.stopPropagation();
-  }
 
+  // onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined}
   return (
-    <div onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined} className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag as unknown as Ref<HTMLDivElement>}>
+    <div data-testid="activity-card"  className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ''}`} ref={drag as unknown as Ref<HTMLDivElement>}>
       <div className={styles.cardHeader}>
         <h4 className={styles.ticketLabel}>#{cardData.ticketLabel}</h4>
 
@@ -104,15 +102,19 @@ const Card: React.FC<CardProps> = (props) => {
               <Popover
                 interactionKind="click"
                 placement="right"
-                usePortal={false}
                 content={
                   <Menu className={styles.cardActionsList} key="menu">
-                    <MenuItem onClick={approveItem} icon="tick-circle" text="Approve Ticket" />
+                    <MenuItem data-testid="approve-ticket" onClick={approveItem} icon="tick-circle" text="Approve Ticket" />
                   </Menu>
                 }
               >
-                <span onClick={handleActionsClick}>
-                  <Icon className={styles.commentActionsIcon} icon="more" />
+                <span
+                  role="button"
+                  tabIndex={0}
+                  data-testid="card-actions-trigger"
+                  aria-label="Card actions"
+                >
+                  <Icon icon="more" />
                 </span>
               </Popover>
             </div>
