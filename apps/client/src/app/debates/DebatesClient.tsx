@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation';
 import buttonStyles from '@/styles/shared/button.module.scss';
 import Tags, { TagsRef } from '@/components/Tags/Tags';
 import { createDebate, CreateDebateData, fetchDebatesWithFilters } from '@/utils/api/debate';
-import SimpleCollapse from '@/components/SimpleCollapse/SimpleCollapse';
 import DebateFilters, { AppliedDebateFilters } from '@/components/DebateFilters/DebateFilters';
 import { useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentUser } from '@/store/slices/user.slice';
@@ -97,7 +96,7 @@ export function DebatesClient(props: Props) {
 
     const uniqueTagIds = new Set();
     return allTags.filter(t => uniqueTagIds.has(t.id) ? false : (uniqueTagIds.add(t.id), true));
-  }, []);
+  }, [debates]);
 
   return (
     <Layout>
@@ -138,7 +137,10 @@ export function DebatesClient(props: Props) {
 
       <Dialog className={styles.createDebateDialog} title="Start a debate" isOpen={isDebateModalOpen} onClose={onStartDebateModalClosed}>
         <DialogBody useOverflowScrollContainer={undefined}>
-          <form className={styles.createDebateForm} onSubmit={handleSubmit(onNewDebateSubmit)}>
+          <form
+            className={styles.createDebateForm}
+            onSubmit={(event) => void handleSubmit(onNewDebateSubmit)(event)}
+          >
             <Input
               inputProps={{
                 className: styles.createDebateTitle,

@@ -7,9 +7,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:clean": "rm -rf dist && tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput"
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix"
   },
   "devDependencies": {
+    "@decentdebates/eslint-config": "workspace:*",
+    "eslint": "^9.39.4",
     "typescript": "^5.7.0"
   }
 }

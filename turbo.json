@@ -20,6 +20,12 @@
         "^lint"
       ]
     },
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": [
+        "^lint:fix"
+      ]
+    },
     "start:prod": {
       "dependsOn": ["build"],
       "persistent": true,

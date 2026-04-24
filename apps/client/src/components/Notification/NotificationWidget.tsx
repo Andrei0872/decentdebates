@@ -2,7 +2,7 @@
 
 import { Notification } from "@/types/notification";
 import { fetchNotifications } from "@/utils/api/notification";
-import { Icon, Menu, MenuDivider, MenuItem, Spinner, SpinnerSize, Popover } from "@blueprintjs/core"
+import { Icon, Spinner, SpinnerSize, Popover } from "@blueprintjs/core"
 import { MouseEvent, useEffect, useState } from "react";
 import RichEditor from "../RichEditor/RichEditor";
 import styles from './NotificationWidget.module.scss'
@@ -130,7 +130,7 @@ function NotificationWidget() {
             ) : <p className={styles.noNotifications}>No notifications.</p>
           )
         }
-        renderTarget={({ isOpen, ref, ...targetProps }) => (
+        renderTarget={({ ref, ...targetProps }) => (
           <span {...targetProps} className={`${styles.bellContainer} ${targetProps.className}`} ref={ref}>
             <Icon icon="notifications" />
             {

@@ -1,10 +1,9 @@
-import { selectCurrentUser, setCurrentUser, User, UserRoles } from "@/store/slices/user.slice";
+import { setCurrentUser, User, UserRoles } from "@/store/slices/user.slice";
 import { api } from "@/utils/api";
-import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
+import { useAppDispatch } from "@/utils/hooks/store";
 import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form"
 import formStyles from '@/styles/shared/form.module.scss';
-import { useEffect } from "react";
 import Input from "../Input/Input";
 import buttonStyles from '@/styles/shared/button.module.scss'
 import styles from './Login.module.scss';
@@ -21,17 +20,17 @@ function Login() {
   } = useForm<LoginData>();
 
   const dispatch = useAppDispatch();
-  const user = useAppSelector(selectCurrentUser);
+  // const user = useAppSelector(selectCurrentUser);
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (!!user) {
-      router.back();
-      return;
-    }
-  }, []);
-
+  // TODO: solve this.
+  // useEffect(() => {
+  //   if (!!user) {
+  //     router.back();
+  //     return;
+  //   }
+  // }, [router, user]);
 
   const onSubmit = (data: LoginData) => {
     api.post('auth/login', data)

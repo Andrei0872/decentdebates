@@ -28,7 +28,7 @@ function DebateCard(props: Props) {
         </div>
         <ul className={styles.tags}>
           {
-            cardData.tags.map((t, idx) => (
+            cardData.tags.map(t => (
               <li className={tagStyles.debateTag} key={t.id}>
                 {t.name}
               </li>

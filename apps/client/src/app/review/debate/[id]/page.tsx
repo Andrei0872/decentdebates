@@ -177,16 +177,16 @@ function Debate() {
 
     (user.role === UserRoles.MODERATOR ? fetchDebateAsModerator : fetchDebateAsUser)(ticketId)
       .then(r => setDebate(r.debate))
-      .catch(err => {
+      .catch(() => {
         router.push('/');
         dispatch(setCurrentUser(null));
       });
-  }, []);
+  }, [dispatch, router, ticketId, user]);
 
   useEffect(() => {
     socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
 
-    socket.on('error', err => {
+    socket.on('error', () => {
       router.push('/');
     });
 
@@ -235,14 +235,14 @@ function Debate() {
       socket?.disconnect();
       socket = undefined;
     }
-  }, []);
+  }, [router, ticketId]);
 
   useEffect(() => {
     fetchTicketComments(ticketId)
       .then(comments => {
         setComments(comments);
       })
-  }, []);
+  }, [ticketId]);
 
   useEffect(() => {
     if (editingCommentId) {
@@ -268,7 +268,10 @@ function Debate() {
   }
 
   const cancelEditing = (comment: IComment) => {
-    const editor = editableCommentRef.current?.getEditor()!;
+    const editor = editableCommentRef.current?.getEditor();
+    if (!editor) {
+      return;
+    }
 
     editor.setEditable(false);
     editor.setEditorState(editor.parseEditorState(comment.content));
@@ -277,7 +280,7 @@ function Debate() {
   }
 
   const saveCommentEdits = (comment: IComment) => {
-    const commentContent = editableCommentRef.current?.getContent()!;
+    const commentContent = editableCommentRef.current?.getContent();
     if (!commentContent) {
       return;
     }
@@ -304,8 +307,8 @@ function Debate() {
           });
         }
 
-        const editor = editableCommentRef.current?.getEditor()!;
-        editor.setEditable(false);
+        const editor = editableCommentRef.current?.getEditor();
+        editor?.setEditable(false);
 
         setEditingCommentId(null);
       }

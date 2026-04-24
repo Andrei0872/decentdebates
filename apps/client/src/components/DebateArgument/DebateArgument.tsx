@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs/core';
+import { Icon, Popover } from '@blueprintjs/core';
 import styles from './DebateArgument.module.scss';
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 // import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
@@ -39,7 +39,7 @@ function DebateArgument(props: Props) {
                 interactionKind="click"
                 placement="right"
                 content={additionalActions}
-                renderTarget={({ isOpen, ref, ...targetProps }) => (
+                renderTarget={({ ref, ...targetProps }) => (
                   <span {...targetProps} ref={ref}>
                     <Icon icon="more" />
                   </span>

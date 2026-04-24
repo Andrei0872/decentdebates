@@ -32,7 +32,6 @@ export function DebatePageClient({ debateInfo }: Props) {
 
   const { metadata, args } = crtDebate ?? debateInfo;
 
-  const [isReadArgumentLoading, setIsReadArgumentLoading] = useState(false);
   const [counterargumentsOfArgId, setCounterargumentsOfArgId] = useState<number | null>(null);
   const [counterargumentsOfArgHistory, setCounterargumentsOfArgHistory] = useState<number[]>([]);
   const [detailedArgs, setDetailedArgs] = useState(args ?? []);
@@ -49,7 +48,22 @@ export function DebatePageClient({ debateInfo }: Props) {
       return null;
     }
     return detailedArgs.find(a => +a.argumentId === +counterargumentsOfArgId);
-  }, [counterargumentsOfArgId]);
+  }, [counterargumentsOfArgId, detailedArgs]);
+
+  const inspectCounterargumentsOf = useCallback((arg: DebateArgument) => {
+    const isSameArgumentInspected = arg.argumentId === counterargumentsOfArgId;
+    if (isSameArgumentInspected) {
+      return;
+    }
+    setCounterargumentsOfArgId(arg.argumentId);
+    const historyIdx = counterargumentsOfArgHistory.findIndex(id => id === arg.argumentId);
+    const isPartOfHistory = historyIdx !== -1;
+    if (isPartOfHistory) {
+      setCounterargumentsOfArgHistory(counterargumentsOfArgHistory.slice(0, historyIdx + 1));
+    } else {
+      setCounterargumentsOfArgHistory([...counterargumentsOfArgHistory, arg.argumentId]);
+    }
+  }, [counterargumentsOfArgHistory, counterargumentsOfArgId]);
 
   const pros = useMemo(() => {
     if (!counterargumentsOfArgId) {
@@ -59,7 +73,7 @@ export function DebatePageClient({ debateInfo }: Props) {
       return [inspectedCounterargsOfArgument];
     }
     return detailedArgs.filter(a => a.argumentType === ArgumentType.PRO && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
+  }, [counterargumentsOfArgId, detailedArgs, inspectedCounterargsOfArgument]);
 
   const cons = useMemo(() => {
     if (!counterargumentsOfArgId) {
@@ -69,11 +83,18 @@ export function DebatePageClient({ debateInfo }: Props) {
       return [inspectedCounterargsOfArgument];
     }
     return detailedArgs.filter(a => a.argumentType === ArgumentType.CON && a.counterargumentTo === inspectedCounterargsOfArgument?.argumentId);
-  }, [counterargumentsOfArgId, expandedArgumentsIDsArray, detailedArgs]);
+  }, [counterargumentsOfArgId, detailedArgs, inspectedCounterargsOfArgument]);
 
   const historyBreadcrumbItems: BreadcrumbProps[] = useMemo(() => {
     return counterargumentsOfArgHistory.map(id => {
-      const arg = detailedArgs.find(arg => arg.argumentId === id)!;
+      const arg = detailedArgs.find(argument => argument.argumentId === id);
+      if (!arg) {
+        return {
+          text: 'Unknown argument',
+          icon: 'comment',
+          id,
+        };
+      }
       return {
         text: arg.title,
         icon: "comment",
@@ -83,7 +104,7 @@ export function DebatePageClient({ debateInfo }: Props) {
         id: arg.argumentId,
       };
     });
-  }, [counterargumentsOfArgHistory]);
+  }, [counterargumentsOfArgHistory, detailedArgs, inspectCounterargumentsOf]);
 
   const onCollapseArgument = (argId: number) => {
     dispatch(removeExpandedArgumentID({ id: argId }));
@@ -93,13 +114,14 @@ export function DebatePageClient({ debateInfo }: Props) {
     if (expandedArgumentsIDs.has(argId)) {
       return;
     }
-    setIsReadArgumentLoading(true);
-    const debateId = +params.id!;
+    const debateId = Number(params.id);
+    if (Number.isNaN(debateId)) {
+      return;
+    }
     fetchArgument(debateId, argId)
       .then(arg => {
         dispatch(addExpandedArgumentID({ id: argId }));
         setDetailedArgs(detailedArgs.map(a => a.argumentId !== argId ? a : ({ ...a, content: arg.content })));
-        setIsReadArgumentLoading(false);
       });
   }
 
@@ -113,21 +135,6 @@ export function DebatePageClient({ debateInfo }: Props) {
 
   const addCounterargument = (arg: DebateArgument) => {
     router.push(`${pathname}/new-argument?counterargumentId=${arg.argumentId}`);
-  }
-
-  const inspectCounterargumentsOf = (arg: DebateArgument) => {
-    const isSameArgumentInspected = arg.argumentId === counterargumentsOfArgId;
-    if (isSameArgumentInspected) {
-      return;
-    }
-    setCounterargumentsOfArgId(arg.argumentId);
-    const historyIdx = counterargumentsOfArgHistory.findIndex(id => id === arg.argumentId);
-    const isPartOfHistory = historyIdx !== -1;
-    if (isPartOfHistory) {
-      setCounterargumentsOfArgHistory(counterargumentsOfArgHistory.slice(0, historyIdx + 1));
-    } else {
-      setCounterargumentsOfArgHistory([...counterargumentsOfArgHistory, arg.argumentId]);
-    }
   }
 
   const disableInspectCounterargumentsMode = () => {
@@ -205,7 +212,7 @@ export function DebatePageClient({ debateInfo }: Props) {
                   <div className={styles.counterargumentsHeader}>
                     <Icon icon="info-sign" />
                     <div className={styles.counterargumentsTitle}>
-                      <h3>You're now in a thread of arguments and counterarguments.</h3>
+                      <h3>You&apos;re now in a thread of arguments and counterarguments.</h3>
                     </div>
                   </div>
                   <div className={styles.counterargumentsDisable}>

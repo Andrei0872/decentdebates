@@ -1,7 +1,6 @@
 import { debounce } from '@/utils/debounce';
-import { Ref, useCallback } from 'react';
+import { ChangeEvent, InputHTMLAttributes, Ref, useMemo } from 'react';
 import styles from './Input.module.scss';
-import { InputHTMLAttributes } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form';
 
 interface Props {
@@ -13,23 +12,24 @@ interface Props {
 }
 
 function Input(props: Props) {
-  const onChangeDebounced = useCallback(
-    debounce((ev: any) => {
+  const { debounceMs, inputProps, inputRef, onChange, register } = props;
+
+  const onChangeDebounced = useMemo(() => {
+    return debounce((ev: ChangeEvent<HTMLInputElement>) => {
       const value = ev.target.value;
-      props.onChange?.(value);
-    }, 500),
-    [],
-  );
+      onChange?.(value);
+    }, debounceMs ?? 500);
+  }, [debounceMs, onChange]);
 
   return (
     <input
       type="text"
       placeholder='Search...'
-      {...props.inputProps}
+      {...inputProps}
       onChange={onChangeDebounced}
-      className={`${styles.input} ${props.inputProps?.className ?? ''}`}
-      ref={props.inputRef ?? null}
-      {...props.register}
+      className={`${styles.input} ${inputProps?.className ?? ''}`}
+      ref={inputRef ?? null}
+      {...register}
     />
   )
 }

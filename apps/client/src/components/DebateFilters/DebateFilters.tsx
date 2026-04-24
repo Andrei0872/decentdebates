@@ -1,5 +1,5 @@
 import { Tag } from "@/types/tag";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Input from "../Input/Input";
 import SimpleCollapse from "../SimpleCollapse/SimpleCollapse";
 import Tags, { TagsRef } from "../Tags/Tags";

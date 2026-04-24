@@ -6,11 +6,10 @@ import styles from '@/styles/NewArgument.module.scss';
 import RichEditor from '@/components/RichEditor/RichEditor';
 import { useForm } from 'react-hook-form';
 import ExportContentPlugin, { ExportContentRefData } from '@/components/RichEditor/plugins/ExportContentPlugin';
-import { Callout, Collapse, Icon, IconSize, Intent, OverlayToaster, Position, Spinner, SpinnerSize } from '@blueprintjs/core';
+import { Callout, Icon, IconSize, Intent, OverlayToaster, Position, Spinner, SpinnerSize } from '@blueprintjs/core';
 import { useAppDispatch, useAppSelector } from '@/utils/hooks/store';
 import { selectCurrentDebate, DebateArgument, ArgumentType, setCurrentDebate } from '@/store/slices/debates.slice';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { api } from '@/utils/api';
 import { default as DebateArgumentCard } from '@/components/DebateArgument/DebateArgument';
 import { createArgument, CreateArgumentData, fetchArgument, fetchDebateById, fetchDraft, saveArgumentAsDraft, submitDraft, updateDraft } from '@/utils/api/debate';
 import { getCorrespondingCounterargumentType } from '@/utils/debate';
@@ -18,6 +17,7 @@ import { selectCurrentUser, setCurrentUser } from '@/store/slices/user.slice';
 import { getDebateDTO } from '@/dtos/debate/get-debate.dto';
 import buttonStyles from '@/styles/shared/button.module.scss';
 import SimpleCollapse from '@/components/SimpleCollapse/SimpleCollapse';
+import { useWatch } from 'react-hook-form';
 
 interface CreateArgumentFormData {
   counterargumentId?: number;
@@ -43,17 +43,20 @@ function NewArgumentContent() {
   const draftId = searchParams.get('draftId');
 
   const isCounterargumentExplicit = !!counterargumentIdParam;
+  const parsedDraftId = draftId ? Number(draftId) : null;
 
   const crtDebate = useAppSelector(selectCurrentDebate);
   const crtUser = useAppSelector(selectCurrentUser);
 
   const dispatch = useAppDispatch();
+  const isDraft = !!draftId && !Number.isNaN(+draftId);
+  const currentDebateId = crtDebate?.metadata.debateId;
 
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
+    control,
   } = useForm<CreateArgumentFormData>({
     defaultValues: {
       argType: ArgumentType.PRO,
@@ -68,7 +71,7 @@ function NewArgumentContent() {
   const [isCounterargumentExpanded, setIsCounterargumentExpanded] = useState(() => isCounterargumentExplicit);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
   const [prefilledEditorContent, setPrefilledEditorContent] = useState<null | string>(null);
-  const [isArgumentEditorReady, setIsArgumentEditorReady] = useState(true);
+  const [isArgumentEditorReady, setIsArgumentEditorReady] = useState(() => !isDraft);
 
   const exportEditorContentRef = useRef<ExportContentRefData>(null);
   const toasterRef = useRef<OverlayToaster>(null);
@@ -84,7 +87,7 @@ function NewArgumentContent() {
         setValue('counterargumentId', +counterargumentIdParam!);
       }, 0)
     }
-  }, []);
+  }, [counterargumentIdParam, crtUser, isCounterargumentExplicit, router, setValue]);
 
   useEffect(() => {
     if (!debateId || Number.isNaN(+debateId)) {
@@ -93,9 +96,7 @@ function NewArgumentContent() {
     }
 
     if (isDraft) {
-      setIsArgumentEditorReady(false);
-
-      fetchDraft(+debateId, +draftId!)
+      fetchDraft(+debateId, parsedDraftId!)
         .then(r => {
           const { debate, draft } = r;
           dispatch(setCurrentDebate(getDebateDTO(debate)));
@@ -125,10 +126,10 @@ function NewArgumentContent() {
       .catch(() => {
         router.push('/debates');
       });
-  }, []);
+  }, [debateId, dispatch, draftId, isDraft, router, setValue, parsedDraftId]);
 
   const onSubmit = (formData: CreateArgumentFormData, ev?: React.BaseSyntheticEvent) => {
-    const submitter = (ev!.nativeEvent as SubmitEvent).submitter;
+    const submitter = (ev?.nativeEvent as SubmitEvent | undefined)?.submitter;
     const isDraftSubmit = submitter?.dataset.isDraft === 'true';
 
     const editor = exportEditorContentRef.current?.getEditor();
@@ -143,13 +144,21 @@ function NewArgumentContent() {
     const action = isDraftSubmit
       ? (
         isUpdatingDraft
-          ? updateDraft({ debateId: +debateId!, draftId: +draftId!, draftData: createdArgument })
-          : saveArgumentAsDraft(crtDebate?.metadata.debateId!, createdArgument)
+          ? parsedDraftId !== null
+            ? updateDraft({ debateId: +debateId, draftId: parsedDraftId, draftData: createdArgument })
+            : Promise.reject(new Error('Draft ID is missing.'))
+          : currentDebateId
+            ? saveArgumentAsDraft(currentDebateId, createdArgument)
+            : Promise.reject(new Error('Current debate is missing.'))
       )
       : (
         isUpdatingDraft
-          ? submitDraft({ debateId: +debateId!, draftId: +draftId!, draftData: createdArgument })
-          : createArgument(crtDebate?.metadata.debateId!, createdArgument)
+          ? parsedDraftId !== null
+            ? submitDraft({ debateId: +debateId, draftId: parsedDraftId, draftData: createdArgument })
+            : Promise.reject(new Error('Draft ID is missing.'))
+          : currentDebateId
+            ? createArgument(currentDebateId, createdArgument)
+            : Promise.reject(new Error('Current debate is missing.'))
       );
     action
       .then(res => {
@@ -173,7 +182,9 @@ function NewArgumentContent() {
             router.push('/my-activity');
             return;
           }
-          router.push(`/debates/${crtDebate?.metadata.debateId!}`);
+          if (currentDebateId) {
+            router.push(`/debates/${currentDebateId}`);
+          }
         }, 1500);
       })
       .catch((err) => {
@@ -206,35 +217,38 @@ function NewArgumentContent() {
     router.back();
   }
 
-  const isCounterargument = watch('isCounterargument') === true;
-  const counterargumentId = isCounterargument ? watch('counterargumentId') : false;
-  const argType = watch('argType');
+  const isCounterargument = useWatch({ control, name: 'isCounterargument' }) === true;
+  const watchedCounterargumentId = useWatch({ control, name: 'counterargumentId' });
+  const counterargumentId = isCounterargument ? watchedCounterargumentId : false;
+  const argType = useWatch({ control, name: 'argType' });
   const isPageReady = !!crtDebate;
 
   const debateArguments = useMemo(() => {
     return crtDebate?.args.filter(arg => arg.argumentType !== argType);
-  }, [argType, isPageReady]);
+  }, [argType, crtDebate?.args]);
 
   useEffect(() => {
     setValue('counterargumentId', undefined);
-  }, [argType]);
+  }, [argType, setValue]);
 
   useEffect(() => {
     if (!isCounterargument) {
       setValue('counterargumentId', undefined);
     }
-  }, [isCounterargument]);
+  }, [isCounterargument, setValue]);
 
   useEffect(() => {
     if (!counterargumentId) {
       return;
     }
-    setCounterargument(null);
     if (isCounterargumentExpanded) {
-      fetchArgument(crtDebate?.metadata.debateId!, counterargumentId)
+      if (!currentDebateId) {
+        return;
+      }
+      fetchArgument(currentDebateId, counterargumentId)
         .then(arg => setCounterargument(arg));
     }
-  }, [counterargumentId]);
+  }, [counterargumentId, currentDebateId, isCounterargumentExpanded]);
 
   const expandCounterargument = async () => {
     setIsCounterargumentExpanded(!isCounterargumentExpanded);
@@ -248,7 +262,10 @@ function NewArgumentContent() {
     }
 
     if (counterargumentId) {
-      fetchArgument(crtDebate?.metadata.debateId!, counterargumentId)
+      if (!currentDebateId) {
+        return;
+      }
+      fetchArgument(currentDebateId, counterargumentId)
         .then(arg => setCounterargument(arg));
     }
   }
@@ -258,10 +275,9 @@ function NewArgumentContent() {
       return null;
     }
     return crtDebate?.args.find(arg => +arg.argumentId === +counterargumentId);
-  }, [counterargumentId]);
+  }, [counterargumentId, crtDebate]);
 
   const isUpdatingDraft = !!prefilledEditorContent;
-  const isDraft = !!draftId && !Number.isNaN(+draftId);
 
   return (
     <Layout>
@@ -295,7 +311,10 @@ function NewArgumentContent() {
               </Callout>
 
               <section className={styles.argumentContainer}>
-                <form className={styles.argumentForm} onSubmit={handleSubmit(onSubmit)}>
+                <form
+                  className={styles.argumentForm}
+                  onSubmit={(event) => void handleSubmit(onSubmit)(event)}
+                >
                   <div className={styles.argumentType}>
                     <div className={styles.radioGroup}>
                       <label className={`${styles.argTypeLabel} ${styles.labelPRO}`} htmlFor="pro">Pro</label>
@@ -308,7 +327,18 @@ function NewArgumentContent() {
                   </div>
 
                   <div className={styles.counterargumentCheck}>
-                    <input className={styles.counterargumentCheckInput} id='counterargumentCheck' type="checkbox" {...register('isCounterargument', { onChange: (ev) => { ev.target.checked && setCounterargument(null); } })} />
+                    <input
+                      className={styles.counterargumentCheckInput}
+                      id='counterargumentCheck'
+                      type="checkbox"
+                      {...register('isCounterargument', {
+                        onChange: (ev) => {
+                          if (ev.target.checked) {
+                            setCounterargument(null);
+                          }
+                        }
+                      })}
+                    />
                     <div className={`${styles.counterargumentSelect} ${isCounterargument ? '' : styles.isDisabled}`}>
                       <label htmlFor='counterargumentCheck'>is counterargument for</label>
                       <select className={styles.counterargumentSelectInput} {...register('counterargumentId')} disabled={!isCounterargument}>

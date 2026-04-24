@@ -4,11 +4,10 @@ import CardSlider from '@/components/CardSlider/CardSlider';
 import Layout from '@/components/Layout/Layout';
 import ArgumentCard from '@/components/UserActivity/ArgumentCard/ArgumentCard';
 import DebateCard from '@/components/UserActivity/DebateCard/DebateCard';
-import { CardLabels } from '@/dtos/moderator/get-activity.dto';
 import styles from '@/styles/MyActivity.module.scss';
 import { ActivityTypes, CardTypes, UserActivity, UserActivityArgument, UserActivityDebate } from '@/types/user';
 import { fetchUserActivity } from '@/utils/api/user';
-import { Dialog, DialogBody, Icon, IconSize } from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import buttonStyles from '@/styles/shared/button.module.scss';
@@ -74,9 +73,9 @@ function MyActivity() {
                   {
                     ongoingItems.map(oi => (
                       oi.cardType === CardTypes.DEBATE ? (
-                        <DebateCard click={() => onDebateClick(oi)} cardData={oi} />
+                        <DebateCard key={oi.ticketId} click={() => onDebateClick(oi)} cardData={oi} />
                       ) : (
-                        <ArgumentCard click={onArgumentClick} cardData={oi} />
+                        <ArgumentCard key={oi.ticketId} click={onArgumentClick} cardData={oi} />
                       )
                     ))
                   }
@@ -97,9 +96,9 @@ function MyActivity() {
                   {
                     solvedItems.map(si => (
                       si.cardType === CardTypes.DEBATE ? (
-                        <DebateCard click={() => onDebateClick(si)} cardData={si} />
+                        <DebateCard key={si.ticketId} click={() => onDebateClick(si)} cardData={si} />
                       ) : (
-                        <ArgumentCard click={onArgumentClick} cardData={si} />
+                        <ArgumentCard key={si.ticketId} click={onArgumentClick} cardData={si} />
                       )
                     ))
                   }

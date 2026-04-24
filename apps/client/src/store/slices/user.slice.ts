@@ -3,11 +3,6 @@ import { PublicUser, UserRoles } from '@decentdebates/shared-types';
 import { RootState } from '..';
 
 const LS_KEY = '@@user';
-let LSUser = null;
-if (global.localStorage) {
-  // @ts-ignore
-  LSUser = JSON.parse(localStorage.getItem(LS_KEY) || null);
-}
 
 export { UserRoles };
 

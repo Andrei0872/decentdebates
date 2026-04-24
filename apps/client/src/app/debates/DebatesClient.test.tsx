@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { UserRoles, type PublicUser } from '@decentdebates/shared-types';
 import { userReducer } from '@/store/slices/user.slice';
 import { debatesSlice } from '@/store/slices/debates.slice';
 import { moderatorSlice } from '@/store/slices/moderator.slice';
@@ -39,7 +40,7 @@ const buildDebate = (id: number, overrides: Partial<Debate> = {}): Debate => ({
 
 const renderWithStore = (
   ui: React.ReactElement,
-  { currentUser = null }: { currentUser?: unknown } = {},
+  { currentUser = null }: { currentUser?: PublicUser | null } = {},
 ) => {
   const store = configureStore({
     reducer: {
@@ -47,7 +48,11 @@ const renderWithStore = (
       [debatesSlice.name]: debatesSlice.reducer,
       [moderatorSlice.name]: moderatorSlice.reducer,
     },
-    preloadedState: { user: { currentUser } } as never,
+    preloadedState: {
+      user: { currentUser },
+      debates: debatesSlice.getInitialState(),
+      moderator: moderatorSlice.getInitialState(),
+    },
   });
   return render(<Provider store={store}>{ui}</Provider>);
 };
@@ -76,7 +81,7 @@ describe('DebatesClient', () => {
 
   it('shows the "Start a debate" button when a user is logged in', () => {
     renderWithStore(<DebatesClient debates={[buildDebate(1)]} />, {
-      currentUser: { id: 1, username: 'foo.bar', role: 'USER' },
+      currentUser: { id: 1, username: 'foo.bar', email: 'foo.bar@example.com', role: UserRoles.USER },
     });
     expect(screen.getByRole('button', { name: 'Start a debate' })).toBeInTheDocument();
   });

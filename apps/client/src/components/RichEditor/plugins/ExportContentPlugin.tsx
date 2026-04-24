@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { ForwardedRef, forwardRef, RefObject, useImperativeHandle } from 'react';
+import { ForwardedRef, forwardRef, useCallback, useImperativeHandle } from 'react';
 import { LexicalEditor } from 'lexical';
 
 export interface ExportContentRefData {
@@ -9,16 +9,16 @@ export interface ExportContentRefData {
 function ExportContentPlugin(props: any, ref: ForwardedRef<ExportContentRefData>) {
   const [editor] = useLexicalComposerContext();
   
-  const getEditor = () => {
+  const getEditor = useCallback(() => {
     return editor;
-  }
+  }, [editor]);
 
   useImperativeHandle(
     ref,
     () => ({
       getEditor,
     }),
-    [],
+    [getEditor],
   )
 
   return null;

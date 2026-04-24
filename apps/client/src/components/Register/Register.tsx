@@ -1,7 +1,7 @@
 
 import { setCurrentUser } from "@/store/slices/user.slice";
 import { api } from "@/utils/api";
-import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
+import { useAppDispatch } from "@/utils/hooks/store";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form"
 import formStyles from '@/styles/shared/form.module.scss';

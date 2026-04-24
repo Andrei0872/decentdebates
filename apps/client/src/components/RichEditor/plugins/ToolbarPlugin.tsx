@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { DOMElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
@@ -11,7 +11,6 @@ import {
   $getSelection,
   $isRangeSelection,
   $createParagraphNode,
-  $getNodeByKey,
   LexicalEditor,
   RangeSelection
 } from "lexical";
@@ -35,12 +34,6 @@ import {
   $createQuoteNode,
   $isHeadingNode
 } from "@lexical/rich-text";
-import {
-  $createCodeNode,
-  $isCodeNode,
-  getDefaultCodeLanguage,
-  getCodeLanguages
-} from "@lexical/code";
 import styles from './ToolbarPlugin.module.scss';
 
 const LowPriority = 1;
@@ -410,18 +403,14 @@ export default function ToolbarPlugin() {
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [blockType, setBlockType] = useState<BlockNames>("paragraph");
-  const [selectedElementKey, setSelectedElementKey] = useState<string | null>(null);
   const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState(
     false
   );
-  const [codeLanguage, setCodeLanguage] = useState("");
-  const [isRTL, setIsRTL] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
-  const [isCode, setIsCode] = useState(false);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -434,7 +423,6 @@ export default function ToolbarPlugin() {
       const elementKey = element.getKey();
       const elementDOM = editor.getElementByKey(elementKey);
       if (elementDOM !== null) {
-        setSelectedElementKey(elementKey);
         if ($isListNode(element)) {
           const parentList = $getNearestNodeOfType(anchorNode, ListNode);
           const type = parentList ? parentList.getTag() : element.getTag();
@@ -446,9 +434,6 @@ export default function ToolbarPlugin() {
           if (Object.hasOwn(blockTypeToBlockName, type)) {
             setBlockType(type as BlockNames);
           }
-          if ($isCodeNode(element)) {
-            setCodeLanguage(element.getLanguage() || getDefaultCodeLanguage());
-          }
         }
       }
       // Update text format
@@ -456,8 +441,8 @@ export default function ToolbarPlugin() {
       setIsItalic(selection.hasFormat("italic"));
       setIsUnderline(selection.hasFormat("underline"));
       setIsStrikethrough(selection.hasFormat("strikethrough"));
-      setIsCode(selection.hasFormat("code"));
-      setIsRTL($isParentElementRTL(selection));
+      selection.hasFormat("code");
+      $isParentElementRTL(selection);
 
       // Update links
       const node = getSelectedNode(selection);
@@ -471,31 +456,18 @@ export default function ToolbarPlugin() {
 
     // const edState = editor.getEditorState().toJSON();
     // console.log(editor.parseEditorState(edState).toJSON());
-
-    const edState = editor.getEditorState();
-    // edState.read(() => {
-
-    // })
-    // console.log(edState.toJSON());
-
-    // ~OK
-    // console.log(editor.getRootElement());
-
-    // console.log(JSON.stringify(editor.toJSON()));
-
-    // console.log(JSON.stringify(editor.getRootElement()));
   }, [editor]);
 
   useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
-          // updateToolbar();
+          updateToolbar();
         });
       }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_payload, newEditor) => {
+        () => {
           updateToolbar();
           return false;
         },

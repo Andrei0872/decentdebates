@@ -21,10 +21,6 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
   const [debateTags, setDebateTags] = useState(tags);
   const [createdTagsIds, setCreatedTagsIds] = useState<{ [k: number]: boolean }>({});
 
-  useImperativeHandle(ref, () => ({
-    getSelectedTags,
-  }));
-
   const getSelectedTags = () => {
     const existingSelectedTags = selectedTagsIds
       .filter(tId => !createdTagsIds[tId])
@@ -39,6 +35,10 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
       createdTags: createdTagsNames,
     }
   };
+
+  useImperativeHandle(ref, () => ({
+    getSelectedTags,
+  }));
 
   const itemRenderer: ItemRenderer<Tag> = (tag, props) => {
     if (!props.modifiers.matchesPredicate) {
@@ -102,11 +102,11 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
     });
   }
 
-  const handleTagRemove = (tag: ReactNode, tagIndex: number) => {
+  const handleTagRemove = (_tag: ReactNode, tagIndex: number) => {
     deselectTag(tagIndex);
   }
 
-  const filterTag: ItemPredicate<Tag> = (query, tag, tagIndex) => {
+  const filterTag: ItemPredicate<Tag> = (query, tag) => {
     const normalizedQuery = query.toLowerCase();
     const normalizedTagName = tag.name.toLowerCase();
 
@@ -153,7 +153,7 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
 
   const selectedTags = useMemo(() => {
     return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
-  }, [selectedTagsIds]);
+  }, [debateTags, selectedTagsIds]);
 
   const handleKeyDown = (ev: KeyboardEvent<HTMLDivElement>) => {
     if (ev.key === "Enter") {

@@ -1,7 +1,6 @@
 import { CardLabels } from "@decentdebates/shared-types";
 import { DebateAsModerator } from "@/types/review";
 import { Tag } from "@/types/tag";
-import { ModeratorDebateResponse } from "@/utils/api/review";
 
 export enum BoardLists {
   PENDING = 'PENDING',

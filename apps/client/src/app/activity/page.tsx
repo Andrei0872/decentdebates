@@ -1,6 +1,6 @@
 'use client';
 
-import { BaseSyntheticEvent, MouseEventHandler, Ref, ReactNode, useEffect, useRef, useState } from "react";
+import { BaseSyntheticEvent, Ref, ReactNode, useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styles from '@/styles/ModeratorActivity.module.scss';
@@ -10,7 +10,7 @@ import { api } from "@/utils/api";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks/store";
 import { selectCurrentUser, setCurrentUser, User } from "@/store/slices/user.slice";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogBody, Icon, IconSize, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from "@blueprintjs/core";
+import { Dialog, DialogBody, Icon, Intent, Menu, MenuItem, OverlayToaster, Popover, Position } from "@blueprintjs/core";
 import { selectPreviewedCard, setActivityPreviewedCard, setActivityPreviewedCardArgument, setActivityPreviewedCardDebate } from "@/store/slices/moderator.slice";
 import RichEditor from "@/components/RichEditor/RichEditor";
 import { approveArgument, approveDebate, fetchArgument, fetchDebateByTicketId } from "@/utils/api/moderator";
@@ -35,14 +35,11 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = (props) => {
   const { header, cards } = props;
 
-  const [{ isOver }, drop] = useDrop(() => ({
+  const [, drop] = useDrop(() => ({
     accept: DNDItemTypes.CARD,
-    drop: (item: DragItem, monitor) => {
+    drop: (item: DragItem) => {
       props.itemDropped(item, props.boardType);
     },
-    collect: monitor => ({
-      isOver: !!monitor.isOver(),
-    }),
   }));
 
   return (
@@ -72,11 +69,8 @@ const Card: React.FC<CardProps> = (props) => {
   const isTicketAvailable = cardData.moderatorId === null;
   const hasRightsOnTicket = isOwnTicket || isTicketAvailable;
 
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [, drag] = useDrag(() => ({
     type: DNDItemTypes.CARD,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging()
-    }),
     item: () => ({
       cardData: props.cardData,
       fromBoardList: props.boardList,
@@ -132,7 +126,7 @@ const Card: React.FC<CardProps> = (props) => {
 
               <ul className={styles.cardBodyDebateTags}>
                 {
-                  cardData.tags.map((t, idx) => (
+                  cardData.tags.map(t => (
                     <li className={tagStyles.debateTag} key={t.id}>
                       {t.name}
                     </li>
@@ -198,9 +192,17 @@ function Activity() {
           router.push('/');
         }
       })
-  }, []);
+  }, [dispatch, router]);
 
   const onItemDropped = (item: DragItem, toBoardList: BoardLists) => {
+    // TODO: remove awkward `?? null` from below by having a guard here.
+    const nextModeratorId = crtModerator?.id;
+    const nextModeratorUsername = crtModerator?.username;
+
+    if (item.fromBoardList === BoardLists.PENDING && toBoardList !== BoardLists.PENDING && (!nextModeratorId || !nextModeratorUsername)) {
+      return;
+    }
+
     const newActivityBoards = activityBoards.map(a => {
       if (a.boardList === item.fromBoardList) {
         a.cards = a.cards.filter(c => c.ticketId !== item.cardData.ticketId);
@@ -214,8 +216,8 @@ function Activity() {
         } else if (item.fromBoardList === BoardLists.PENDING && toBoardList !== BoardLists.PENDING) {
           item.cardData = {
             ...item.cardData,
-            moderatorId: crtModerator?.id!,
-            moderatorUsername: crtModerator?.username!,
+            moderatorId: nextModeratorId ?? null,
+            moderatorUsername: nextModeratorUsername ?? null,
           }
         }
 

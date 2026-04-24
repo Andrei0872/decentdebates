@@ -263,7 +263,7 @@ function Argument() {
 
   const user = useAppSelector(selectCurrentUser);
 
-  const [windowWidth, setWindowWidth] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false)
   const [argument, setArgument] = useState<ArgumentAsModerator | ArgumentAsUser | null>(null);
   const [counterargument, setCounterargument] = useState<DebateArgument | null>(null);
@@ -277,7 +277,6 @@ function Argument() {
   const canAddComments = canEditArgument;
 
   useEffect(() => {
-    setWindowWidth(window.innerWidth);
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -295,12 +294,12 @@ function Argument() {
         router.push('/');
         dispatch(setCurrentUser(null));
       });
-  }, []);
+  }, [dispatch, router, ticketId, user]);
 
   useEffect(() => {
     socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, { autoConnect: false, withCredentials: true, query: { ticketId } });
 
-    socket.on('error', err => {
+    socket.on('error', () => {
       router.push('/');
     });
 
@@ -350,14 +349,14 @@ function Argument() {
       socket?.disconnect();
       socket = undefined;
     }
-  }, []);
+  }, [router, ticketId]);
 
   useEffect(() => {
     fetchTicketComments(ticketId)
       .then(comments => {
         setComments(comments);
       })
-  }, []);
+  }, [ticketId]);
 
   useEffect(() => {
     if (editingCommentId) {
@@ -389,7 +388,10 @@ function Argument() {
   }
 
   const cancelEditing = (comment: IComment) => {
-    const editor = editableCommentRef.current?.getEditor()!;
+    const editor = editableCommentRef.current?.getEditor();
+    if (!editor) {
+      return;
+    }
 
     editor.setEditable(false);
     editor.setEditorState(editor.parseEditorState(comment.content));
@@ -398,7 +400,7 @@ function Argument() {
   }
 
   const saveCommentEdits = (comment: IComment) => {
-    const commentContent = editableCommentRef.current?.getContent()!;
+    const commentContent = editableCommentRef.current?.getContent();
     if (!commentContent) {
       return;
     }
@@ -425,8 +427,8 @@ function Argument() {
           });
         }
 
-        const editor = editableCommentRef.current?.getEditor()!;
-        editor.setEditable(false);
+        const editor = editableCommentRef.current?.getEditor();
+        editor?.setEditable(false);
 
         setEditingCommentId(null);
       }

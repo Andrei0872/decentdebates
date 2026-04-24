@@ -41,16 +41,6 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
 
   }, [commentData?.content]);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      getContent,
-      clearContent,
-      getEditor
-    }),
-    []
-  );
-
   const getContent = () => {
     const editor = exportEditorContentRef.current?.getEditor();
     if (!editor) {
@@ -75,6 +65,16 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
     const editor = exportEditorContentRef.current?.getEditor();
     return editor;
   }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getContent,
+      clearContent,
+      getEditor
+    }),
+    []
+  );
 
   return (
     <div className={styles.container}>

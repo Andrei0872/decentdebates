@@ -10,7 +10,7 @@ export default function Contribute() {
       <div className={styles.container}>
         <section className={styles.header}>
           <p className={styles.description}>
-            <span>DecentDebates</span> is a community effort. If you'd like to be part of this community of dedicated and wonderful people, here are a few ways to do that:
+            <span>DecentDebates</span> is a community effort. If you&apos;d like to be part of this community of dedicated and wonderful people, here are a few ways to do that:
           </p>
         </section>
 
