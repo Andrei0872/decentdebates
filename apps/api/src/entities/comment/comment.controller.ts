@@ -1,10 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Req, Res } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Param, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { from, map, catchError, tap } from 'rxjs';
+import { from, map, catchError } from 'rxjs';
 import { UserCookieData } from '../user/user.model';
-import { UpdateCommentData } from './comment.model';
 import { CommentService } from './comment.service';
-import { UpdateCommentDTO } from './dtos/update-comment.dto';
 
 @Controller('comment')
 export class CommentController {

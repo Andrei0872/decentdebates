@@ -21,7 +21,7 @@ export class AuthService {
     try {
       registerUserDTO.password = await this.hashPassword(registerUserDTO.password);
       return await this.userService.insertOne(registerUserDTO);
-    } catch (err) {
+    } catch {
       throw new Error('An error occurred while registering the user.');
     }
   }

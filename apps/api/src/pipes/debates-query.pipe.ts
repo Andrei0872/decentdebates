@@ -10,7 +10,7 @@ const tagsMatchingStrategyMap = {
 
 @Injectable()
 export class DebatesQueryPipe implements PipeTransform {
-  transform(encodedQuery: any, metadata: ArgumentMetadata): Filters {
+  transform(encodedQuery: any, _metadata: ArgumentMetadata): Filters {
     if (!encodedQuery) {
       return null;
     }

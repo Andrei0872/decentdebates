@@ -3,7 +3,7 @@ import { isNumber } from 'src/utils';
 
 @Injectable()
 export class DebateDraftPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
+  transform(value: any, _metadata: ArgumentMetadata) {
     const { debateId, draftId } = value;
     
     if (!isNumber(debateId)) {

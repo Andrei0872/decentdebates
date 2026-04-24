@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, HttpStatus, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce } from 'rxjs';
+import { catchError, forkJoin, from, map, mergeAll, reduce } from 'rxjs';
 import { UserCookieData } from './user.model';
 import { UserService } from './user.service';
 

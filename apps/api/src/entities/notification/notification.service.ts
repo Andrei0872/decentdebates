@@ -261,7 +261,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
     const client = await this.pool.connect();
     try {
-      const res = await client.query(sqlStl, values);
+      await client.query(sqlStl, values);
     } catch (err) {
       this.logError(err);
       throw err;
@@ -293,7 +293,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
     const client = await this.pool.connect();
     try {
-      const res = await client.query(sqlStl, values);
+      await client.query(sqlStl, values);
     } catch (err) {
       this.logError(err);
       throw err;

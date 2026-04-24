@@ -1,6 +1,5 @@
 import { LinkNode } from "@lexical/link";
-import { $createParagraphNode, $createTextNode, $insertNodes, createEditor } from "lexical";
-import { config } from 'src/config';
+import { $createParagraphNode, $createTextNode } from "lexical";
 import { richEditor } from "src/utils/rich-editor";
 import { NotificationEvent } from "../notification/notificatin.model";
 import { UserCookieData } from "../user/user.model";

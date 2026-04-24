@@ -3,8 +3,7 @@ import { Pool } from 'pg';
 import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
 import { ArgumentAsModerator, DebateAsModerator } from '../review/review.model';
 import { UserCookieData } from '../user/user.model';
-import { UpdateTicketDTO } from './dtos/update-ticket.dto';
-import { ModeratorActivity, ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
+import { ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
 
 @Injectable()
 export class ModeratorService {

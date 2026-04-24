@@ -246,7 +246,7 @@ export class DebatesService {
         argumentData.user.id,
         argumentData.argumentDetails.argumentType
       ];
-      const { rows: [{ id: argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
+      const { rows: [{ id: _argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
 
       await client.query('COMMIT');
 
@@ -487,9 +487,9 @@ export class DebatesService {
         draftInfo.debateId,
         draftInfo.user.id,
       ];
-      client.query(updateArgumentSql, updateArgumentValues),
+      await client.query(updateArgumentSql, updateArgumentValues);
 
-        await client.query('COMMIT');
+      await client.query('COMMIT');
     } catch (err) {
       this.logError(err);
       await client.query('ROLLBACK');

@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { ArgumentCommentPayload, ArgumentReviewUpdated, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
+import { ArgumentCommentPayload, ArgumentReviewUpdated, DebateCommentPayload, DebateReviewUpdated, SocketIOServer } from './review.model';
 import { Socket } from 'socket.io';
 import { ReviewService } from './review.service';
 import { UserCookieData, UserRoles } from '../user/user.model';
@@ -33,13 +32,13 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private eventEmitter: EventEmitter2,
   ) { }
 
-  afterInit(server: any) {
+  afterInit(_server: any) {
     if (shouldEmitRoutineLogs()) {
       this.logger.log(`Websocket server up & running on port ${PORT}.`);
     }
   }
 
-  async handleConnection(socket: Socket, ...args: any[]) {
+  async handleConnection(socket: Socket, ..._args: any[]) {
     try {
       const user = await this.reviewService.getUserFromSocket(socket);
       this.addUserToRoom(socket, user);

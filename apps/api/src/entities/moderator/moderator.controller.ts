@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Patch, Req, Res, UseGuards } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
-import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, tap, throwError } from 'rxjs';
+import { catchError, filter, forkJoin, from, groupBy, map, mergeAll, mergeMap, reduce, tap } from 'rxjs';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { ArgumentTicketApproved, DebateTicketApproved } from '../debates/debate.events';

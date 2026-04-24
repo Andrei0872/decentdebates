@@ -1,7 +1,7 @@
-import { Controller, Get, HttpException, HttpStatus, Logger, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { Controller, Get, HttpException, HttpStatus, Logger, MessageEvent, Req, Res, Sse } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Request, Response } from 'express';
-import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, mapTo, merge, NEVER, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { catchError, concat, filter, finalize, forkJoin, from, fromEventPattern, map, merge, NEVER, Observable, takeUntil, tap } from 'rxjs';
 import { ArgumentTicketApproved, ArgumentTicketCreated, ArgumentUpdated, DebateTicketApproved, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
 import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
 import { UserCookieData, UserRoles } from '../user/user.model';

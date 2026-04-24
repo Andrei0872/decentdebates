@@ -65,7 +65,6 @@ describe('ModeratorService integration', () => {
       boardList: 'PENDING',
       tagIds: [healthTagId],
     });
-    debateTicketId = debateTicketId;
     await createArgument(pool, {
       debateId: pendingDebateId,
       createdBy: userId,

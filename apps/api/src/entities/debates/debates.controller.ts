@@ -55,7 +55,7 @@ export class DebatesController {
 
     return from(this.debatesService.createDebate(user, body))
       .pipe(
-        map(data => res.status(HttpStatus.CREATED).json({ message: 'Debate successfully proposed.' })),
+        map(_data => res.status(HttpStatus.CREATED).json({ message: 'Debate successfully proposed.' })),
         catchError((err) => {
           throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
@@ -104,7 +104,7 @@ export class DebatesController {
 
     return from(this.debatesService.createArgument(argData))
       .pipe(
-        map((arg) => res.status(HttpStatus.CREATED).json({ message: 'The argument has been successfully created.' })),
+        map((_arg) => res.status(HttpStatus.CREATED).json({ message: 'The argument has been successfully created.' })),
         catchError((err) => {
           throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
@@ -128,7 +128,7 @@ export class DebatesController {
 
     return from(this.debatesService.saveArgumentAsDraft(argData))
       .pipe(
-        map((arg) => res.status(HttpStatus.CREATED).json({ message: 'Draft successfully saved.' })),
+        map((_arg) => res.status(HttpStatus.CREATED).json({ message: 'Draft successfully saved.' })),
         catchError((err) => {
           throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
@@ -182,7 +182,7 @@ export class DebatesController {
     };
     return from(this.debatesService.updateDraft(draftInfo))
       .pipe(
-        map(data => res.status(HttpStatus.OK).json({ message: 'Draft successfully updated.' })),
+        map(_data => res.status(HttpStatus.OK).json({ message: 'Draft successfully updated.' })),
         catchError((err) => {
           throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
@@ -202,7 +202,7 @@ export class DebatesController {
     };
     return from(this.debatesService.submitDraft(draftInfo))
       .pipe(
-        map(data => res.status(HttpStatus.CREATED).json({ message: 'The draft has been submitted successfully.' })),
+        map(_data => res.status(HttpStatus.CREATED).json({ message: 'The draft has been submitted successfully.' })),
         catchError((err) => {
           throw new HttpException(err instanceof Error ? err.message : String(err), HttpStatus.BAD_REQUEST);
         })
