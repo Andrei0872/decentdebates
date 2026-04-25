@@ -8,69 +8,71 @@ export class DebateTicketCreated implements NotificationEvent {
   constructor(
     public readonly ticketId: number,
     public readonly debateTitle: string,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'debate.ticket:created';
+  static EVENT_NAME = "debate.ticket:created";
 
   public getContent(): Promise<string> {
-    return richEditor.insertNodes(() => {
-      const debateTitleText = $createTextNode(this.debateTitle);
-      debateTitleText.setFormat('italic');
+    return richEditor
+      .insertNodes(() => {
+        const debateTitleText = $createTextNode(this.debateTitle);
+        debateTitleText.setFormat("italic");
 
-      const linkHref = new LinkNode(`/activity`);
-      const linkText = $createTextNode(' here');
-      linkHref.append(linkText);
+        const linkHref = new LinkNode(`/activity`);
+        const linkText = $createTextNode(" here");
+        linkHref.append(linkText);
 
-      const p = $createParagraphNode();
-      p.append(
-        $createTextNode('Find the ticket of '),
-        debateTitleText,
-        linkHref
-      );
+        const p = $createParagraphNode();
+        p.append(
+          $createTextNode("Find the ticket of "),
+          debateTitleText,
+          linkHref,
+        );
 
-      return [p];
-    }).getContent();
+        return [p];
+      })
+      .getContent();
   }
 
   public getTitle() {
-    return 'New proposed debate!';
+    return "New proposed debate!";
   }
 }
-
 
 export class ArgumentTicketCreated implements NotificationEvent {
   constructor(
     public readonly ticketId: number,
     public readonly argumentTitle: string,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'argument.ticket:created';
+  static EVENT_NAME = "argument.ticket:created";
 
   getContent(): Promise<string> {
-    return richEditor.insertNodes(() => {
-      const argumentTitleText = $createTextNode(this.argumentTitle);
-      argumentTitleText.setFormat('italic');
+    return richEditor
+      .insertNodes(() => {
+        const argumentTitleText = $createTextNode(this.argumentTitle);
+        argumentTitleText.setFormat("italic");
 
-      const linkHref = new LinkNode(`/activity`);
-      const linkText = $createTextNode(' here');
-      linkHref.append(linkText);
+        const linkHref = new LinkNode(`/activity`);
+        const linkText = $createTextNode(" here");
+        linkHref.append(linkText);
 
-      const p = $createParagraphNode();
-      p.append(
-        $createTextNode('Find the ticket of '),
-        argumentTitleText,
-        linkHref
-      );
+        const p = $createParagraphNode();
+        p.append(
+          $createTextNode("Find the ticket of "),
+          argumentTitleText,
+          linkHref,
+        );
 
-      return [p];
-    }).getContent();
+        return [p];
+      })
+      .getContent();
   }
 
   getTitle(): string {
-    return 'New argument proposed!';
+    return "New argument proposed!";
   }
 }
-
 
 export class DebateTitleUpdated implements NotificationEvent {
   constructor(
@@ -79,40 +81,42 @@ export class DebateTitleUpdated implements NotificationEvent {
     public readonly oldTitle: string,
     public readonly newTitle: string,
     public readonly recipientId: number,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'debate/title:update';
+  static EVENT_NAME = "debate/title:update";
 
   getContent(): Promise<string> {
     // 'X changed the title from Y to Z'.
-    return richEditor.insertNodes(() => {
-      const usernameText = $createTextNode(this.user.username);
-      usernameText.setFormat('bold');
+    return richEditor
+      .insertNodes(() => {
+        const usernameText = $createTextNode(this.user.username);
+        usernameText.setFormat("bold");
 
-      const oldTitleText = $createTextNode(this.oldTitle);
-      oldTitleText.setFormat('strikethrough');
+        const oldTitleText = $createTextNode(this.oldTitle);
+        oldTitleText.setFormat("strikethrough");
 
-      const debateTitleText = $createTextNode(this.newTitle);
-      debateTitleText.setFormat('italic');
-      const linkHref = new LinkNode(`/review/debate/${this.ticketId}`);
-      linkHref.append(debateTitleText);
+        const debateTitleText = $createTextNode(this.newTitle);
+        debateTitleText.setFormat("italic");
+        const linkHref = new LinkNode(`/review/debate/${this.ticketId}`);
+        linkHref.append(debateTitleText);
 
-      const p = $createParagraphNode();
-      p.append(
-        usernameText,
-        $createTextNode(' changed the title from '),
-        oldTitleText,
-        $createTextNode(' to '),
-        linkHref,
-        $createTextNode('.'),
-      );
+        const p = $createParagraphNode();
+        p.append(
+          usernameText,
+          $createTextNode(" changed the title from "),
+          oldTitleText,
+          $createTextNode(" to "),
+          linkHref,
+          $createTextNode("."),
+        );
 
-      return [p];
-    }).getContent();
+        return [p];
+      })
+      .getContent();
   }
 
   getTitle(): string {
-    return 'Debate updated!'
+    return "Debate updated!";
   }
 }
 
@@ -123,40 +127,42 @@ export class ArgumentUpdated implements NotificationEvent {
     public readonly debateTitle: string,
     public readonly argumentTitle: string,
     public readonly recipientId: number,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'argument:update';
+  static EVENT_NAME = "argument:update";
 
   getContent(): Promise<string> {
     // 'X updated Y in the debate entitled Z'.
-    return richEditor.insertNodes(() => {
-      const usernameText = $createTextNode(this.user.username);
-      usernameText.setFormat('bold');
+    return richEditor
+      .insertNodes(() => {
+        const usernameText = $createTextNode(this.user.username);
+        usernameText.setFormat("bold");
 
-      const debateTitle = $createTextNode(this.debateTitle);
-      debateTitle.setFormat('italic');
+        const debateTitle = $createTextNode(this.debateTitle);
+        debateTitle.setFormat("italic");
 
-      const argumentTitleText = $createTextNode(this.argumentTitle);
-      argumentTitleText.setFormat('italic');
-      const linkHref = new LinkNode(`/review/argument/${this.ticketId}`);
-      linkHref.append(argumentTitleText);
+        const argumentTitleText = $createTextNode(this.argumentTitle);
+        argumentTitleText.setFormat("italic");
+        const linkHref = new LinkNode(`/review/argument/${this.ticketId}`);
+        linkHref.append(argumentTitleText);
 
-      const p = $createParagraphNode();
-      p.append(
-        usernameText,
-        $createTextNode(' updated '),
-        linkHref,
-        $createTextNode(' in the debate entitled '),
-        debateTitle,
-        $createTextNode('.'),
-      );
+        const p = $createParagraphNode();
+        p.append(
+          usernameText,
+          $createTextNode(" updated "),
+          linkHref,
+          $createTextNode(" in the debate entitled "),
+          debateTitle,
+          $createTextNode("."),
+        );
 
-      return [p];
-    }).getContent();
+        return [p];
+      })
+      .getContent();
   }
 
   getTitle(): string {
-    return 'Argument updated!'
+    return "Argument updated!";
   }
 }
 
@@ -167,29 +173,28 @@ export class DebateTicketApproved implements NotificationEvent {
     public readonly debateTitle: string,
     public readonly recipientId: number,
     public readonly senderId: number,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'debate/ticket:approved';
+  static EVENT_NAME = "debate/ticket:approved";
 
   getContent(): Promise<string> {
-    return richEditor.insertNodes(() => {
-      const debateTitleText = $createTextNode(this.debateTitle);
-      debateTitleText.setFormat('italic');
-      const linkHref = new LinkNode(`/debates/${this.debateId}`);
-      linkHref.append(debateTitleText);
+    return richEditor
+      .insertNodes(() => {
+        const debateTitleText = $createTextNode(this.debateTitle);
+        debateTitleText.setFormat("italic");
+        const linkHref = new LinkNode(`/debates/${this.debateId}`);
+        linkHref.append(debateTitleText);
 
-      const p = $createParagraphNode();
-      p.append(
-        linkHref,
-        $createTextNode(' has been published!'),
-      );
+        const p = $createParagraphNode();
+        p.append(linkHref, $createTextNode(" has been published!"));
 
-      return [p];
-    }).getContent();
+        return [p];
+      })
+      .getContent();
   }
 
   getTitle(): string {
-    return 'Debate published!';
+    return "Debate published!";
   }
 }
 
@@ -202,34 +207,36 @@ export class ArgumentTicketApproved implements NotificationEvent {
     public readonly argumentTitle: string,
     public readonly recipientId: number,
     public readonly senderId: number,
-  ) { }
+  ) {}
 
-  static EVENT_NAME = 'argument/ticket:approved';
+  static EVENT_NAME = "argument/ticket:approved";
 
   getContent(): Promise<string> {
     // 'The argument X has been published in Y'.
-    return richEditor.insertNodes(() => {
-      const argumentTitleText = $createTextNode(this.argumentTitle);
-      argumentTitleText.setFormat('italic');
-      
-      const debateTitleText = $createTextNode(this.debateTitle);
-      debateTitleText.setFormat('italic');
-      const linkHref = new LinkNode(`/debates/${this.debateId}`);
-      linkHref.append(debateTitleText);
+    return richEditor
+      .insertNodes(() => {
+        const argumentTitleText = $createTextNode(this.argumentTitle);
+        argumentTitleText.setFormat("italic");
 
-      const p = $createParagraphNode();
-      p.append(
-        $createTextNode('The argument '),
-        argumentTitleText,
-        $createTextNode(' has been published in '),
-        linkHref,
-      );
+        const debateTitleText = $createTextNode(this.debateTitle);
+        debateTitleText.setFormat("italic");
+        const linkHref = new LinkNode(`/debates/${this.debateId}`);
+        linkHref.append(debateTitleText);
 
-      return [p];
-    }).getContent();
+        const p = $createParagraphNode();
+        p.append(
+          $createTextNode("The argument "),
+          argumentTitleText,
+          $createTextNode(" has been published in "),
+          linkHref,
+        );
+
+        return [p];
+      })
+      .getContent();
   }
 
   getTitle(): string {
-    return 'Argument published!';
+    return "Argument published!";
   }
 }

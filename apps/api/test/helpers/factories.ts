@@ -1,6 +1,13 @@
-import type { Pool } from 'pg';
+import type { Pool } from "pg";
 
-export async function createUser(pool: Pool, overrides?: Partial<{ username: string; email: string; role: 'USER' | 'MODERATOR' }>) {
+export async function createUser(
+  pool: Pool,
+  overrides?: Partial<{
+    username: string;
+    email: string;
+    role: "USER" | "MODERATOR";
+  }>,
+) {
   const uniqueSuffix = `${Date.now()}-${Math.random()}`;
   const result = await pool.query<{ id: number }>(
     `
@@ -10,9 +17,9 @@ export async function createUser(pool: Pool, overrides?: Partial<{ username: str
     `,
     [
       overrides?.username ?? `user-${uniqueSuffix}`,
-      'test-password',
+      "test-password",
       overrides?.email ?? `user-${uniqueSuffix}@example.com`,
-      overrides?.role ?? 'USER',
+      overrides?.role ?? "USER",
     ],
   );
 
@@ -32,11 +39,14 @@ export async function createTag(pool: Pool, name: string) {
   return result.rows[0].id;
 }
 
-export async function createTicket(pool: Pool, data: {
-  createdBy: number;
-  assignedTo?: number | null;
-  boardList?: 'PENDING' | 'IN REVIEW' | 'ACCEPTED' | 'CANCELED' | null;
-}) {
+export async function createTicket(
+  pool: Pool,
+  data: {
+    createdBy: number;
+    assignedTo?: number | null;
+    boardList?: "PENDING" | "IN REVIEW" | "ACCEPTED" | "CANCELED" | null;
+  },
+) {
   const result = await pool.query<{ id: number }>(
     `
       insert into ticket (created_by, assigned_to, board_list)
@@ -49,13 +59,16 @@ export async function createTicket(pool: Pool, data: {
   return result.rows[0].id;
 }
 
-export async function createDebate(pool: Pool, data: {
-  title: string;
-  createdBy: number;
-  boardList: 'PENDING' | 'IN REVIEW' | 'ACCEPTED' | 'CANCELED';
-  tagIds: number[];
-  assignedTo?: number | null;
-}) {
+export async function createDebate(
+  pool: Pool,
+  data: {
+    title: string;
+    createdBy: number;
+    boardList: "PENDING" | "IN REVIEW" | "ACCEPTED" | "CANCELED";
+    tagIds: number[];
+    assignedTo?: number | null;
+  },
+) {
   const ticketId = await createTicket(pool, {
     createdBy: data.createdBy,
     assignedTo: data.assignedTo,
@@ -85,25 +98,29 @@ export async function createDebate(pool: Pool, data: {
   return debateId;
 }
 
-export async function createArgument(pool: Pool, data: {
-  debateId: number;
-  createdBy: number;
-  title: string;
-  content: string;
-  argumentType: 'PRO' | 'CON';
-  counterargumentTo?: number | null;
-  ticketId?: number | null;
-  isDraft?: boolean;
-  assignedTo?: number | null;
-  boardList?: 'PENDING' | 'IN REVIEW' | 'ACCEPTED' | 'CANCELED' | null;
-}) {
-  const ticketId = data.ticketId === undefined
-    ? await createTicket(pool, {
-      createdBy: data.createdBy,
-      assignedTo: data.assignedTo,
-      boardList: data.boardList ?? null,
-    })
-    : data.ticketId;
+export async function createArgument(
+  pool: Pool,
+  data: {
+    debateId: number;
+    createdBy: number;
+    title: string;
+    content: string;
+    argumentType: "PRO" | "CON";
+    counterargumentTo?: number | null;
+    ticketId?: number | null;
+    isDraft?: boolean;
+    assignedTo?: number | null;
+    boardList?: "PENDING" | "IN REVIEW" | "ACCEPTED" | "CANCELED" | null;
+  },
+) {
+  const ticketId =
+    data.ticketId === undefined
+      ? await createTicket(pool, {
+          createdBy: data.createdBy,
+          assignedTo: data.assignedTo,
+          boardList: data.boardList ?? null,
+        })
+      : data.ticketId;
 
   const result = await pool.query<{ id: number }>(
     `
@@ -129,11 +146,14 @@ export async function createArgument(pool: Pool, data: {
   };
 }
 
-export async function createComment(pool: Pool, data: {
-  ticketId: number;
-  content: string;
-  commenterId: number;
-}) {
+export async function createComment(
+  pool: Pool,
+  data: {
+    ticketId: number;
+    content: string;
+    commenterId: number;
+  },
+) {
   const result = await pool.query<{ id: number }>(
     `
       insert into ticket_comment (ticket_id, content, commenter_id)
@@ -146,20 +166,29 @@ export async function createComment(pool: Pool, data: {
   return result.rows[0].id;
 }
 
-export async function createNotification(pool: Pool, data: {
-  title: string;
-  content: string;
-  recipientId: number;
-  event: 'ARGUMENT' | 'DEBATE' | 'SUGGESTION';
-  isRead?: boolean;
-}) {
+export async function createNotification(
+  pool: Pool,
+  data: {
+    title: string;
+    content: string;
+    recipientId: number;
+    event: "ARGUMENT" | "DEBATE" | "SUGGESTION";
+    isRead?: boolean;
+  },
+) {
   const result = await pool.query<{ id: number }>(
     `
       insert into notification (title, content, recipient_id, event, is_read)
       values ($1, $2, $3, $4, $5)
       returning id
     `,
-    [data.title, data.content, data.recipientId, data.event, data.isRead ?? false],
+    [
+      data.title,
+      data.content,
+      data.recipientId,
+      data.event,
+      data.isRead ?? false,
+    ],
   );
 
   return result.rows[0].id;

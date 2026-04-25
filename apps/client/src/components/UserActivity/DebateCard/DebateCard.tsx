@@ -1,7 +1,7 @@
-import { UserActivityDebate } from "@/types/user"
+import { UserActivityDebate } from "@/types/user";
 import { Icon, IconSize } from "@blueprintjs/core";
-import styles from './DebateCard.module.scss'
-import tagStyles from '@/styles/shared/debate-tag.module.scss';
+import styles from "./DebateCard.module.scss";
+import tagStyles from "@/styles/shared/debate-tag.module.scss";
 
 interface Props {
   cardData: UserActivityDebate;
@@ -25,26 +25,28 @@ function DebateCard(props: Props) {
         </p>
 
         <ul className={styles.debateTags}>
-          {
-            cardData.tags.map(t => (
-              <li className={tagStyles.debateTag} key={t.id}>
-                {t.name}
-              </li>
-            ))
-          }
+          {cardData.tags.map((t) => (
+            <li className={tagStyles.debateTag} key={t.id}>
+              {t.name}
+            </li>
+          ))}
         </ul>
       </div>
 
       <div className={styles.footer}>
         <div className={styles.status}>{cardData.boardList}</div>
 
-        <div className={`${styles.moderator} ${!cardData.moderatorUsername ? styles.unassigned : ''}`}>
-          <div><Icon icon="person" /></div>
+        <div
+          className={`${styles.moderator} ${!cardData.moderatorUsername ? styles.unassigned : ""}`}
+        >
+          <div>
+            <Icon icon="person" />
+          </div>
           <div>{cardData.moderatorUsername ?? <b>unassigned</b>}</div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default DebateCard
+export default DebateCard;

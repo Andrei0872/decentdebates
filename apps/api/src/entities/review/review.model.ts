@@ -1,8 +1,11 @@
 import { IoAdapter } from "@nestjs/platform-socket.io";
-import { ArgumentAsModerator, ArgumentAsUser } from "@decentdebates/shared-types";
+import {
+  ArgumentAsModerator,
+  ArgumentAsUser,
+} from "@decentdebates/shared-types";
 import { Debate } from "../debates/debates.model";
 
-export type SocketIOServer = ReturnType<IoAdapter['create']>
+export type SocketIOServer = ReturnType<IoAdapter["create"]>;
 export { ArgumentAsModerator, ArgumentAsUser };
 
 export interface DebateAsModerator extends Debate {

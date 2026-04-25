@@ -4,4 +4,4 @@ export const isNumber = (arg: any) => {
   }
 
   return !Number.isNaN(+arg);
-}
+};

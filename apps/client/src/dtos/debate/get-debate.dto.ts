@@ -4,7 +4,7 @@ export const getDebateDTO = (debateInfo: CurrentDebate) => {
   if (!debateInfo.args.length) {
     return debateInfo;
   }
-  
+
   const argsWithCounterargs = new Map<number, number[]>();
 
   for (const arg of debateInfo.args) {
@@ -13,9 +13,17 @@ export const getDebateDTO = (debateInfo: CurrentDebate) => {
       continue;
     }
 
-    argsWithCounterargs.set(counterargumentId, (argsWithCounterargs.get(counterargumentId) ?? []).concat([arg.argumentId]));
+    argsWithCounterargs.set(
+      counterargumentId,
+      (argsWithCounterargs.get(counterargumentId) ?? []).concat([
+        arg.argumentId,
+      ]),
+    );
   }
 
-  debateInfo.args = debateInfo.args.map(a => ({ ...a, counterarguments: argsWithCounterargs.get(a.argumentId) ?? null }));
+  debateInfo.args = debateInfo.args.map((a) => ({
+    ...a,
+    counterarguments: argsWithCounterargs.get(a.argumentId) ?? null,
+  }));
   return debateInfo;
-}
+};

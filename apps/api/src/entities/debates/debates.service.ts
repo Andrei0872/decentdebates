@@ -1,17 +1,26 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
-import { DebateAsModerator } from '../review/review.model';
-import { UserCookieData } from '../user/user.model';
-import { ArgumentTicketCreated, DebateTicketCreated } from './debate.events';
-import { CreateArgumentData, Debate, DebateArgument, GetDraftData, SubmitDraftData, UpdateArgumentData, UpdateDebateData, UpdateDraftData } from './debates.model';
-import { CreateDebateDTO } from './dtos/create-debate.dto';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Pool } from "pg";
+import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import { DebateAsModerator } from "../review/review.model";
+import { UserCookieData } from "../user/user.model";
+import { ArgumentTicketCreated, DebateTicketCreated } from "./debate.events";
+import {
+  CreateArgumentData,
+  Debate,
+  DebateArgument,
+  GetDraftData,
+  SubmitDraftData,
+  UpdateArgumentData,
+  UpdateDebateData,
+  UpdateDraftData,
+} from "./debates.model";
+import { CreateDebateDTO } from "./dtos/create-debate.dto";
 
 export enum TagsMatchingStrategy {
   ALL,
-  ANY
-};
+  ANY,
+}
 
 export interface RawFilters {
   queryStr?: string;
@@ -28,7 +37,7 @@ export interface Filters {
 }
 
 // This corresponds to the DB's ENUM type.
-const PENDING_BOARD_LIST = 'PENDING';
+const PENDING_BOARD_LIST = "PENDING";
 
 @Injectable()
 export class DebatesService {
@@ -37,7 +46,7 @@ export class DebatesService {
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
     private eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   private logError(err: unknown) {
     this.logger.error(err instanceof Error ? err.message : String(err));
@@ -90,7 +99,7 @@ export class DebatesService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debates.');
+      throw new Error("An error occurred while fetching the debates.");
     } finally {
       client.release();
     }
@@ -119,7 +128,7 @@ export class DebatesService {
     const tagsIdsArr = debateData.tagsIds;
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const hasCreatedTags = !!debateData.createdTags;
       if (hasCreatedTags) {
@@ -138,21 +147,22 @@ export class DebatesService {
         const values = [debateData.createdTags];
 
         const res = await client.query(insertTagsSql, values);
-        tagsIdsArr.push(...res.rows.map(r => r.id));
+        tagsIdsArr.push(...res.rows.map((r) => r.id));
       }
 
-      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+      const {
+        rows: [{ id: ticketId }],
+      } = await client.query(createTicketSqlStr, createTicketValues);
 
       const createDebateValues = [ticketId, debateData.title, user.id];
-      const { rows: [{ id: debateId }] } = await client.query(createDebateSql, createDebateValues);
+      const {
+        rows: [{ id: debateId }],
+      } = await client.query(createDebateSql, createDebateValues);
 
-      const assocDebateTagValues = [
-        tagsIdsArr.map(() => debateId),
-        tagsIdsArr,
-      ];
+      const assocDebateTagValues = [tagsIdsArr.map(() => debateId), tagsIdsArr];
       await client.query(assocDebateTagSql, assocDebateTagValues);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       this.eventEmitter.emitAsync(
         DebateTicketCreated.EVENT_NAME,
@@ -160,7 +170,7 @@ export class DebatesService {
       );
     } catch (err) {
       this.logError(err);
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw err;
     } finally {
       client.release();
@@ -210,7 +220,9 @@ export class DebatesService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate\'s information.');
+      throw new Error(
+        "An error occurred while fetching the debate's information.",
+      );
     } finally {
       client.release();
     }
@@ -233,9 +245,11 @@ export class DebatesService {
     `;
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
-      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+      const {
+        rows: [{ id: ticketId }],
+      } = await client.query(createTicketSqlStr, createTicketValues);
 
       const createArgumentValues = [
         argumentData.debateId,
@@ -244,11 +258,13 @@ export class DebatesService {
         argumentData.argumentDetails.content,
         argumentData.argumentDetails.counterargumentId,
         argumentData.user.id,
-        argumentData.argumentDetails.argumentType
+        argumentData.argumentDetails.argumentType,
       ];
-      const { rows: [{ id: _argumentId }] } = await client.query(createArgumentSql, createArgumentValues);
+      const {
+        rows: [{ id: _argumentId }],
+      } = await client.query(createArgumentSql, createArgumentValues);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       this.eventEmitter.emitAsync(
         ArgumentTicketCreated.EVENT_NAME,
@@ -256,15 +272,19 @@ export class DebatesService {
       );
     } catch (err) {
       this.logError(err);
-      await client.query('ROLLBACK');
-      throw new Error('An error occurred while adding the argument to the debate.');
+      await client.query("ROLLBACK");
+      throw new Error(
+        "An error occurred while adding the argument to the debate.",
+      );
     } finally {
       client.release();
     }
   }
 
-
-  async getDebateArgument(debateId: string, argumentId: string): Promise<DebateArgument[]> {
+  async getDebateArgument(
+    debateId: string,
+    argumentId: string,
+  ): Promise<DebateArgument[]> {
     const sqlStr = `
       select
         a.debate_id "debateId",
@@ -296,13 +316,18 @@ export class DebatesService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate\'s information.');
+      throw new Error(
+        "An error occurred while fetching the debate's information.",
+      );
     } finally {
       client.release();
     }
   }
 
-  async getDebateArgumentAsModerator(debateId: string, argumentId: string): Promise<DebateArgument[]> {
+  async getDebateArgumentAsModerator(
+    debateId: string,
+    argumentId: string,
+  ): Promise<DebateArgument[]> {
     const sqlStr = `
       select
         a.debate_id "debateId",
@@ -334,7 +359,9 @@ export class DebatesService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate\'s information.');
+      throw new Error(
+        "An error occurred while fetching the debate's information.",
+      );
     } finally {
       client.release();
     }
@@ -349,13 +376,13 @@ export class DebatesService {
 
     const values = [
       argumentData.debateId,
-      null, /* ticketId */
+      null /* ticketId */,
       argumentData.argumentDetails.title,
       argumentData.argumentDetails.content,
       argumentData.argumentDetails.counterargumentId,
       argumentData.user.id,
       argumentData.argumentDetails.argumentType,
-      true, /* is_draft */
+      true /* is_draft */,
     ];
 
     const client = await this.pool.connect();
@@ -364,7 +391,7 @@ export class DebatesService {
       await client.query(sqlStr, values);
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while saving the argument as draft.');
+      throw new Error("An error occurred while saving the argument as draft.");
     } finally {
       client.release();
     }
@@ -405,7 +432,7 @@ export class DebatesService {
       return res.rows[0];
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while saving the argument as draft.');
+      throw new Error("An error occurred while saving the argument as draft.");
     } finally {
       client.release();
     }
@@ -437,12 +464,11 @@ export class DebatesService {
     try {
       const res = await client.query(sqlStr, values);
       if (!res.rowCount) {
-        throw new Error('An error occurred while updating the draft.');
+        throw new Error("An error occurred while updating the draft.");
       }
-
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while updating the draft.');
+      throw new Error("An error occurred while updating the draft.");
     } finally {
       client.release();
     }
@@ -473,9 +499,11 @@ export class DebatesService {
     const client = await this.pool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
-      const { rows: [{ id: ticketId }] } = await client.query(createTicketSqlStr, createTicketValues);
+      const {
+        rows: [{ id: ticketId }],
+      } = await client.query(createTicketSqlStr, createTicketValues);
 
       const updateArgumentValues = [
         draftData.title,
@@ -489,11 +517,11 @@ export class DebatesService {
       ];
       await client.query(updateArgumentSql, updateArgumentValues);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
     } catch (err) {
       this.logError(err);
-      await client.query('ROLLBACK');
-      throw new Error('An error occurred while submitting the draft.');
+      await client.query("ROLLBACK");
+      throw new Error("An error occurred while submitting the draft.");
     } finally {
       client.release();
     }
@@ -541,7 +569,7 @@ export class DebatesService {
       return res.rows[0];
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate metadata.');
+      throw new Error("An error occurred while fetching the debate metadata.");
     } finally {
       client.release();
     }
@@ -560,7 +588,7 @@ export class DebatesService {
       data.argumentData.title,
       data.argumentData.content,
       data.argumentId,
-      data.user.id
+      data.user.id,
     ];
 
     const client = await this.pool.connect();
@@ -569,7 +597,7 @@ export class DebatesService {
       return res;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while updating the argument.');
+      throw new Error("An error occurred while updating the argument.");
     } finally {
       client.release();
     }
@@ -583,11 +611,7 @@ export class DebatesService {
       from ticket t
       where d.id = $2 and d.created_by = $3 and t.id = d.ticket_id and t.board_list != 'ACCEPTED';
     `;
-    const values = [
-      data.title,
-      data.debateId,
-      data.user.id
-    ];
+    const values = [data.title, data.debateId, data.user.id];
 
     const client = await this.pool.connect();
     try {
@@ -595,7 +619,7 @@ export class DebatesService {
       return res;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while updating the debate.');
+      throw new Error("An error occurred while updating the debate.");
     } finally {
       client.release();
     }
@@ -609,25 +633,36 @@ export class DebatesService {
     if (hasAll) {
       return {
         sql: `d.title::text ilike $1 and ${this.getTagFiltersSql(tagsFilter, 2)}`,
-        values: [queryStrFilter, filters.tags.values, ...tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL ? [filters.tags.values] : []],
-      }
+        values: [
+          queryStrFilter,
+          filters.tags.values,
+          ...(tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL
+            ? [filters.tags.values]
+            : []),
+        ],
+      };
     }
 
     if (queryStrFilter) {
       return {
         sql: `d.title::text ilike $1`,
         values: [queryStrFilter],
-      }
+      };
     }
 
     return {
       sql: `${this.getTagFiltersSql(tagsFilter, 1)}`,
-      values: [filters.tags.values, ...tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL ? [filters.tags.values] : []],
-    }
+      values: [
+        filters.tags.values,
+        ...(tagsFilter.matchingStrategy === TagsMatchingStrategy.ALL
+          ? [filters.tags.values]
+          : []),
+      ],
+    };
   }
 
   // Ideas came from here: https://www.postgresql.org/docs/current/functions-array.html.
-  private getTagFiltersSql(tags: Filters['tags'], parameterizedIdx: number) {
+  private getTagFiltersSql(tags: Filters["tags"], parameterizedIdx: number) {
     if (tags.matchingStrategy === TagsMatchingStrategy.ANY) {
       return `string_to_array(dts."tagsIds", ',') && string_to_array($${parameterizedIdx++}, ',')`;
     }

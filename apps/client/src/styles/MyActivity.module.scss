@@ -32,7 +32,7 @@
   align-self: flex-start;
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .ongoing .list,
@@ -45,7 +45,7 @@
   width: 100vw;
 }
 
-.list>li {
+.list > li {
   height: calc(5rem + 5vh);
   border: 1px solid black;
   min-width: calc(7rem + 10vw);
@@ -56,7 +56,7 @@
   margin-block-start: 2rem;
   width: 80%;
   margin-inline-start: 4rem;
-  justify-content: space-between
+  justify-content: space-between;
 }
 
 .pageTitle {

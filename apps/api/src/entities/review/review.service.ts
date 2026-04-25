@@ -1,24 +1,24 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
-import { parse } from 'cookie'
-import * as cookieSignature from 'cookie-signature'
-import { ConfigService } from '@nestjs/config';
-import { REDIS_STORE_TOKEN } from 'src/redis/redis.module';
-import { UserCookieData } from '../user/user.model';
+import { Inject, Injectable } from "@nestjs/common";
+import { WsException } from "@nestjs/websockets";
+import { Socket } from "socket.io";
+import { parse } from "cookie";
+import * as cookieSignature from "cookie-signature";
+import { ConfigService } from "@nestjs/config";
+import { REDIS_STORE_TOKEN } from "src/redis/redis.module";
+import { UserCookieData } from "../user/user.model";
 
-const UNAUTHENTICATED_ERR = new WsException('Unauthenticated');
+const UNAUTHENTICATED_ERR = new WsException("Unauthenticated");
 
 @Injectable()
 export class ReviewService {
   constructor(
     private configService: ConfigService,
     @Inject(REDIS_STORE_TOKEN) private redisStore: any,
-  ) { }
+  ) {}
 
   getUserFromSocket(socket: Socket): Promise<UserCookieData> {
     const { cookie: cookieHeaderValue, connection } = socket.handshake.headers;
-    if (connection === 'close') {
+    if (connection === "close") {
       socket.disconnect(true);
       return;
     }
@@ -32,8 +32,11 @@ export class ReviewService {
       throw UNAUTHENTICATED_ERR;
     }
 
-    const cookieSecret = this.configService.get('COOKIE_SECRET');
-    const sessionId = cookieSignature.unsign(signedSessionId.slice(2), cookieSecret);
+    const cookieSecret = this.configService.get("COOKIE_SECRET");
+    const sessionId = cookieSignature.unsign(
+      signedSessionId.slice(2),
+      cookieSecret,
+    );
     if (!sessionId) {
       throw UNAUTHENTICATED_ERR;
     }
@@ -45,8 +48,7 @@ export class ReviewService {
           return;
         }
         res(sess.user);
-      })
+      });
     });
   }
-
 }

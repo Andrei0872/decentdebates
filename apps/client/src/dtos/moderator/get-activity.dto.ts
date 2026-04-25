@@ -3,10 +3,10 @@ import { DebateAsModerator } from "@/types/review";
 import { Tag } from "@/types/tag";
 
 export enum BoardLists {
-  PENDING = 'PENDING',
-  IN_REVIEW = 'IN REVIEW',
-  ACCEPTED = 'ACCEPTED',
-  CANCELED = 'CANCELED',
+  PENDING = "PENDING",
+  IN_REVIEW = "IN REVIEW",
+  ACCEPTED = "ACCEPTED",
+  CANCELED = "CANCELED",
 }
 
 const BOARD_LISTS_SORT_ORDER = {
@@ -14,7 +14,7 @@ const BOARD_LISTS_SORT_ORDER = {
   [BoardLists.IN_REVIEW]: 1,
   [BoardLists.ACCEPTED]: 2,
   [BoardLists.CANCELED]: 3,
-}
+};
 
 export { CardLabels };
 
@@ -26,7 +26,8 @@ export interface ModeratorActivityBase {
   moderatorUsername: string | null;
 }
 
-export interface ModeratorActivityDebate extends ModeratorActivityBase, DebateAsModerator {
+export interface ModeratorActivityDebate
+  extends ModeratorActivityBase, DebateAsModerator {
   ticketLabel: CardLabels.DEBATE;
   tags: Tag[];
   debateId: number;
@@ -43,7 +44,9 @@ export interface ModeratorActivityArgument extends ModeratorActivityBase {
   username: string;
 }
 
-export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;
+export type ModeratorActivity =
+  | ModeratorActivityArgument
+  | ModeratorActivityDebate;
 
 export interface BoardData {
   boardList: BoardLists;
@@ -51,7 +54,11 @@ export interface BoardData {
 }
 
 export const getActivityDTO = (data: BoardData[]) => {
-  data.sort((b1, b2) => BOARD_LISTS_SORT_ORDER[b1.boardList] - BOARD_LISTS_SORT_ORDER[b2.boardList]);
+  data.sort(
+    (b1, b2) =>
+      BOARD_LISTS_SORT_ORDER[b1.boardList] -
+      BOARD_LISTS_SORT_ORDER[b2.boardList],
+  );
 
   return data;
 };

@@ -6,7 +6,7 @@
 .header {
   display: flex;
   justify-content: space-between;
-  padding: .3rem .5rem;
+  padding: 0.3rem 0.5rem;
   align-items: center;
 
   &.expandOnClick {
@@ -18,7 +18,7 @@
 .bodyWrapper {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows .1s;
+  transition: grid-template-rows 0.1s;
   overflow: hidden;
 
   &.isOpen {
@@ -28,13 +28,13 @@
 
 .body {
   visibility: hidden;
-  transition: all .1s;
+  transition: all 0.1s;
   min-height: 0;
   padding: 0;
-  
+
   .isOpen & {
     visibility: visible;
-    padding: .3rem .5rem;
+    padding: 0.3rem 0.5rem;
   }
 }
 

@@ -1,9 +1,9 @@
 import { ArgumentType, DebateArgument } from "@/store/slices/debates.slice";
 import { api } from ".";
-import { CurrentDebate } from '@/store/slices/debates.slice';
+import { CurrentDebate } from "@/store/slices/debates.slice";
 import { AppliedDebateFilters } from "@/components/DebateFilters/DebateFilters";
 
-const ROOT_PATH = '/debates';
+const ROOT_PATH = "/debates";
 
 export interface CreateArgumentData {
   title: string;
@@ -18,56 +18,74 @@ export interface UpdateDraftParams {
   draftData: CreateArgumentData;
 }
 
-
 export interface GetDraftResponse {
-  debate: Pick<CurrentDebate, 'metadata' | 'args'>;
+  debate: Pick<CurrentDebate, "metadata" | "args">;
   draft: DebateArgument;
 }
 
 export const createArgument = (debateId: number, data: CreateArgumentData) => {
-  return api.post(`${ROOT_PATH}/${debateId}/argument`, data)
-    .then(r => r.data);
-}
+  return api
+    .post(`${ROOT_PATH}/${debateId}/argument`, data)
+    .then((r) => r.data);
+};
 
-export const fetchArgument = (debateId: number, argId: number): Promise<DebateArgument> => {
-  return api.get(`debates/${debateId}/argument/${argId}`)
-    .then(r => r.data.data);
-}
+export const fetchArgument = (
+  debateId: number,
+  argId: number,
+): Promise<DebateArgument> => {
+  return api
+    .get(`debates/${debateId}/argument/${argId}`)
+    .then((r) => r.data.data);
+};
 
 export const fetchDebateById = (debateId: number) => {
-  return api.get(`/debates/${debateId}`)
-    .then(r => r.data.data);
-}
+  return api.get(`/debates/${debateId}`).then((r) => r.data.data);
+};
 
-export const saveArgumentAsDraft = (debateId: number, data: CreateArgumentData) => {
-  return api.post(`${ROOT_PATH}/${debateId}/draft`, data)
-    .then(r => r.data);
-}
+export const saveArgumentAsDraft = (
+  debateId: number,
+  data: CreateArgumentData,
+) => {
+  return api.post(`${ROOT_PATH}/${debateId}/draft`, data).then((r) => r.data);
+};
 
-export const fetchDraft = (debateId: number, argId: number): Promise<GetDraftResponse> => {
-  return api.get(`${ROOT_PATH}/${debateId}/draft/${argId}?includeDebate=true`)
-    .then(r => r.data.data);
-}
+export const fetchDraft = (
+  debateId: number,
+  argId: number,
+): Promise<GetDraftResponse> => {
+  return api
+    .get(`${ROOT_PATH}/${debateId}/draft/${argId}?includeDebate=true`)
+    .then((r) => r.data.data);
+};
 
 export const updateDraft = (params: UpdateDraftParams) => {
-  return api.patch(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}`, params.draftData)
-    .then(r => r.data);
-}
+  return api
+    .patch(
+      `${ROOT_PATH}/${params.debateId}/draft/${params.draftId}`,
+      params.draftData,
+    )
+    .then((r) => r.data);
+};
 
 export const submitDraft = (params: UpdateDraftParams) => {
-  return api.post(`${ROOT_PATH}/${params.debateId}/draft/${params.draftId}/save`, params.draftData)
-    .then(r => r.data);
-}
+  return api
+    .post(
+      `${ROOT_PATH}/${params.debateId}/draft/${params.draftId}/save`,
+      params.draftData,
+    )
+    .then((r) => r.data);
+};
 
 export interface CreateDebateData {
   title: string;
   tagsIds: number[];
   createdTags: string[];
 }
-export const createDebate = (data: CreateDebateData): Promise<{ message: string }> => {
-  return api.post(`${ROOT_PATH}`, data)
-    .then(r => r.data);
-}
+export const createDebate = (
+  data: CreateDebateData,
+): Promise<{ message: string }> => {
+  return api.post(`${ROOT_PATH}`, data).then((r) => r.data);
+};
 
 export interface DebateFilters {
   queryStr?: string;
@@ -82,7 +100,7 @@ export const fetchDebatesWithFilters = (filters: AppliedDebateFilters) => {
   }
 
   if (filters.tags) {
-    queryParams.tags = filters.tags.join(',');
+    queryParams.tags = filters.tags.join(",");
   }
 
   if (filters.tags_match) {
@@ -90,6 +108,5 @@ export const fetchDebatesWithFilters = (filters: AppliedDebateFilters) => {
   }
 
   const encodedQueryParams = btoa(JSON.stringify(queryParams));
-  return api.get(`/debates?q=${encodedQueryParams}`)
-    .then(r => r.data.data)
-}
+  return api.get(`/debates?q=${encodedQueryParams}`).then((r) => r.data.data);
+};

@@ -12,13 +12,13 @@ import {
   $isRangeSelection,
   $createParagraphNode,
   LexicalEditor,
-  RangeSelection
+  RangeSelection,
 } from "lexical";
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import {
   $isParentElementRTL,
   $wrapNodes,
-  $isAtNodeEnd
+  $isAtNodeEnd,
 } from "@lexical/selection";
 import { $getNearestNodeOfType, mergeRegister } from "@lexical/utils";
 import {
@@ -26,15 +26,15 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   REMOVE_LIST_COMMAND,
   $isListNode,
-  ListNode
+  ListNode,
 } from "@lexical/list";
 import { createPortal } from "react-dom";
 import {
   $createHeadingNode,
   $createQuoteNode,
-  $isHeadingNode
+  $isHeadingNode,
 } from "@lexical/rich-text";
-import styles from './ToolbarPlugin.module.scss';
+import styles from "./ToolbarPlugin.module.scss";
 
 const LowPriority = 1;
 
@@ -45,7 +45,7 @@ const supportedBlockTypes = new Set([
   "h1",
   "h2",
   "ul",
-  "ol"
+  "ol",
 ]);
 
 const blockTypeToBlockName = {
@@ -58,7 +58,7 @@ const blockTypeToBlockName = {
   ol: "Numbered List",
   paragraph: "Normal",
   quote: "Quote",
-  ul: "Bulleted List"
+  ul: "Bulleted List",
 } as const;
 type BlockNames = keyof typeof blockTypeToBlockName;
 
@@ -74,8 +74,9 @@ function positionEditorElement(editor: HTMLElement, rect: DOMRect | null) {
   } else {
     editor.style.opacity = "1";
     editor.style.top = `${rect.top + rect.height + window.pageYOffset + 10}px`;
-    editor.style.left = `${rect.left + window.pageXOffset - editor.offsetWidth / 2 + rect.width / 2
-      }px`;
+    editor.style.left = `${
+      rect.left + window.pageXOffset - editor.offsetWidth / 2 + rect.width / 2
+    }px`;
   }
 }
 
@@ -90,7 +91,9 @@ function FloatingLinkEditor({ editor }: FloatingEditorLinkProps) {
   const mouseDownRef = useRef(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [isEditMode, setEditMode] = useState(false);
-  const [lastSelection, setLastSelection] = useState<EditorSelection | null>(null);
+  const [lastSelection, setLastSelection] = useState<EditorSelection | null>(
+    null,
+  );
 
   const updateLinkEditor = useCallback(() => {
     const selection = $getSelection();
@@ -161,8 +164,8 @@ function FloatingLinkEditor({ editor }: FloatingEditorLinkProps) {
           updateLinkEditor();
           return true;
         },
-        LowPriority
-      )
+        LowPriority,
+      ),
     );
   }, [editor, updateLinkEditor]);
 
@@ -251,7 +254,7 @@ function BlockOptionsDropdownList({
   editor,
   blockType,
   toolbarRef,
-  setShowBlockOptionsDropDown
+  setShowBlockOptionsDropDown,
 }: BProps) {
   const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -360,17 +363,25 @@ function BlockOptionsDropdownList({
     <div className={styles.dropdown} ref={dropDownRef}>
       <button type="button" className={styles.item} onClick={formatParagraph}>
         <span className={`${styles.icon} ${styles.paragraph}`} />
-        <span className={styles.text} >Normal</span>
+        <span className={styles.text}>Normal</span>
         {blockType === "paragraph" && <span className={styles.active} />}
       </button>
 
-      <button type="button" className={styles.item} onClick={formatLargeHeading}>
+      <button
+        type="button"
+        className={styles.item}
+        onClick={formatLargeHeading}
+      >
         <span className={`${styles.icon} ${styles.largeHeading}`} />
         <span className={styles.text}>Large Heading</span>
         {blockType === "h1" && <span className={styles.active} />}
       </button>
 
-      <button type="button" className={styles.item} onClick={formatSmallHeading}>
+      <button
+        type="button"
+        className={styles.item}
+        onClick={formatSmallHeading}
+      >
         <span className={`${styles.icon} ${styles.smallHeading}`} />
         <span className={styles.text}>Small Heading</span>
         {blockType === "h2" && <span className={styles.active} />}
@@ -382,7 +393,11 @@ function BlockOptionsDropdownList({
         {blockType === "ul" && <span className={styles.active} />}
       </button>
 
-      <button type="button" className={styles.item} onClick={formatNumberedList}>
+      <button
+        type="button"
+        className={styles.item}
+        onClick={formatNumberedList}
+      >
         <span className={`${styles.icon} ${styles.numberedList}`} />
         <span className={styles.text}>Numbered List</span>
         {blockType === "ol" && <span className={styles.active} />}
@@ -403,9 +418,8 @@ export default function ToolbarPlugin() {
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [blockType, setBlockType] = useState<BlockNames>("paragraph");
-  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] = useState(
-    false
-  );
+  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
+    useState(false);
   const [isLink, setIsLink] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -471,7 +485,7 @@ export default function ToolbarPlugin() {
           updateToolbar();
           return false;
         },
-        LowPriority
+        LowPriority,
       ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
@@ -479,7 +493,7 @@ export default function ToolbarPlugin() {
           setCanUndo(payload);
           return false;
         },
-        LowPriority
+        LowPriority,
       ),
       editor.registerCommand(
         CAN_REDO_COMMAND,
@@ -487,8 +501,8 @@ export default function ToolbarPlugin() {
           setCanRedo(payload);
           return false;
         },
-        LowPriority
-      )
+        LowPriority,
+      ),
     );
   }, [editor, updateToolbar]);
 
@@ -535,8 +549,12 @@ export default function ToolbarPlugin() {
             }
             aria-label="Formatting Options"
           >
-            <span className={`${styles.icon} ${styles.blockType} ${styles[blockType]}`} />
-            <span className={styles.text}>{blockTypeToBlockName[blockType]}</span>
+            <span
+              className={`${styles.icon} ${styles.blockType} ${styles[blockType]}`}
+            />
+            <span className={styles.text}>
+              {blockTypeToBlockName[blockType]}
+            </span>
             <i className={styles.chevronDown} />
           </button>
           {showBlockOptionsDropDown &&
@@ -547,7 +565,7 @@ export default function ToolbarPlugin() {
                 toolbarRef={toolbarRef}
                 setShowBlockOptionsDropDown={setShowBlockOptionsDropDown}
               />,
-              document.body
+              document.body,
             )}
           <Divider />
         </>
@@ -557,7 +575,7 @@ export default function ToolbarPlugin() {
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
         }}
-        className={`${styles.toolbarItem} ${styles.spaced} ${isBold ? styles.active : ''}`}
+        className={`${styles.toolbarItem} ${styles.spaced} ${isBold ? styles.active : ""}`}
         aria-label="Format Bold"
       >
         <i className={`${styles.format} ${styles.bold}`} />
@@ -567,7 +585,7 @@ export default function ToolbarPlugin() {
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         }}
-        className={`${styles.toolbarItem} ${styles.spaced} ${isItalic ? styles.active : ''}`}
+        className={`${styles.toolbarItem} ${styles.spaced} ${isItalic ? styles.active : ""}`}
         aria-label="Format Italics"
       >
         <i className={`${styles.format} ${styles.italic}`} />
@@ -577,7 +595,7 @@ export default function ToolbarPlugin() {
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
         }}
-        className={`${styles.toolbarItem} ${styles.spaced} ${isUnderline ? styles.active : ''}`}
+        className={`${styles.toolbarItem} ${styles.spaced} ${isUnderline ? styles.active : ""}`}
         aria-label="Format Underline"
       >
         <i className={`${styles.format} ${styles.underline}`} />
@@ -587,7 +605,7 @@ export default function ToolbarPlugin() {
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
         }}
-        className={`${styles.toolbarItem} ${styles.spaced} ${isStrikethrough ? styles.active : ''}`}
+        className={`${styles.toolbarItem} ${styles.spaced} ${isStrikethrough ? styles.active : ""}`}
         aria-label="Format Strikethrough"
       >
         <i className={`${styles.format} ${styles.strikethrough}`} />
@@ -595,7 +613,7 @@ export default function ToolbarPlugin() {
       <button
         type="button"
         onClick={insertLink}
-        className={`${styles.toolbarItem} ${styles.spaced} ${isLink ? styles.active : ''}`}
+        className={`${styles.toolbarItem} ${styles.spaced} ${isLink ? styles.active : ""}`}
         aria-label="Insert Link"
       >
         <i className={`${styles.format} ${styles.link}`} />

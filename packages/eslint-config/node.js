@@ -1,5 +1,5 @@
-import globals from 'globals';
-import base from './base.js';
+import globals from "globals";
+import base from "./base.js";
 
 export default [
   ...base,
@@ -12,12 +12,12 @@ export default [
   },
   {
     files: [
-      '**/*.spec.ts',
-      '**/*.test.ts',
-      '**/*.int-spec.ts',
-      '**/*.e2e-spec.ts',
-      '**/test/**/*.ts',
-      '**/tests/**/*.ts',
+      "**/*.spec.ts",
+      "**/*.test.ts",
+      "**/*.int-spec.ts",
+      "**/*.e2e-spec.ts",
+      "**/test/**/*.ts",
+      "**/tests/**/*.ts",
     ],
     languageOptions: {
       globals: {

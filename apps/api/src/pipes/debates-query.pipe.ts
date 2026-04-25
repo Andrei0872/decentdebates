@@ -1,11 +1,15 @@
-import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { Filters, RawFilters, TagsMatchingStrategy } from 'src/entities/debates/debates.service';
+import { ArgumentMetadata, Injectable, PipeTransform } from "@nestjs/common";
+import {
+  Filters,
+  RawFilters,
+  TagsMatchingStrategy,
+} from "src/entities/debates/debates.service";
 
 // TODO: make sure no other filter keys beyond the established ones are accepted.
 
 const tagsMatchingStrategyMap = {
-  'any': TagsMatchingStrategy.ANY,
-  'all': TagsMatchingStrategy.ALL,
+  any: TagsMatchingStrategy.ANY,
+  all: TagsMatchingStrategy.ALL,
 };
 
 @Injectable()
@@ -15,14 +19,14 @@ export class DebatesQueryPipe implements PipeTransform {
       return null;
     }
 
-    const decodedQuery = Buffer.from(encodedQuery, 'base64').toString();
+    const decodedQuery = Buffer.from(encodedQuery, "base64").toString();
     const rawFilters = JSON.parse(decodedQuery) as RawFilters;
 
     const filters: Filters = {
-      tags: {}
+      tags: {},
     };
 
-    if ('queryStr' in rawFilters && !rawFilters.queryStr) {
+    if ("queryStr" in rawFilters && !rawFilters.queryStr) {
       delete rawFilters.queryStr;
     }
 
@@ -36,7 +40,9 @@ export class DebatesQueryPipe implements PipeTransform {
 
     if (rawFilters.tags) {
       filters.tags.values = rawFilters.tags;
-      filters.tags.matchingStrategy = tagsMatchingStrategyMap[rawFilters.tags_match] ?? TagsMatchingStrategy.ANY;
+      filters.tags.matchingStrategy =
+        tagsMatchingStrategyMap[rawFilters.tags_match] ??
+        TagsMatchingStrategy.ANY;
     }
 
     if (!Object.keys(filters.tags).length) {

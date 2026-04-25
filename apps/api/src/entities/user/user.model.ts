@@ -1,4 +1,9 @@
-import { ActivityTypes, CardTypes, PublicUser, UserRoles } from "@decentdebates/shared-types";
+import {
+  ActivityTypes,
+  CardTypes,
+  PublicUser,
+  UserRoles,
+} from "@decentdebates/shared-types";
 
 export { ActivityTypes, CardTypes, PublicUser, UserRoles };
 
@@ -40,10 +45,10 @@ export interface UserActivityArgument {
 
 export type UserActivity = UserActivityDebate | UserActivityArgument;
 
-export type UserCookieData = Pick<User, 'id' | 'role' | 'username'>;
+export type UserCookieData = Pick<User, "id" | "role" | "username">;
 
 export const getPublicUser = (u: User): PublicUser => {
   const { password, ...rest } = u;
 
   return rest;
-}
+};

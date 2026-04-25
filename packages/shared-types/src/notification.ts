@@ -1,7 +1,7 @@
 export enum NotificationEvents {
-  ARGUMENT = 'ARGUMENT',
-  DEBATE = 'DEBATE',
-  SUGGESTION = 'SUGGESTION',
+  ARGUMENT = "ARGUMENT",
+  DEBATE = "DEBATE",
+  SUGGESTION = "SUGGESTION",
 }
 
 export interface Notification {

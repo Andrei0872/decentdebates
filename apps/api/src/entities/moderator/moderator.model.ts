@@ -1,7 +1,6 @@
 import { CardLabels } from "@decentdebates/shared-types";
 import { UpdateTicketDTO } from "./dtos/update-ticket.dto";
 
-
 export { CardLabels };
 
 export interface ModeratorActivityBase {
@@ -28,7 +27,9 @@ export interface ModeratorActivityArgument extends ModeratorActivityBase {
   argumentId: number;
 }
 
-export type ModeratorActivity = ModeratorActivityArgument | ModeratorActivityDebate;
+export type ModeratorActivity =
+  | ModeratorActivityArgument
+  | ModeratorActivityDebate;
 
 export interface UpdateTicketData {
   ticketId: string;

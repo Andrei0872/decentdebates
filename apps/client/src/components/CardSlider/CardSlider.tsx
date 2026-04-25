@@ -1,15 +1,18 @@
-import { Icon } from '@blueprintjs/core'
-import React, { ReactNode, useEffect, useRef, useState } from 'react'
-import styles from './CardSlider.module.scss'
-import buttonStyles from '@/styles/shared/button.module.scss'
+import { Icon } from "@blueprintjs/core";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
+import styles from "./CardSlider.module.scss";
+import buttonStyles from "@/styles/shared/button.module.scss";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 function CardSlider(props: Props) {
   const [sliderIdx, setSliderIdx] = useState(0);
-  const [sliderMetrics, setSliderMetrics] = useState({ slidesCount: 1, scrollAmount: 0 });
+  const [sliderMetrics, setSliderMetrics] = useState({
+    slidesCount: 1,
+    scrollAmount: 0,
+  });
 
   const sliderContainerRef = useRef<HTMLDivElement | null>(null);
   const cardsContainerRef = useRef<HTMLUListElement | null>(null);
@@ -29,15 +32,18 @@ function CardSlider(props: Props) {
       }
 
       const scrollAmount = sliderContainer.offsetWidth;
-      const slidesCount = Math.max(1, Math.ceil(cardsContainer.scrollWidth / sliderContainer.clientWidth));
+      const slidesCount = Math.max(
+        1,
+        Math.ceil(cardsContainer.scrollWidth / sliderContainer.clientWidth),
+      );
       setSliderMetrics({ slidesCount, scrollAmount });
     };
 
     updateSliderMetrics();
-    window.addEventListener('resize', updateSliderMetrics);
+    window.addEventListener("resize", updateSliderMetrics);
 
     return () => {
-      window.removeEventListener('resize', updateSliderMetrics);
+      window.removeEventListener("resize", updateSliderMetrics);
     };
   }, [props.children]);
 
@@ -46,14 +52,14 @@ function CardSlider(props: Props) {
     if (cardsContainerRef.current) {
       cardsContainerRef.current.scrollLeft += sliderMetrics.scrollAmount;
     }
-  }
+  };
 
   const goPrevSlide = () => {
     setSliderIdx(sliderIdx - 1);
     if (cardsContainerRef.current) {
       cardsContainerRef.current.scrollLeft -= sliderMetrics.scrollAmount;
     }
-  }
+  };
 
   const canSlideNext = sliderIdx < sliderMetrics.slidesCount - 1;
   const canSlidePrev = sliderIdx >= 1;
@@ -61,19 +67,15 @@ function CardSlider(props: Props) {
   return (
     <div ref={sliderContainerRef} className={styles.container}>
       <ul ref={cardsContainerRef} className={styles.cards}>
-        {React.Children.map(props.children, elem => {
-          return (
-            <li className={styles.card}>
-              {elem}
-            </li>
-          )
+        {React.Children.map(props.children, (elem) => {
+          return <li className={styles.card}>{elem}</li>;
         })}
       </ul>
 
       <button
         disabled={!canSlidePrev}
         onClick={goPrevSlide}
-        type='button'
+        type="button"
         className={`${styles.cardButton} ${styles.buttonPrev} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-left" />
@@ -81,13 +83,13 @@ function CardSlider(props: Props) {
       <button
         disabled={!canSlideNext}
         onClick={goNextSlide}
-        type='button'
+        type="button"
         className={`${styles.cardButton} ${styles.buttonNext} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-right" />
       </button>
     </div>
-  )
+  );
 }
 
-export default CardSlider
+export default CardSlider;

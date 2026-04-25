@@ -1,8 +1,8 @@
-import type { INestApplication } from '@nestjs/common';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import request = require('supertest');
-import { closeTestApp, createTestApp } from '../helpers/app';
-import { loginAsSeededModerator, loginAsSeededUser } from '../helpers/auth';
+import type { INestApplication } from "@nestjs/common";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import request = require("supertest");
+import { closeTestApp, createTestApp } from "../helpers/app";
+import { loginAsSeededModerator, loginAsSeededUser } from "../helpers/auth";
 
 interface DebateTag {
   id: string;
@@ -27,7 +27,7 @@ interface ModeratorActivityColumn {
   cards: ModeratorActivityCard[];
 }
 
-describe('Debate flow (e2e)', () => {
+describe("Debate flow (e2e)", () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -40,39 +40,40 @@ describe('Debate flow (e2e)', () => {
     }
   });
 
-  it('creates, approves, and publishes a debate through the moderator workflow', async () => {
+  it("creates, approves, and publishes a debate through the moderator workflow", async () => {
     const userAgent = await loginAsSeededUser(app);
     const moderatorAgent = await loginAsSeededModerator(app);
     const title = `E2E debate ${Date.now()}`;
 
     await userAgent
-      .post('/api/debates')
+      .post("/api/debates")
       .send({
         title,
         tagsIds: [1],
-        createdTags: ['e2e-testing'],
+        createdTags: ["e2e-testing"],
       })
       .expect(201);
 
     const moderatorActivityResponse = await moderatorAgent
-      .get('/api/moderator/activity')
+      .get("/api/moderator/activity")
       .expect(200);
 
-    const moderatorActivity = moderatorActivityResponse.body.data as ModeratorActivityColumn[];
+    const moderatorActivity = moderatorActivityResponse.body
+      .data as ModeratorActivityColumn[];
     const pendingDebate = moderatorActivity
-      .flatMap(column => column.cards)
-      .find(card => card.ticketTitle === title);
+      .flatMap((column) => column.cards)
+      .find((card) => card.ticketTitle === title);
 
     expect(pendingDebate).toEqual(
       expect.objectContaining({
         ticketTitle: title,
-        boardList: 'PENDING',
+        boardList: "PENDING",
       }),
     );
 
     await moderatorAgent
       .patch(`/api/moderator/activity/ticket/${pendingDebate!.ticketId}`)
-      .send({ boardList: 'IN REVIEW' })
+      .send({ boardList: "IN REVIEW" })
       .expect(204);
 
     await moderatorAgent
@@ -84,7 +85,7 @@ describe('Debate flow (e2e)', () => {
       .expect(200);
 
     const publicDebatesResponse = await request(app.getHttpServer())
-      .get('/api/debates')
+      .get("/api/debates")
       .expect(200);
 
     const publicDebates = publicDebatesResponse.body.data as DebateSummary[];
@@ -93,7 +94,7 @@ describe('Debate flow (e2e)', () => {
         expect.objectContaining({
           title,
           tags: expect.arrayContaining([
-            expect.objectContaining({ name: 'e2e-testing' }),
+            expect.objectContaining({ name: "e2e-testing" }),
           ]),
         }),
       ]),

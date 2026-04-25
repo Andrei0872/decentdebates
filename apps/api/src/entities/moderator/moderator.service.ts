@@ -1,17 +1,19 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
-import { ArgumentAsModerator, DebateAsModerator } from '../review/review.model';
-import { UserCookieData } from '../user/user.model';
-import { ModeratorActivityArgument, ModeratorActivityDebate, UpdateTicketData } from './moderator.model';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Pool } from "pg";
+import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import { ArgumentAsModerator, DebateAsModerator } from "../review/review.model";
+import { UserCookieData } from "../user/user.model";
+import {
+  ModeratorActivityArgument,
+  ModeratorActivityDebate,
+  UpdateTicketData,
+} from "./moderator.model";
 
 @Injectable()
 export class ModeratorService {
   private readonly logger = new Logger(ModeratorService.name);
 
-  constructor(
-    @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
-  ) { }
+  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) {}
 
   private logError(err: unknown) {
     this.logger.error(err instanceof Error ? err.message : String(err));
@@ -66,7 +68,9 @@ export class ModeratorService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the moderator\'s activity(debates).');
+      throw new Error(
+        "An error occurred while fetching the moderator's activity(debates).",
+      );
     } finally {
       client.release();
     }
@@ -108,13 +112,18 @@ export class ModeratorService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the moderator\'s activity(arguments).');
+      throw new Error(
+        "An error occurred while fetching the moderator's activity(arguments).",
+      );
     } finally {
       client.release();
     }
   }
 
-  async getArgumentAsModerator(user: UserCookieData, ticketId: string): Promise<ArgumentAsModerator> {
+  async getArgumentAsModerator(
+    user: UserCookieData,
+    ticketId: string,
+  ): Promise<ArgumentAsModerator> {
     const sqlStr = `
       select
         t.id "ticketId",
@@ -154,7 +163,10 @@ export class ModeratorService {
     }
   }
 
-  async getDebateAsModerator(user: UserCookieData, ticketId: string): Promise<DebateAsModerator> {
+  async getDebateAsModerator(
+    user: UserCookieData,
+    ticketId: string,
+  ): Promise<DebateAsModerator> {
     const sqlStr = `
       with debates_tags as (
         select
@@ -198,7 +210,7 @@ export class ModeratorService {
       return res.rows[0];
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate.');
+      throw new Error("An error occurred while fetching the debate.");
     } finally {
       client.release();
     }
@@ -232,11 +244,11 @@ export class ModeratorService {
       const res = await client.query(sqlStr, values);
 
       if (!res.rowCount) {
-        throw new Error('Wrong attempt to update the ticket.');
+        throw new Error("Wrong attempt to update the ticket.");
       }
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while updated the ticket.');
+      throw new Error("An error occurred while updated the ticket.");
     } finally {
       client.release();
     }
@@ -250,10 +262,7 @@ export class ModeratorService {
       where id = $1 and assigned_to = $2
       returning created_by;
     `;
-    const values = [
-      ticketId,
-      user.id,
-    ];
+    const values = [ticketId, user.id];
 
     const client = await this.pool.connect();
 
@@ -262,7 +271,7 @@ export class ModeratorService {
       return res;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while updated the ticket.');
+      throw new Error("An error occurred while updated the ticket.");
     } finally {
       client.release();
     }

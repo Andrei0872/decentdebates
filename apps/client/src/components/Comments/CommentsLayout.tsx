@@ -1,5 +1,5 @@
-import { ReactNode } from 'react'
-import styles from './CommentsLayout.module.scss'
+import { ReactNode } from "react";
+import styles from "./CommentsLayout.module.scss";
 
 interface Props {
   mainContent: ReactNode;
@@ -10,11 +10,7 @@ interface CommentsListProps {
   children: ReactNode;
 }
 function CommentsList(props: CommentsListProps) {
-  return (
-    <ul className={styles.commentsList}>
-      {props.children}
-    </ul>
-  )
+  return <ul className={styles.commentsList}>{props.children}</ul>;
 }
 
 function CommentsLayout(props: Props) {
@@ -22,9 +18,7 @@ function CommentsLayout(props: Props) {
 
   return (
     <div className={styles.container}>
-      <section className={styles.mainContent}>
-        {mainContent}
-      </section>
+      <section className={styles.mainContent}>{mainContent}</section>
 
       <section className={styles.comments}>
         <div className={styles.commentsHeader}>
@@ -34,9 +28,9 @@ function CommentsLayout(props: Props) {
         {children}
       </section>
     </div>
-  )
+  );
 }
 
 CommentsLayout.CommentsList = CommentsList;
 
-export default CommentsLayout
+export default CommentsLayout;

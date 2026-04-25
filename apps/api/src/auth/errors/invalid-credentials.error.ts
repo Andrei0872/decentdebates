@@ -1,9 +1,9 @@
-const ERROR_MESSAGE = 'Invalid credentials.';
+const ERROR_MESSAGE = "Invalid credentials.";
 
 export class InvalidCredentialsError extends Error {
   status = 400;
 
-  constructor () {
+  constructor() {
     super(ERROR_MESSAGE);
   }
 }

@@ -1,9 +1,14 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
-import { ArgumentAsUser, DebateAsUser } from '../review/review.model';
-import { RegisterUserDTO } from './dtos/register-user.dto';
-import { User, UserCookieData, UserActivityArgument, UserActivityDebate } from './user.model';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Pool } from "pg";
+import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import { ArgumentAsUser, DebateAsUser } from "../review/review.model";
+import { RegisterUserDTO } from "./dtos/register-user.dto";
+import {
+  User,
+  UserCookieData,
+  UserActivityArgument,
+  UserActivityDebate,
+} from "./user.model";
 
 const TABLE_NAME = `"user"`;
 const TABLE_COLUMNS = `(username, password, email, role)`;
@@ -12,7 +17,7 @@ const TABLE_COLUMNS = `(username, password, email, role)`;
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) {}
 
   private logError(err: unknown) {
     this.logger.error(err instanceof Error ? err.message : String(err));
@@ -20,7 +25,12 @@ export class UserService {
 
   public async insertOne(registerUserDTO: RegisterUserDTO): Promise<User> {
     const client = await this.pool.connect();
-    const values = [registerUserDTO.username, registerUserDTO.password, registerUserDTO.email, 'USER'];
+    const values = [
+      registerUserDTO.username,
+      registerUserDTO.password,
+      registerUserDTO.email,
+      "USER",
+    ];
 
     try {
       const res = await client.query(
@@ -29,7 +39,7 @@ export class UserService {
           values ($1, $2, $3, $4)
           returning *
         `,
-        values
+        values,
       );
 
       return res.rows[0];
@@ -62,7 +72,9 @@ export class UserService {
     return res.rows[0];
   }
 
-  async getActivityDebates(user: UserCookieData): Promise<UserActivityDebate[]> {
+  async getActivityDebates(
+    user: UserCookieData,
+  ): Promise<UserActivityDebate[]> {
     const sqlStr = `
       with debates_tags as (
         select
@@ -109,13 +121,17 @@ export class UserService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the user\'s activity(debates).');
+      throw new Error(
+        "An error occurred while fetching the user's activity(debates).",
+      );
     } finally {
       client.release();
     }
   }
 
-  async getActivityArguments(user: UserCookieData): Promise<UserActivityArgument[]> {
+  async getActivityArguments(
+    user: UserCookieData,
+  ): Promise<UserActivityArgument[]> {
     const sqlStr = `
       select
         a.id "argumentId",
@@ -152,13 +168,18 @@ export class UserService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the user\'s activity(arguments).');
+      throw new Error(
+        "An error occurred while fetching the user's activity(arguments).",
+      );
     } finally {
       client.release();
     }
   }
 
-  async getDebateAsUser(user: UserCookieData, ticketId: string): Promise<DebateAsUser> {
+  async getDebateAsUser(
+    user: UserCookieData,
+    ticketId: string,
+  ): Promise<DebateAsUser> {
     const sqlStr = `
       with debates_tags as (
         select
@@ -203,13 +224,16 @@ export class UserService {
       return res.rows[0];
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the debate.');
+      throw new Error("An error occurred while fetching the debate.");
     } finally {
       client.release();
     }
   }
 
-  async getArgumentAsUser(user: UserCookieData, ticketId: string): Promise<ArgumentAsUser> {
+  async getArgumentAsUser(
+    user: UserCookieData,
+    ticketId: string,
+  ): Promise<ArgumentAsUser> {
     const sqlStr = `
       select
         t.id "ticketId",

@@ -4,7 +4,7 @@ import Input from "../Input/Input";
 import SimpleCollapse from "../SimpleCollapse/SimpleCollapse";
 import Tags, { TagsRef } from "../Tags/Tags";
 import styles from "./DebateFilters.module.scss";
-import buttonStyles from '@/styles/shared/button.module.scss';
+import buttonStyles from "@/styles/shared/button.module.scss";
 import { useForm } from "react-hook-form";
 
 export interface AppliedDebateFilters {
@@ -24,25 +24,24 @@ function DebateFilters(props: Props) {
   const inputFilterRef = useRef<HTMLInputElement | null>(null);
   const tagFiltersRef = useRef<TagsRef | null>(null);
 
-  const {
-    getValues,
-    register,
-  } = useForm<{ tagsMatchingStrategy: 'all' | 'any' }>({
+  const { getValues, register } = useForm<{
+    tagsMatchingStrategy: "all" | "any";
+  }>({
     defaultValues: {
-      tagsMatchingStrategy: 'any',
+      tagsMatchingStrategy: "any",
     },
   });
 
   const applyFilters = () => {
     const filters: AppliedDebateFilters = {
       query: inputFilterRef.current?.value,
-      ...shouldUseTagsFilter && {
+      ...(shouldUseTagsFilter && {
         tags: getFilterTags(),
         tags_match: getValues().tagsMatchingStrategy,
-      }
+      }),
     };
     props.applyFilters(filters);
-  }
+  };
 
   const getFilterTags = () => {
     if (!tagFiltersRef.current) {
@@ -54,12 +53,12 @@ function DebateFilters(props: Props) {
       return undefined;
     }
 
-    return tags.map(t => t.id.toString());
-  }
+    return tags.map((t) => t.id.toString());
+  };
 
   const onExpandChange = (isExpanded: boolean) => {
     setShouldUseTagsFilter(isExpanded);
-  }
+  };
 
   return (
     <>
@@ -76,20 +75,31 @@ function DebateFilters(props: Props) {
         header={<p className={styles.tagsHeader}>Tags</p>}
       >
         <div className={styles.tagsContainer}>
-          <Tags
-            ref={tagFiltersRef}
-            debateTags={props.debateTags}
-          />
+          <Tags ref={tagFiltersRef} debateTags={props.debateTags} />
 
           <div className={styles.tagsMatchingStrategiesContainer}>
             <div className={styles.radioGroup}>
-              <label className={``} htmlFor="all">All</label>
-              <input {...register('tagsMatchingStrategy')} type="radio" id="all" value="all" />
+              <label className={``} htmlFor="all">
+                All
+              </label>
+              <input
+                {...register("tagsMatchingStrategy")}
+                type="radio"
+                id="all"
+                value="all"
+              />
             </div>
 
             <div className={styles.radioGroup}>
-              <label className={``} htmlFor="any">Any</label>
-              <input {...register('tagsMatchingStrategy')} type="radio" id="any" value="any" />
+              <label className={``} htmlFor="any">
+                Any
+              </label>
+              <input
+                {...register("tagsMatchingStrategy")}
+                type="radio"
+                id="any"
+                value="any"
+              />
             </div>
           </div>
 
@@ -105,7 +115,7 @@ function DebateFilters(props: Props) {
         </div>
       </SimpleCollapse>
     </>
-  )
+  );
 }
 
-export default DebateFilters
+export default DebateFilters;

@@ -23,19 +23,19 @@
   flex-direction: column;
   border: 1px solid var(--cl-neutral-1);
   border-radius: 7px;
-  margin-block-start: .2rem;
-  padding-inline-start: .1rem;
+  margin-block-start: 0.2rem;
+  padding-inline-start: 0.1rem;
   background-color: #fff;
   max-height: 27vh;
   overflow-y: auto;
   overscroll-behavior: contain;
 
-  --gap-amount: .4rem;
+  --gap-amount: 0.4rem;
   gap: var(--gap-amount);
 }
 
 .notificationItem {
-  padding-inline: .3rem;
+  padding-inline: 0.3rem;
   padding-block-end: calc(var(--gap-amount));
 
   &:first-child {
@@ -69,6 +69,6 @@
   background-color: #fff;
   text-align: center;
   border: 1px solid var(--cl-neutral-1);
-  padding: .6rem;
+  padding: 0.6rem;
   border-radius: 6px;
 }

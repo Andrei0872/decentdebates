@@ -1,12 +1,33 @@
-import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
-import { ArgumentTicketApproved, ArgumentTicketCreated, ArgumentUpdated, DebateTicketApproved, DebateTicketCreated, DebateTitleUpdated } from '../debates/debate.events';
-import { ArgumentReviewNewComment, DebateReviewNewComment } from '../review/review.events';
-import { UserCookieData } from '../user/user.model';
-import { NewGenericModeratorNotification, NewNotificationToOtherTicketParticipant, Notification, NotificationEvents } from './notificatin.model';
-import { NotificationsReadEvent } from './notification.events';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { Pool } from "pg";
+import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import {
+  ArgumentTicketApproved,
+  ArgumentTicketCreated,
+  ArgumentUpdated,
+  DebateTicketApproved,
+  DebateTicketCreated,
+  DebateTitleUpdated,
+} from "../debates/debate.events";
+import {
+  ArgumentReviewNewComment,
+  DebateReviewNewComment,
+} from "../review/review.events";
+import { UserCookieData } from "../user/user.model";
+import {
+  NewGenericModeratorNotification,
+  NewNotificationToOtherTicketParticipant,
+  Notification,
+  NotificationEvents,
+} from "./notificatin.model";
+import { NotificationsReadEvent } from "./notification.events";
 
 @Injectable()
 export class NotificationService implements OnModuleDestroy, OnModuleInit {
@@ -14,133 +35,149 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
 
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
-    private eventEmitter: EventEmitter2
-  ) { }
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   private logError(err: unknown) {
     this.logger.error(err instanceof Error ? err.message : String(err));
   }
 
   onModuleInit() {
-    this.eventEmitter.on(DebateTicketCreated.EVENT_NAME, async (ev: DebateTicketCreated) => {
-      const newNotif: NewGenericModeratorNotification = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.DEBATE,
-      };
+    this.eventEmitter.on(
+      DebateTicketCreated.EVENT_NAME,
+      async (ev: DebateTicketCreated) => {
+        const newNotif: NewGenericModeratorNotification = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.DEBATE,
+        };
 
-      this.addGenericModeratorNotifications(newNotif)
-        .catch();
-    });
+        this.addGenericModeratorNotifications(newNotif).catch();
+      },
+    );
 
-    this.eventEmitter.on(ArgumentTicketCreated.EVENT_NAME, async (ev: ArgumentTicketCreated) => {
-      const newNotif: NewGenericModeratorNotification = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.ARGUMENT,
-      };
+    this.eventEmitter.on(
+      ArgumentTicketCreated.EVENT_NAME,
+      async (ev: ArgumentTicketCreated) => {
+        const newNotif: NewGenericModeratorNotification = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.ARGUMENT,
+        };
 
-      this.addGenericModeratorNotifications(newNotif)
-        .catch();
-    });
+        this.addGenericModeratorNotifications(newNotif).catch();
+      },
+    );
 
-    this.eventEmitter.on(DebateReviewNewComment.EVENT_NAME, async (ev: DebateReviewNewComment) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.DEBATE,
-      };
+    this.eventEmitter.on(
+      DebateReviewNewComment.EVENT_NAME,
+      async (ev: DebateReviewNewComment) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.DEBATE,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.user.id,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.user.id,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
 
-    this.eventEmitter.on(ArgumentReviewNewComment.EVENT_NAME, async (ev: ArgumentReviewNewComment) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.ARGUMENT,
-      };
+    this.eventEmitter.on(
+      ArgumentReviewNewComment.EVENT_NAME,
+      async (ev: ArgumentReviewNewComment) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.ARGUMENT,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.user.id,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.user.id,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
 
-    this.eventEmitter.on(DebateTitleUpdated.EVENT_NAME, async (ev: DebateTitleUpdated) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.DEBATE,
-      };
+    this.eventEmitter.on(
+      DebateTitleUpdated.EVENT_NAME,
+      async (ev: DebateTitleUpdated) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.DEBATE,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.user.id,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.user.id,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
 
-    this.eventEmitter.on(ArgumentUpdated.EVENT_NAME, async (ev: ArgumentUpdated) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.ARGUMENT,
-      };
+    this.eventEmitter.on(
+      ArgumentUpdated.EVENT_NAME,
+      async (ev: ArgumentUpdated) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.ARGUMENT,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.user.id,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.user.id,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
 
-    this.eventEmitter.on(DebateTicketApproved.EVENT_NAME, async (ev: DebateTicketApproved) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.DEBATE,
-      };
+    this.eventEmitter.on(
+      DebateTicketApproved.EVENT_NAME,
+      async (ev: DebateTicketApproved) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.DEBATE,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.senderId,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.senderId,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
 
-    this.eventEmitter.on(ArgumentTicketApproved.EVENT_NAME, async (ev: ArgumentTicketApproved) => {
-      const notif: NewNotificationToOtherTicketParticipant = {
-        content: await ev.getContent(),
-        title: ev.getTitle(),
-        isRead: false,
-        notificationEvent: NotificationEvents.ARGUMENT,
-      };
+    this.eventEmitter.on(
+      ArgumentTicketApproved.EVENT_NAME,
+      async (ev: ArgumentTicketApproved) => {
+        const notif: NewNotificationToOtherTicketParticipant = {
+          content: await ev.getContent(),
+          title: ev.getTitle(),
+          isRead: false,
+          notificationEvent: NotificationEvents.ARGUMENT,
+        };
 
-      this.addNotificationToOtherTicketParticipant(
-        ev.senderId,
-        ev.ticketId,
-        notif
-      )
-        .catch();
-    });
+        this.addNotificationToOtherTicketParticipant(
+          ev.senderId,
+          ev.ticketId,
+          notif,
+        ).catch();
+      },
+    );
   }
 
   onModuleDestroy() {
@@ -180,7 +217,6 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     } finally {
       client.release();
     }
-
   }
 
   async getUnreadCount(user: UserCookieData): Promise<number> {
@@ -204,7 +240,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     }
   }
 
-  @OnEvent('notifications.read', { async: true })
+  @OnEvent("notifications.read", { async: true })
   handleNotificationsRead(payload: NotificationsReadEvent) {
     const { notifIds } = payload;
 
@@ -223,7 +259,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
     try {
       const res = await client.query(sqlStl, values);
       if (!res.rowCount) {
-        throw new Error('No notifications updated.');
+        throw new Error("No notifications updated.");
       }
     } catch (err) {
       this.logError(err);
@@ -236,7 +272,11 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
   // The logic here is that a ticket creates a 'connection' between
   // a user and a moderator. So, by having the `senderId` and a `ticketId`,
   // we can determine the other participant, and that will the recipient.
-  async addNotificationToOtherTicketParticipant(senderId: number, ticketId: number, notif: NewNotificationToOtherTicketParticipant) {
+  async addNotificationToOtherTicketParticipant(
+    senderId: number,
+    ticketId: number,
+    notif: NewNotificationToOtherTicketParticipant,
+  ) {
     const sqlStl = `
       insert into notification(title, content, recipient_id, event)
       select distinct
@@ -256,7 +296,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
       senderId,
       senderId,
       notif.notificationEvent,
-      ticketId
+      ticketId,
     ];
 
     const client = await this.pool.connect();
@@ -273,7 +313,9 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
   // Adding the same notification to all moderators.
   // Cases: a new ticket has been created - all moderators should be
   // notified.
-  async addGenericModeratorNotifications(notif: NewGenericModeratorNotification) {
+  async addGenericModeratorNotifications(
+    notif: NewGenericModeratorNotification,
+  ) {
     const sqlStl = `
       insert into notification(title, content, recipient_id, event, is_read)
       select
@@ -285,11 +327,7 @@ export class NotificationService implements OnModuleDestroy, OnModuleInit {
       from "user" u
       where u.role = 'MODERATOR'
     `;
-    const values = [
-      notif.title,
-      notif.content,
-      notif.notificationEvent,
-    ];
+    const values = [notif.title, notif.content, notif.notificationEvent];
 
     const client = await this.pool.connect();
     try {

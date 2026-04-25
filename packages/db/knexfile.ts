@@ -4,7 +4,9 @@ import * as path from "path";
 
 const SOURCE_ENV_FILE = path.resolve(__dirname, ".env");
 const DIST_ENV_FILE = path.resolve(__dirname, "../.env");
-const DB_ENV_FILE = fs.existsSync(SOURCE_ENV_FILE) ? SOURCE_ENV_FILE : DIST_ENV_FILE;
+const DB_ENV_FILE = fs.existsSync(SOURCE_ENV_FILE)
+  ? SOURCE_ENV_FILE
+  : DIST_ENV_FILE;
 
 dotenv.config({
   path: DB_ENV_FILE,
