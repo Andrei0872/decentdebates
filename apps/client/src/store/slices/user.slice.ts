@@ -1,13 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { PublicUser, UserRoles } from '@decentdebates/shared-types';
-import { RootState } from '..';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { PublicUser, UserRoles } from "@decentdebates/shared-types";
+import { RootState } from "..";
 
-const LS_KEY = '@@user';
-let LSUser = null;
-if (global.localStorage) {
-  // @ts-ignore
-  LSUser = JSON.parse(localStorage.getItem(LS_KEY) || null);
-}
+const LS_KEY = "@@user";
 
 export { UserRoles };
 
@@ -15,17 +10,20 @@ export interface UserState {
   currentUser: PublicUser | null;
 }
 
-export type User = UserState['currentUser'];
+export type User = UserState["currentUser"];
 
 const initialState: UserState = {
   currentUser: null,
 };
 
 export const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    setCurrentUser (state, action: PayloadAction<UserState['currentUser'] | null>) {
+    setCurrentUser(
+      state,
+      action: PayloadAction<UserState["currentUser"] | null>,
+    ) {
       state.currentUser = action.payload;
 
       if (action.payload) {
@@ -34,7 +32,7 @@ export const userSlice = createSlice({
         localStorage.removeItem(LS_KEY);
       }
     },
-  }
+  },
 });
 
 export const { setCurrentUser } = userSlice.actions;

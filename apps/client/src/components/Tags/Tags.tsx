@@ -1,8 +1,15 @@
-import { Tag } from '@/types/tag'
-import styles from './Tags.module.scss'
-import { ItemPredicate, ItemRenderer, MultiSelect2 } from '@blueprintjs/select';
-import { MenuItem } from '@blueprintjs/core';
-import React, { ForwardedRef, KeyboardEvent, ReactNode, useImperativeHandle, useMemo, useState } from 'react';
+import { Tag } from "@/types/tag";
+import styles from "./Tags.module.scss";
+import { ItemPredicate, ItemRenderer, MultiSelect2 } from "@blueprintjs/select";
+import { MenuItem } from "@blueprintjs/core";
+import React, {
+  ForwardedRef,
+  KeyboardEvent,
+  ReactNode,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 
 interface Props {
   debateTags: Tag[];
@@ -10,7 +17,7 @@ interface Props {
 }
 
 export interface TagsRef {
-  getSelectedTags: () => { tags: Tag[], createdTags: string[] };
+  getSelectedTags: () => { tags: Tag[]; createdTags: string[] };
 }
 
 function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
@@ -19,26 +26,28 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
 
   const [selectedTagsIds, setSelectedTagsIds] = useState<number[]>([]);
   const [debateTags, setDebateTags] = useState(tags);
-  const [createdTagsIds, setCreatedTagsIds] = useState<{ [k: number]: boolean }>({});
-
-  useImperativeHandle(ref, () => ({
-    getSelectedTags,
-  }));
+  const [createdTagsIds, setCreatedTagsIds] = useState<{
+    [k: number]: boolean;
+  }>({});
 
   const getSelectedTags = () => {
     const existingSelectedTags = selectedTagsIds
-      .filter(tId => !createdTagsIds[tId])
-      .map(tId => debateTags.find(dt => dt.id === tId)!);
-    
+      .filter((tId) => !createdTagsIds[tId])
+      .map((tId) => debateTags.find((dt) => dt.id === tId)!);
+
     const createdTagsNames = selectedTagsIds
-      .filter(tId => !!createdTagsIds[tId])
-      .map(tId => debateTags.find(dt => dt.id === tId)!.name);
+      .filter((tId) => !!createdTagsIds[tId])
+      .map((tId) => debateTags.find((dt) => dt.id === tId)!.name);
 
     return {
       tags: existingSelectedTags,
       createdTags: createdTagsNames,
-    }
+    };
   };
+
+  useImperativeHandle(ref, () => ({
+    getSelectedTags,
+  }));
 
   const itemRenderer: ItemRenderer<Tag> = (tag, props) => {
     if (!props.modifiers.matchesPredicate) {
@@ -55,14 +64,14 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
         ref={props.ref}
         roleStructure="listoption"
         shouldDismissPopover={false}
-        className={`${styles.tagItem} ${createdTagsIds[tag.id] ? styles.createdItem : ''}`}
+        className={`${styles.tagItem} ${createdTagsIds[tag.id] ? styles.createdItem : ""}`}
       />
-    )
-  }
+    );
+  };
 
   const handleItemSelect = (tag: Tag) => {
-    setDebateTags(debateTags => {
-      const doesTagExist = !!debateTags.find(dt => dt.id === tag.id);
+    setDebateTags((debateTags) => {
+      const doesTagExist = !!debateTags.find((dt) => dt.id === tag.id);
       if (doesTagExist) {
         return debateTags;
       }
@@ -70,8 +79,8 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
       return [...debateTags, tag];
     });
 
-    setCreatedTagsIds(createdTagsIds => {
-      const doesTagExist = !!debateTags.find(dt => dt.id === tag.id);
+    setCreatedTagsIds((createdTagsIds) => {
+      const doesTagExist = !!debateTags.find((dt) => dt.id === tag.id);
       if (doesTagExist) {
         return createdTagsIds;
       }
@@ -79,59 +88,59 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
       return {
         ...createdTagsIds,
         [tag.id]: true,
-      }
+      };
     });
 
     setSelectedTagsIds((selectedTags) => {
-      const isItemSelected = !!selectedTags.find(tId => tId === tag.id);
+      const isItemSelected = !!selectedTags.find((tId) => tId === tag.id);
       if (isItemSelected) {
-        return selectedTags.filter(tId => tId !== tag.id);
+        return selectedTags.filter((tId) => tId !== tag.id);
       }
 
       return [...selectedTags, tag.id];
     });
-  }
+  };
 
   const tagRenderer = (tag: Tag) => {
     return tag.name;
-  }
+  };
 
   const deselectTag = (tagIdx: number) => {
-    setSelectedTagsIds(selectedTagsIds => {
+    setSelectedTagsIds((selectedTagsIds) => {
       return selectedTagsIds.filter((_, idx) => idx !== tagIdx);
     });
-  }
+  };
 
-  const handleTagRemove = (tag: ReactNode, tagIndex: number) => {
+  const handleTagRemove = (_tag: ReactNode, tagIndex: number) => {
     deselectTag(tagIndex);
-  }
+  };
 
-  const filterTag: ItemPredicate<Tag> = (query, tag, tagIndex) => {
+  const filterTag: ItemPredicate<Tag> = (query, tag) => {
     const normalizedQuery = query.toLowerCase();
     const normalizedTagName = tag.name.toLowerCase();
 
     return normalizedTagName.includes(normalizedQuery);
-  }
+  };
 
   const isTagSelected = (tag: Tag) => {
     return selectedTagsIds.includes(tag.id);
-  }
+  };
 
   const areTagsEqual = (tag1: Tag, tag2: Tag) => {
     return tag1.name.toLowerCase() === tag2.name.toLowerCase();
-  }
+  };
 
   const createTag = (query: string): Tag => {
     return {
       id: Date.now(),
       name: query,
     };
-  }
+  };
 
   const renderCreatedTag = (
     query: string,
     active: boolean,
-    handleClick: React.MouseEventHandler<HTMLElement>
+    handleClick: React.MouseEventHandler<HTMLElement>,
   ) => {
     return (
       <MenuItem
@@ -143,26 +152,32 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
         shouldDismissPopover={false}
       />
     );
-  }
+  };
 
   const handleOnClear = () => {
     setSelectedTagsIds([]);
     setCreatedTagsIds({});
     setDebateTags(props.debateTags);
-  }
+  };
 
   const selectedTags = useMemo(() => {
-    return selectedTagsIds.map(tId => debateTags.find(dt => dt.id === tId)!);
-  }, [selectedTagsIds]);
+    return selectedTagsIds.map(
+      (tId) => debateTags.find((dt) => dt.id === tId)!,
+    );
+  }, [debateTags, selectedTagsIds]);
 
   const handleKeyDown = (ev: KeyboardEvent<HTMLDivElement>) => {
     if (ev.key === "Enter") {
       ev.preventDefault();
     }
-  }
+  };
 
   return (
-    <div className={styles.container} onKeyDown={handleKeyDown} suppressHydrationWarning>
+    <div
+      className={styles.container}
+      onKeyDown={handleKeyDown}
+      suppressHydrationWarning
+    >
       <MultiSelect2<Tag>
         items={debateTags}
         itemRenderer={itemRenderer}
@@ -177,14 +192,20 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
             const isTagNew = !!createdTagsIds[tag.id];
 
             return {
-              className: `${styles.tag} ${isTagNew ? styles.tagNew : ''}`
-            }
+              className: `${styles.tag} ${isTagNew ? styles.tagNew : ""}`,
+            };
           },
         }}
         itemPredicate={filterTag}
         resetOnSelect={true}
         itemsEqual={areTagsEqual}
-        noResults={<MenuItem disabled={true} text="No results." roleStructure="listoption" />}
+        noResults={
+          <MenuItem
+            disabled={true}
+            text="No results."
+            roleStructure="listoption"
+          />
+        }
         createNewItemFromQuery={canCreateTags ? createTag : undefined}
         createNewItemRenderer={canCreateTags ? renderCreatedTag : undefined}
         onClear={handleOnClear}
@@ -197,11 +218,11 @@ function Tags(props: Props, ref: ForwardedRef<TagsRef>) {
           minimal: true,
         }}
         menuProps={{
-          className: styles.tagsMenu
+          className: styles.tagsMenu,
         }}
       />
     </div>
-  )
+  );
 }
 
 export default React.forwardRef(Tags);

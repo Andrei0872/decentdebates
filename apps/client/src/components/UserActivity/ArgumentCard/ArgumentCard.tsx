@@ -1,6 +1,6 @@
 import { UserActivityArgument } from "@/types/user";
 import { Icon, IconSize } from "@blueprintjs/core";
-import styles from './ArgumentCard.module.scss'
+import styles from "./ArgumentCard.module.scss";
 
 interface Props {
   cardData: UserActivityArgument;
@@ -18,7 +18,7 @@ function ArgumentCard(props: Props) {
       </div>
 
       <div className={styles.body}>
-        <p className={styles.debateTitle} >
+        <p className={styles.debateTitle}>
           <Icon size={IconSize.LARGE} icon="document" />
           <h4>{cardData.debateTitle}</h4>
         </p>
@@ -30,22 +30,26 @@ function ArgumentCard(props: Props) {
 
       <div className={styles.footer}>
         <div className={`${styles.status}`}>
-          {cardData.boardList ? cardData.boardList : (cardData.argumentIsDraft ? '#draft' : null)}
+          {cardData.boardList
+            ? cardData.boardList
+            : cardData.argumentIsDraft
+              ? "#draft"
+              : null}
         </div>
 
-        {
-          cardData.argumentIsDraft ? (
-            null
-          ) : (
-            <div className={`${styles.moderator} ${!cardData.moderatorUsername ? styles.unassigned : ''}`}>
-              <div><Icon icon="person" /></div>
-              <div>{cardData.moderatorUsername ?? <b>unassigned</b>}</div>
+        {cardData.argumentIsDraft ? null : (
+          <div
+            className={`${styles.moderator} ${!cardData.moderatorUsername ? styles.unassigned : ""}`}
+          >
+            <div>
+              <Icon icon="person" />
             </div>
-          )
-        }
+            <div>{cardData.moderatorUsername ?? <b>unassigned</b>}</div>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }
 
-export default ArgumentCard
+export default ArgumentCard;

@@ -1,7 +1,6 @@
-import { UserActivity, CardTypes } from "@/types/user";
-import { api } from "."
+import { UserActivity } from "@/types/user";
+import { api } from ".";
 
 export const fetchUserActivity = (): Promise<UserActivity[]> => {
-  return api.get('/user/activity')
-    .then(r => r.data.data)
-}
+  return api.get("/user/activity").then((r) => r.data.data);
+};

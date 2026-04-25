@@ -1,13 +1,14 @@
 .input {
   border: 2px solid var(--cl-secondary);
-  padding: .2rem .3rem;
+  padding: 0.2rem 0.3rem;
   border-radius: 3px;
   color: var(--cl-secondary-shade-1);
   font-size: 0.9rem;
   outline: none;
   width: 100%;
 
-  &::placeholder, &::-moz-placeholder {
+  &::placeholder,
+  &::-moz-placeholder {
     color: #ccc;
   }
 }

@@ -49,7 +49,6 @@ export interface SubmitDraftData {
   draftData: UpdateDraftDTO;
 }
 
-
 export interface UpdateArgumentData {
   user: UserCookieData;
   argumentId: string;

@@ -1,11 +1,24 @@
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
-import type { Pool } from 'pg';
-import { CommentService } from '../../src/entities/comment/comment.service';
-import { applySchema, createTestPool, recreateTestDatabase } from '../helpers/db';
-import { createArgument, createComment, createDebate, createTag, createUser } from '../helpers/factories';
-import { getDebateTicketId, getFirstCommentIdByTicketAndCommenter } from '../helpers/queries';
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import type { Pool } from "pg";
+import { CommentService } from "../../src/entities/comment/comment.service";
+import {
+  applySchema,
+  createTestPool,
+  recreateTestDatabase,
+} from "../helpers/db";
+import {
+  createArgument,
+  createComment,
+  createDebate,
+  createTag,
+  createUser,
+} from "../helpers/factories";
+import {
+  getDebateTicketId,
+  getFirstCommentIdByTicketAndCommenter,
+} from "../helpers/queries";
 
-describe('CommentService integration', () => {
+describe("CommentService integration", () => {
   let service: CommentService;
   let pool: Pool;
   let userId: number;
@@ -22,25 +35,25 @@ describe('CommentService integration', () => {
     service = new CommentService(pool as never);
 
     userId = await createUser(pool, {
-      username: 'comment-user',
-      email: 'comment-user@example.com',
+      username: "comment-user",
+      email: "comment-user@example.com",
     });
     moderatorId = await createUser(pool, {
-      username: 'comment-moderator',
-      email: 'comment-moderator@example.com',
-      role: 'MODERATOR',
+      username: "comment-moderator",
+      email: "comment-moderator@example.com",
+      role: "MODERATOR",
     });
     outsiderId = await createUser(pool, {
-      username: 'comment-outsider',
-      email: 'comment-outsider@example.com',
+      username: "comment-outsider",
+      email: "comment-outsider@example.com",
     });
 
-    const tagId = await createTag(pool, 'comments');
+    const tagId = await createTag(pool, "comments");
     const debateId = await createDebate(pool, {
-      title: 'Comments debate',
+      title: "Comments debate",
       createdBy: userId,
       assignedTo: moderatorId,
-      boardList: 'IN REVIEW',
+      boardList: "IN REVIEW",
       tagIds: [tagId],
     });
     debateTicketId = await getDebateTicketId(pool, debateId);
@@ -49,10 +62,10 @@ describe('CommentService integration', () => {
       debateId,
       createdBy: userId,
       assignedTo: moderatorId,
-      boardList: 'IN REVIEW',
-      title: 'Commentable argument',
-      content: 'Argument content',
-      argumentType: 'PRO',
+      boardList: "IN REVIEW",
+      title: "Commentable argument",
+      content: "Argument content",
+      argumentType: "PRO",
     });
     argumentTicketId = argument.ticketId as number;
   });
@@ -63,79 +76,83 @@ describe('CommentService integration', () => {
     }
   });
 
-  it('adds a comment to a debate ticket for a connected participant', async () => {
+  it("adds a comment to a debate ticket for a connected participant", async () => {
     const comment = await service.addCommentToDebate({
       ticketId: debateTicketId,
-      content: 'User debate comment',
+      content: "User debate comment",
       commenterId: userId,
     });
 
     expect(comment).toEqual(
       expect.objectContaining({
-        content: 'User debate comment',
+        content: "User debate comment",
         commenterId: userId,
-        commenterUsername: 'comment-user',
+        commenterUsername: "comment-user",
       }),
     );
   });
 
-  it('adds a comment to an argument ticket for a connected moderator', async () => {
+  it("adds a comment to an argument ticket for a connected moderator", async () => {
     const comment = await service.addCommentToArgument({
       ticketId: argumentTicketId,
-      content: 'Moderator argument comment',
+      content: "Moderator argument comment",
       commenterId: moderatorId,
     });
 
     expect(comment).toEqual(
       expect.objectContaining({
-        content: 'Moderator argument comment',
+        content: "Moderator argument comment",
         commenterId: moderatorId,
-        commenterUsername: 'comment-moderator',
+        commenterUsername: "comment-moderator",
       }),
     );
   });
 
-  it('rejects a commenter who is not connected to the ticket', async () => {
+  it("rejects a commenter who is not connected to the ticket", async () => {
     await expect(
       service.addCommentToDebate({
         ticketId: debateTicketId,
-        content: 'Outsider comment',
+        content: "Outsider comment",
         commenterId: outsiderId,
       }),
-    ).rejects.toThrow('Ticket and commenter are not connected.');
+    ).rejects.toThrow("Ticket and commenter are not connected.");
   });
 
-  it('returns ticket comments only to connected participants', async () => {
+  it("returns ticket comments only to connected participants", async () => {
     await createComment(pool, {
       ticketId: debateTicketId,
-      content: 'Second debate comment',
+      content: "Second debate comment",
       commenterId: moderatorId,
     });
 
     const comments = await service.getTicketComments(String(debateTicketId), {
       id: userId,
-      username: 'comment-user',
-      role: 'USER' as never,
+      username: "comment-user",
+      role: "USER" as never,
     });
 
-    expect(comments.map(comment => comment.content)).toEqual([
-      'User debate comment',
-      'Second debate comment',
+    expect(comments.map((comment) => comment.content)).toEqual([
+      "User debate comment",
+      "Second debate comment",
     ]);
   });
 
-  it('updates only the owner comment', async () => {
-    const commentId = await getFirstCommentIdByTicketAndCommenter(pool, debateTicketId, userId);
+  it("updates only the owner comment", async () => {
+    const commentId = await getFirstCommentIdByTicketAndCommenter(
+      pool,
+      debateTicketId,
+      userId,
+    );
 
     const result = await service.updateComment(
       {
         id: userId,
-        username: 'comment-user',
-        role: 'USER' as never,
+        username: "comment-user",
+        role: "USER" as never,
       },
       {
         commentId,
-        content: 'Updated user debate comment',
+        content: "Updated user debate comment",
       },
     );
 

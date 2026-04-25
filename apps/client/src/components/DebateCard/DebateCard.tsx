@@ -1,7 +1,7 @@
-import styles from './DebateCard.module.scss'
-import tagStyles from '@/styles/shared/debate-tag.module.scss';
-import { Icon } from '@blueprintjs/core';
-import { Tag } from '@/types/tag'
+import styles from "./DebateCard.module.scss";
+import tagStyles from "@/styles/shared/debate-tag.module.scss";
+import { Icon } from "@blueprintjs/core";
+import { Tag } from "@/types/tag";
 
 export interface DebateCardData {
   title: string;
@@ -11,7 +11,7 @@ export interface DebateCardData {
 }
 
 interface Props {
-  cardData: DebateCardData
+  cardData: DebateCardData;
 }
 
 function DebateCard(props: Props) {
@@ -19,7 +19,9 @@ function DebateCard(props: Props) {
 
   return (
     <div data-testid="debate-card" className={styles.container}>
-      <div data-testid="debate-card-title" className={styles.title}>{cardData.title}</div>
+      <div data-testid="debate-card-title" className={styles.title}>
+        {cardData.title}
+      </div>
 
       <div className={styles.info}>
         <div className={styles.createdBy}>
@@ -27,17 +29,15 @@ function DebateCard(props: Props) {
           <span>{cardData.username}</span>
         </div>
         <ul className={styles.tags}>
-          {
-            cardData.tags.map((t, idx) => (
-              <li className={tagStyles.debateTag} key={t.id}>
-                {t.name}
-              </li>
-            ))
-          }
+          {cardData.tags.map((t) => (
+            <li className={tagStyles.debateTag} key={t.id}>
+              {t.name}
+            </li>
+          ))}
         </ul>
       </div>
     </div>
-  )
+  );
 }
 
-export default DebateCard
+export default DebateCard;

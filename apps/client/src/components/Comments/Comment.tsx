@@ -1,10 +1,19 @@
-import { Comment as IComment } from '@/types/comment';
-import { ForwardedRef, forwardRef, ReactNode, useEffect, useImperativeHandle, useRef } from 'react';
-import ExportContentPlugin, { ExportContentRefData } from '../RichEditor/plugins/ExportContentPlugin';
-import RichEditor from '../RichEditor/RichEditor';
-import styles from './Comment.module.scss'
-import { $getRoot, LexicalEditor } from 'lexical'
-import richEditorStyles from '../RichEditor/RichEditor.module.scss';
+import { Comment as IComment } from "@/types/comment";
+import {
+  ForwardedRef,
+  forwardRef,
+  ReactNode,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import ExportContentPlugin, {
+  ExportContentRefData,
+} from "../RichEditor/plugins/ExportContentPlugin";
+import RichEditor from "../RichEditor/RichEditor";
+import styles from "./Comment.module.scss";
+import { $getRoot, LexicalEditor } from "lexical";
+import richEditorStyles from "../RichEditor/RichEditor.module.scss";
 
 interface Props {
   commentData?: IComment;
@@ -14,7 +23,11 @@ interface Props {
 }
 
 function CommentPlaceholder() {
-  return <div className={`${richEditorStyles.placeholder} ${styles.placeholder}`}>Add your comment here...</div>;
+  return (
+    <div className={`${richEditorStyles.placeholder} ${styles.placeholder}`}>
+      Add your comment here...
+    </div>
+  );
 }
 
 export interface CommentRef {
@@ -38,27 +51,16 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
 
     const editor = exportEditorContentRef.current?.getEditor();
     editor?.setEditorState(editor.parseEditorState(commentData.content));
-
   }, [commentData?.content]);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      getContent,
-      clearContent,
-      getEditor
-    }),
-    []
-  );
 
   const getContent = () => {
     const editor = exportEditorContentRef.current?.getEditor();
     if (!editor) {
-      return '';
+      return "";
     }
 
     return JSON.stringify(editor.getEditorState());
-  }
+  };
 
   const clearContent = () => {
     const editor = exportEditorContentRef.current?.getEditor();
@@ -69,33 +71,44 @@ function Comment(props: Props, ref: ForwardedRef<CommentRef>) {
     editor.update(() => {
       $getRoot().clear();
     });
-  }
+  };
 
   const getEditor = () => {
     const editor = exportEditorContentRef.current?.getEditor();
     return editor;
-  }
+  };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getContent,
+      clearContent,
+      getEditor,
+    }),
+    [],
+  );
 
   return (
     <div className={styles.container}>
-      {
-        shouldDisplayHeader ? (
-          <div className={styles.header}>
-            {props.renderHeader?.()}
-          </div>
-        ) : null
-      }
+      {shouldDisplayHeader ? (
+        <div className={styles.header}>{props.renderHeader?.()}</div>
+      ) : null}
 
       <div className={styles.body}>
         <RichEditor
           placeholder={<CommentPlaceholder />}
           containerClassName={styles.commentEditorContainer}
-          configOptions={{ editable: isEditable, editorState: commentData?.content }}
-          additionalPlugins={<ExportContentPlugin ref={exportEditorContentRef} />}
+          configOptions={{
+            editable: isEditable,
+            editorState: commentData?.content,
+          }}
+          additionalPlugins={
+            <ExportContentPlugin ref={exportEditorContentRef} />
+          }
         />
       </div>
     </div>
-  )
+  );
 }
 
 export default forwardRef(Comment);

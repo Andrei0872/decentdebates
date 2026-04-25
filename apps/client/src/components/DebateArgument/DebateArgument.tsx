@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Button, Icon, Menu, MenuDivider, MenuItem, Popover } from '@blueprintjs/core';
-import styles from './DebateArgument.module.scss';
+import { Icon, Popover } from "@blueprintjs/core";
+import styles from "./DebateArgument.module.scss";
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 // import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-import type { DebateArgument } from '@/store/slices/debates.slice';
-import RichEditor from '../RichEditor/RichEditor';
-import buttonStyles from '@/styles/shared/button.module.scss';
+import type { DebateArgument } from "@/store/slices/debates.slice";
+import RichEditor from "../RichEditor/RichEditor";
+import buttonStyles from "@/styles/shared/button.module.scss";
 
 interface Props {
   debateArgumentData: DebateArgument;
@@ -32,31 +32,33 @@ function DebateArgument(props: Props) {
     <div className={styles.argument}>
       <div className={styles.header}>
         <h3 className={styles.title}>{debateArgumentData.title}</h3>
-        {
-          additionalActions ? (
-            <div className={styles.actions}>
-              <Popover
-                interactionKind="click"
-                placement="right"
-                content={additionalActions}
-                renderTarget={({ isOpen, ref, ...targetProps }) => (
-                  <span {...targetProps} ref={ref}>
-                    <Icon icon="more" />
-                  </span>
-                )}
-              />
-            </div>
-          ) : null
-        }
+        {additionalActions ? (
+          <div className={styles.actions}>
+            <Popover
+              interactionKind="click"
+              placement="right"
+              content={additionalActions}
+              renderTarget={({ ref, ...targetProps }) => (
+                <span {...targetProps} ref={ref}>
+                  <Icon icon="more" />
+                </span>
+              )}
+            />
+          </div>
+        ) : null}
       </div>
 
-      {
-        isExpanded && debateArgumentData.content ? (
-          <div className={styles.body}>
-            <RichEditor containerClassName={styles.argumentEditorContainer} configOptions={{ editable: false, editorState: debateArgumentData.content }} />
-          </div>
-        ) : null
-      }
+      {isExpanded && debateArgumentData.content ? (
+        <div className={styles.body}>
+          <RichEditor
+            containerClassName={styles.argumentEditorContainer}
+            configOptions={{
+              editable: false,
+              editorState: debateArgumentData.content,
+            }}
+          />
+        </div>
+      ) : null}
 
       <div className={styles.footer}>
         <div className={styles.username}>
@@ -64,34 +66,30 @@ function DebateArgument(props: Props) {
           <span>{debateArgumentData.username}</span>
         </div>
 
-        {
-          isAbleToExpand ? (
-            <div className={styles.expand}>
-              {
-                !isExpanded ? (
-                  <button
-                    onClick={() => readArgument(debateArgumentData.argumentId)}
-                    type='button'
-                    className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
-                  >
-                    Read more
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => collapseArgument(debateArgumentData.argumentId)}
-                    type='button'
-                    className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
-                  >
-                    Collapse
-                  </button>
-                )
-              }
-            </div>
-          ) : null
-        }
+        {isAbleToExpand ? (
+          <div className={styles.expand}>
+            {!isExpanded ? (
+              <button
+                onClick={() => readArgument(debateArgumentData.argumentId)}
+                type="button"
+                className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
+              >
+                Read more
+              </button>
+            ) : (
+              <button
+                onClick={() => collapseArgument(debateArgumentData.argumentId)}
+                type="button"
+                className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.outlined} ${styles.argButton}`}
+              >
+                Collapse
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
-  )
+  );
 }
 
-export default DebateArgument
+export default DebateArgument;

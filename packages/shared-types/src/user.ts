@@ -1,7 +1,7 @@
 export enum UserRoles {
-  USER = 'USER',
-  MODERATOR = 'MODERATOR',
-  ADMIN = 'ADMIN',
+  USER = "USER",
+  MODERATOR = "MODERATOR",
+  ADMIN = "ADMIN",
 }
 
 export interface PublicUser {
@@ -12,11 +12,11 @@ export interface PublicUser {
 }
 
 export enum CardTypes {
-  DEBATE = 'debate',
-  ARGUMENT = 'argument',
+  DEBATE = "debate",
+  ARGUMENT = "argument",
 }
 
 export enum ActivityTypes {
-  SOLVED = 'SOLVED',
-  ONGOING = 'ONGOING',
+  SOLVED = "SOLVED",
+  ONGOING = "ONGOING",
 }

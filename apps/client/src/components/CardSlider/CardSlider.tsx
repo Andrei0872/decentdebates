@@ -1,14 +1,18 @@
-import { Icon } from '@blueprintjs/core'
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import styles from './CardSlider.module.scss'
-import buttonStyles from '@/styles/shared/button.module.scss'
+import { Icon } from "@blueprintjs/core";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
+import styles from "./CardSlider.module.scss";
+import buttonStyles from "@/styles/shared/button.module.scss";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 function CardSlider(props: Props) {
   const [sliderIdx, setSliderIdx] = useState(0);
+  const [sliderMetrics, setSliderMetrics] = useState({
+    slidesCount: 1,
+    scrollAmount: 0,
+  });
 
   const sliderContainerRef = useRef<HTMLDivElement | null>(null);
   const cardsContainerRef = useRef<HTMLUListElement | null>(null);
@@ -17,38 +21,61 @@ function CardSlider(props: Props) {
   // const slidesCount = sliderContainerRef.current ? Math.floor((cardsContainerRef.current!.scrollWidth) / (sliderContainerRef.current.offsetWidth - 400)) : 1;
   // const scrollAmount = sliderContainerRef.current ? sliderContainerRef.current.offsetWidth - 400 : 0;
 
-  const slidesCount = sliderContainerRef.current ? Math.ceil((cardsContainerRef.current!.scrollWidth) / sliderContainerRef.current.clientWidth) : 1;
-  const scrollAmount = sliderContainerRef.current ? sliderContainerRef.current.offsetWidth : 0;
+  useEffect(() => {
+    const updateSliderMetrics = () => {
+      const sliderContainer = sliderContainerRef.current;
+      const cardsContainer = cardsContainerRef.current;
+
+      if (!sliderContainer || !cardsContainer) {
+        setSliderMetrics({ slidesCount: 1, scrollAmount: 0 });
+        return;
+      }
+
+      const scrollAmount = sliderContainer.offsetWidth;
+      const slidesCount = Math.max(
+        1,
+        Math.ceil(cardsContainer.scrollWidth / sliderContainer.clientWidth),
+      );
+      setSliderMetrics({ slidesCount, scrollAmount });
+    };
+
+    updateSliderMetrics();
+    window.addEventListener("resize", updateSliderMetrics);
+
+    return () => {
+      window.removeEventListener("resize", updateSliderMetrics);
+    };
+  }, [props.children]);
 
   const goNextSlide = () => {
     setSliderIdx(sliderIdx + 1);
-    cardsContainerRef.current!.scrollLeft += scrollAmount;
-  }
+    if (cardsContainerRef.current) {
+      cardsContainerRef.current.scrollLeft += sliderMetrics.scrollAmount;
+    }
+  };
 
   const goPrevSlide = () => {
     setSliderIdx(sliderIdx - 1);
-    cardsContainerRef.current!.scrollLeft -= scrollAmount;
-  }
+    if (cardsContainerRef.current) {
+      cardsContainerRef.current.scrollLeft -= sliderMetrics.scrollAmount;
+    }
+  };
 
-  const canSlideNext = sliderIdx < slidesCount - 1;
+  const canSlideNext = sliderIdx < sliderMetrics.slidesCount - 1;
   const canSlidePrev = sliderIdx >= 1;
 
   return (
     <div ref={sliderContainerRef} className={styles.container}>
       <ul ref={cardsContainerRef} className={styles.cards}>
-        {React.Children.map(props.children, elem => {
-          return (
-            <li className={styles.card}>
-              {elem}
-            </li>
-          )
+        {React.Children.map(props.children, (elem) => {
+          return <li className={styles.card}>{elem}</li>;
         })}
       </ul>
 
       <button
         disabled={!canSlidePrev}
         onClick={goPrevSlide}
-        type='button'
+        type="button"
         className={`${styles.cardButton} ${styles.buttonPrev} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-left" />
@@ -56,13 +83,13 @@ function CardSlider(props: Props) {
       <button
         disabled={!canSlideNext}
         onClick={goNextSlide}
-        type='button'
+        type="button"
         className={`${styles.cardButton} ${styles.buttonNext} ${buttonStyles.button} ${buttonStyles.secondary}`}
       >
         <Icon icon="chevron-right" />
       </button>
     </div>
-  )
+  );
 }
 
-export default CardSlider
+export default CardSlider;

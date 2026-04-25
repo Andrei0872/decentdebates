@@ -1,26 +1,28 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { createRequire } from 'module';
-import { Pool, type PoolConfig } from 'pg';
-import { seed as seedDebates } from '../../../../packages/db/data/seeds/03_debates';
+import * as fs from "fs";
+import * as path from "path";
+import { createRequire } from "module";
+import { Pool, type PoolConfig } from "pg";
+import { seed as seedDebates } from "../../../../packages/db/data/seeds/03_debates";
 
-const REPO_ROOT = path.resolve(__dirname, '../../../..');
-const DB_ENV_FILE = path.resolve(REPO_ROOT, 'packages/db/.env');
-const API_ENV_FILE = path.resolve(REPO_ROOT, 'apps/api/.env');
-const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, 'apps/api/.env.test');
-const SCHEMA_FILE = path.resolve(REPO_ROOT, 'packages/db/schema.sql');
-const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, 'packages/db/package.json');
+const REPO_ROOT = path.resolve(__dirname, "../../../..");
+const DB_ENV_FILE = path.resolve(REPO_ROOT, "packages/db/.env");
+const API_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env");
+const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
+const SCHEMA_FILE = path.resolve(REPO_ROOT, "packages/db/schema.sql");
+const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, "packages/db/package.json");
 const requireFromDbPackage = createRequire(DB_PACKAGE_JSON);
 
 let envLoaded = false;
 
 function createKnexClient(config: PoolConfig) {
-  const knexFactory = requireFromDbPackage('knex') as (options: Record<string, unknown>) => {
+  const knexFactory = requireFromDbPackage("knex") as (
+    options: Record<string, unknown>,
+  ) => {
     destroy: () => Promise<void>;
   };
 
   return knexFactory({
-    client: 'pg',
+    client: "pg",
     connection: config,
   });
 }
@@ -30,22 +32,25 @@ function maybeLoadEnv(pathname: string, override = false) {
     return;
   }
 
-  const lines = fs.readFileSync(pathname, 'utf8').split(/\r?\n/);
+  const lines = fs.readFileSync(pathname, "utf8").split(/\r?\n/);
 
   for (const line of lines) {
     const trimmed = line.trim();
 
-    if (!trimmed || trimmed.startsWith('#')) {
+    if (!trimmed || trimmed.startsWith("#")) {
       continue;
     }
 
-    const separatorIndex = trimmed.indexOf('=');
+    const separatorIndex = trimmed.indexOf("=");
     if (separatorIndex === -1) {
       continue;
     }
 
     const key = trimmed.slice(0, separatorIndex).trim();
-    const value = trimmed.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, '');
+    const value = trimmed
+      .slice(separatorIndex + 1)
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
 
     if (override || process.env[key] === undefined) {
       process.env[key] = value;
@@ -66,9 +71,10 @@ export function loadTestEnv() {
   maybeLoadEnv(API_ENV_FILE);
   maybeLoadEnv(API_TEST_ENV_FILE, true);
 
-  const baseDbName = process.env.POSTGRES_DB ?? 'decentdebates';
-  process.env.POSTGRES_DB = process.env.POSTGRES_DB_TEST ?? `${baseDbName}_test`;
-  process.env.COOKIE_SECRET = process.env.COOKIE_SECRET ?? 'test-cookie-secret';
+  const baseDbName = process.env.POSTGRES_DB ?? "decentdebates";
+  process.env.POSTGRES_DB =
+    process.env.POSTGRES_DB_TEST ?? `${baseDbName}_test`;
+  process.env.COOKIE_SECRET = process.env.COOKIE_SECRET ?? "test-cookie-secret";
 
   envLoaded = true;
 }
@@ -92,7 +98,7 @@ function getConnectionConfig(database: string): PoolConfig {
 }
 
 export function createAdminPool() {
-  return new Pool(getConnectionConfig('postgres'));
+  return new Pool(getConnectionConfig("postgres"));
 }
 
 export function createTestPool() {
@@ -122,7 +128,7 @@ export async function recreateTestDatabase() {
 
 export async function applySchema() {
   const pool = createTestPool();
-  const schemaSql = fs.readFileSync(SCHEMA_FILE, 'utf8');
+  const schemaSql = fs.readFileSync(SCHEMA_FILE, "utf8");
 
   try {
     await pool.query(schemaSql);
@@ -148,7 +154,10 @@ export async function resetTestDatabase() {
   await runSeeds();
 }
 
-export async function queryOne<T = Record<string, unknown>>(sql: string, values: unknown[] = []) {
+export async function queryOne<T = Record<string, unknown>>(
+  sql: string,
+  values: unknown[] = [],
+) {
   const pool = createTestPool();
 
   try {

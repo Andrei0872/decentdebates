@@ -1,24 +1,47 @@
-import { Logger } from '@nestjs/common';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, WsResponse } from '@nestjs/websockets';
-import { ArgumentCommentPayload, ArgumentReviewUpdated, CommentPayload, DebateCommentPayload, DebateReviewUpdated, SocketIOServer, UpdateReviewArgumentData, UpdateReviewDebateData } from './review.model';
-import { Socket } from 'socket.io';
-import { ReviewService } from './review.service';
-import { UserCookieData, UserRoles } from '../user/user.model';
-import { CommentService } from '../comment/comment.service';
-import { AddCommentData, UpdateCommentData } from '../comment/comment.model';
-import { config } from 'src/config';
-import { DebatesService } from '../debates/debates.service';
-import { UpdateArgumentData, UpdateDebateData } from '../debates/debates.model';
-import { ArgumentReviewNewComment, DebateReviewNewComment, } from './review.events';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ArgumentUpdated, DebateTitleUpdated } from '../debates/debate.events';
-import { shouldEmitRoutineLogs } from 'src/logging';
+import { Logger } from "@nestjs/common";
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  WsException,
+  WsResponse,
+} from "@nestjs/websockets";
+import {
+  ArgumentCommentPayload,
+  ArgumentReviewUpdated,
+  DebateCommentPayload,
+  DebateReviewUpdated,
+  SocketIOServer,
+} from "./review.model";
+import { Socket } from "socket.io";
+import { ReviewService } from "./review.service";
+import { UserCookieData, UserRoles } from "../user/user.model";
+import { CommentService } from "../comment/comment.service";
+import { AddCommentData, UpdateCommentData } from "../comment/comment.model";
+import { config } from "src/config";
+import { DebatesService } from "../debates/debates.service";
+import { UpdateArgumentData, UpdateDebateData } from "../debates/debates.model";
+import {
+  ArgumentReviewNewComment,
+  DebateReviewNewComment,
+} from "./review.events";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { ArgumentUpdated, DebateTitleUpdated } from "../debates/debate.events";
+import { shouldEmitRoutineLogs } from "src/logging";
 
 const PORT = 3002;
 
-@WebSocketGateway(PORT, { namespace: 'review', cors: { origin: config.CLIENT_URL, credentials: true }, cookie: true })
-export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway(PORT, {
+  namespace: "review",
+  cors: { origin: config.CLIENT_URL, credentials: true },
+  cookie: true,
+})
+export class ReviewGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(ReviewGateway.name);
 
   @WebSocketServer()
@@ -31,22 +54,22 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private commentService: CommentService,
     private debatesService: DebatesService,
     private eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
-  afterInit(server: any) {
+  afterInit(_server: any) {
     if (shouldEmitRoutineLogs()) {
       this.logger.log(`Websocket server up & running on port ${PORT}.`);
     }
   }
 
-  async handleConnection(socket: Socket, ...args: any[]) {
+  async handleConnection(socket: Socket, ..._args: any[]) {
     try {
       const user = await this.reviewService.getUserFromSocket(socket);
       this.addUserToRoom(socket, user);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(errorMessage);
-      socket.emit('error', { reason: errorMessage });
+      socket.emit("error", { reason: errorMessage });
       socket.disconnect(true);
     }
   }
@@ -59,8 +82,11 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  @SubscribeMessage('comment/debate:create')
-  async handleDebateCommentCreate(socket: Socket, payload: DebateCommentPayload): Promise<WsResponse> {
+  @SubscribeMessage("comment/debate:create")
+  async handleDebateCommentCreate(
+    socket: Socket,
+    payload: DebateCommentPayload,
+  ): Promise<WsResponse> {
     try {
       const content = payload.comment;
       if (!content) {
@@ -75,10 +101,13 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         commenterId: user.id,
       };
 
-      const insertedComment = await this.commentService.addCommentToDebate(commentData);
+      const insertedComment =
+        await this.commentService.addCommentToDebate(commentData);
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('comment/debate:create', { insertedComment });
+      socket
+        .to(roomIdentifier)
+        .emit("comment/debate:create", { insertedComment });
 
       this.eventEmitter.emitAsync(
         DebateReviewNewComment.EVENT_NAME,
@@ -88,20 +117,26 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           user,
           payload.debateTitle,
           user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        )
+        ),
       );
 
       return {
-        event: 'comment/debate:create',
+        event: "comment/debate:create",
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket, err instanceof Error ? err.message : String(err));
+      this.removeUserFromRoom(
+        socket,
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 
-  @SubscribeMessage('comment/debate:update')
-  async handleDebateCommentUpdate(socket: Socket, payload: UpdateCommentData): Promise<string> {
+  @SubscribeMessage("comment/debate:update")
+  async handleDebateCommentUpdate(
+    socket: Socket,
+    payload: UpdateCommentData,
+  ): Promise<string> {
     try {
       if (!payload.content) {
         throw new WsException(`Comment's content can't be empty.`);
@@ -110,13 +145,15 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const result = await this.commentService.updateComment(user, payload);
       if (!result.rowCount) {
-        throw new WsException('No updates occurred');
+        throw new WsException("No updates occurred");
       }
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('comment/debate:update', { updatedComment: payload });
+      socket
+        .to(roomIdentifier)
+        .emit("comment/debate:update", { updatedComment: payload });
 
-      return 'OK';
+      return "OK";
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(errorMessage);
@@ -124,8 +161,11 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  @SubscribeMessage('comment/argument:create')
-  async handleArgumentCommentCreate(socket: Socket, payload: ArgumentCommentPayload): Promise<WsResponse> {
+  @SubscribeMessage("comment/argument:create")
+  async handleArgumentCommentCreate(
+    socket: Socket,
+    payload: ArgumentCommentPayload,
+  ): Promise<WsResponse> {
     try {
       const content = payload.comment;
       if (!content) {
@@ -140,10 +180,13 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         commenterId: user.id,
       };
 
-      const insertedComment = await this.commentService.addCommentToArgument(commentData);
+      const insertedComment =
+        await this.commentService.addCommentToArgument(commentData);
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('comment/argument:create', { insertedComment });
+      socket
+        .to(roomIdentifier)
+        .emit("comment/argument:create", { insertedComment });
 
       this.eventEmitter.emitAsync(
         ArgumentReviewNewComment.EVENT_NAME,
@@ -154,20 +197,26 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           payload.debateTitle,
           payload.argumentTitle,
           user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        )
+        ),
       );
 
       return {
-        event: 'comment/argument:create',
+        event: "comment/argument:create",
         data: { insertedComment },
       };
     } catch (err) {
-      this.removeUserFromRoom(socket, err instanceof Error ? err.message : String(err));
+      this.removeUserFromRoom(
+        socket,
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 
-  @SubscribeMessage('comment/argument:update')
-  async handleArgumentCommentUpdate(socket: Socket, payload: UpdateCommentData): Promise<string> {
+  @SubscribeMessage("comment/argument:update")
+  async handleArgumentCommentUpdate(
+    socket: Socket,
+    payload: UpdateCommentData,
+  ): Promise<string> {
     try {
       if (!payload.content) {
         throw new WsException(`Comment's content can't be empty.`);
@@ -176,13 +225,15 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const result = await this.commentService.updateComment(user, payload);
       if (!result.rowCount) {
-        throw new WsException('No updates occurred');
+        throw new WsException("No updates occurred");
       }
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('comment/argument:update', { updatedComment: payload });
+      socket
+        .to(roomIdentifier)
+        .emit("comment/argument:update", { updatedComment: payload });
 
-      return 'OK';
+      return "OK";
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(errorMessage);
@@ -190,15 +241,18 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  @SubscribeMessage('argument:update')
-  async handleArgumentUpdate(socket: Socket, payload: ArgumentReviewUpdated): Promise<string> {
+  @SubscribeMessage("argument:update")
+  async handleArgumentUpdate(
+    socket: Socket,
+    payload: ArgumentReviewUpdated,
+  ): Promise<string> {
     try {
       if (!payload.data) {
         throw new WsException(`Argument data is missing.`);
       }
       const user = this.userSockets.get(socket.id);
       if (user.role !== UserRoles.USER) {
-        throw new WsException('Only users can updated their own comment.');
+        throw new WsException("Only users can updated their own comment.");
       }
 
       const argData: UpdateArgumentData = {
@@ -211,11 +265,11 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       };
       const result = await this.debatesService.updateArgument(argData);
       if (!result.rowCount) {
-        throw new WsException('No updates occurred');
+        throw new WsException("No updates occurred");
       }
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('argument:update', payload.data);
+      socket.to(roomIdentifier).emit("argument:update", payload.data);
 
       this.eventEmitter.emitAsync(
         ArgumentUpdated.EVENT_NAME,
@@ -228,7 +282,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         ),
       );
 
-      return 'OK';
+      return "OK";
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(errorMessage);
@@ -236,15 +290,18 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  @SubscribeMessage('debate:update')
-  async handleDebateUpdate(socket: Socket, payload: DebateReviewUpdated): Promise<string> {
+  @SubscribeMessage("debate:update")
+  async handleDebateUpdate(
+    socket: Socket,
+    payload: DebateReviewUpdated,
+  ): Promise<string> {
     try {
       if (!payload.data) {
         throw new WsException(`Debate data is missing.`);
       }
       const user = this.userSockets.get(socket.id);
       if (user.role !== UserRoles.USER) {
-        throw new WsException('Only users can updated their own debate.');
+        throw new WsException("Only users can updated their own debate.");
       }
 
       const debateData: UpdateDebateData = {
@@ -254,11 +311,11 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       };
       const result = await this.debatesService.updateDebate(debateData);
       if (!result.rowCount) {
-        throw new WsException('No updates occurred');
+        throw new WsException("No updates occurred");
       }
 
       const roomIdentifier = this.getRoomIdentifier(socket);
-      socket.to(roomIdentifier).emit('debate:update', payload.data);
+      socket.to(roomIdentifier).emit("debate:update", payload.data);
 
       this.eventEmitter.emitAsync(
         DebateTitleUpdated.EVENT_NAME,
@@ -268,17 +325,16 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           payload.oldTitle,
           payload.data.title,
           user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        )
+        ),
       );
 
-      return 'OK';
+      return "OK";
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(errorMessage);
       this.removeUserFromRoom(socket, errorMessage);
     }
   }
-
 
   private addUserToRoom(socket: Socket, user: UserCookieData) {
     this.userSockets.set(socket.id, user);
@@ -294,7 +350,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     socket.leave(roomIdentifier);
 
     if (errorMessage) {
-      socket.emit('error', { reason: errorMessage });
+      socket.emit("error", { reason: errorMessage });
     }
   }
 
@@ -305,7 +361,7 @@ export class ReviewGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   private getTicketIdFromSocket(socket: Socket) {
     const { ticketId } = socket.handshake.query;
-    if (!ticketId || ticketId === 'undefined') {
+    if (!ticketId || ticketId === "undefined") {
       throw new WsException(`'ticketId' is missing.`);
     }
 

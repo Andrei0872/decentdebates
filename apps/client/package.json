@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "start:prod": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check \"src/**/*.{ts,tsx,scss,css}\" \"tests/**/*.ts\"",
+    "format:fix": "prettier --write \"src/**/*.{ts,tsx,scss,css}\" \"tests/**/*.ts\"",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest"
@@ -46,10 +49,11 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.1",
+    "@decentdebates/eslint-config": "workspace:*",
     "dotenv": "^16.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^16.2.4",
+    "eslint": "^9.39.4",
     "jsdom": "^29.0.2",
+    "prettier": "^3.0.0",
     "sass": "^1.58.1",
     "vitest": "^4.1.4"
   }

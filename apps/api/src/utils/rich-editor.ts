@@ -5,7 +5,7 @@ interface NodesFactory {
   (): Array<LexicalNode>;
 }
 
-const editor = createEditor({ nodes: [LinkNode], namespace: 'decentdebates' });
+const editor = createEditor({ nodes: [LinkNode], namespace: "decentdebates" });
 editor._headless = true;
 
 const insertNodes = (nodesFactory: NodesFactory) => {
@@ -17,7 +17,7 @@ const insertNodes = (nodesFactory: NodesFactory) => {
   return {
     getContent: (): Promise<string> => {
       let resolve;
-      const resultPromise = new Promise<string>(r => resolve = r);
+      const resultPromise = new Promise<string>((r) => (resolve = r));
 
       // Based on a quick look into the source code, the node's insertion
       // is achieved via `setTimeout()`.
@@ -25,19 +25,18 @@ const insertNodes = (nodesFactory: NodesFactory) => {
         resolve(JSON.stringify(editor.getEditorState()));
       });
 
-      return resultPromise
-        .finally(() => {
-          clearEditor();
-        });
-    }
-  }
-}
+      return resultPromise.finally(() => {
+        clearEditor();
+      });
+    },
+  };
+};
 
 const clearEditor = () => {
   editor.update(() => {
     $getRoot().clear();
   });
-}
+};
 
 export const richEditor = {
   insertNodes,

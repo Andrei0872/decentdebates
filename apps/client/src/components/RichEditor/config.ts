@@ -1,9 +1,9 @@
 import { InitialConfigType } from "@lexical/react/LexicalComposer";
-import styles from './RichEditor.module.scss';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text'
-import { ListNode, ListItemNode } from '@lexical/list'
+import styles from "./RichEditor.module.scss";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
 import { LinkNode } from "@lexical/link";
-import { CodeNode } from '@lexical/code';
+import { CodeNode } from "@lexical/code";
 
 export const editorConfig: InitialConfigType = {
   theme: {
@@ -15,15 +15,15 @@ export const editorConfig: InitialConfigType = {
       h2: styles.h2,
       h3: styles.h3,
       h4: styles.h4,
-      h5: styles.h5
+      h5: styles.h5,
     },
     list: {
       nested: {
-        listitem: styles.nestedListItem
+        listitem: styles.nestedListItem,
       },
       ol: styles.ol,
       ul: styles.ul,
-      listitem: styles.listItem
+      listitem: styles.listItem,
     },
     link: styles.link,
     text: {
@@ -36,13 +36,6 @@ export const editorConfig: InitialConfigType = {
   onError(err) {
     throw err;
   },
-  namespace: 'decentdebates',
-  nodes: [
-    HeadingNode,
-    ListNode,
-    ListItemNode,
-    QuoteNode,
-    LinkNode,
-    CodeNode,
-  ],
-}
+  namespace: "decentdebates",
+  nodes: [HeadingNode, ListNode, ListItemNode, QuoteNode, LinkNode, CodeNode],
+};

@@ -1,6 +1,6 @@
-import { Icon } from '@blueprintjs/core';
-import { ReactNode, useState } from 'react'
-import styles from './SimpleCollapse.module.scss'
+import { Icon } from "@blueprintjs/core";
+import { ReactNode, useState } from "react";
+import styles from "./SimpleCollapse.module.scss";
 
 interface Props {
   header: ReactNode;
@@ -22,32 +22,34 @@ function SimpleCollapse(props: Props) {
     }
 
     props.click?.();
-  }
+  };
 
   const handleExpandChange = () => {
     setIsOpen(!isOpen);
     props.expandChange?.(!isOpen);
-  }
+  };
 
   return (
     <div onClick={onContainerClick} className={styles.container}>
-      <div className={`${styles.header} ${shouldExpandOnClick ? styles.expandOnClick : ''}`}>
+      <div
+        className={`${styles.header} ${shouldExpandOnClick ? styles.expandOnClick : ""}`}
+      >
         {props.header}
 
-        <button className={styles.triggerButton} onClick={handleExpandChange} type='button'>
+        <button
+          className={styles.triggerButton}
+          onClick={handleExpandChange}
+          type="button"
+        >
           <Icon icon={`${isOpen ? "chevron-up" : "chevron-down"}`} />
         </button>
       </div>
 
-      <div
-        className={`${styles.bodyWrapper} ${isOpen ? styles.isOpen : ''}`}
-      >
-        <div className={styles.body}>
-          {props.children}
-        </div>
+      <div className={`${styles.bodyWrapper} ${isOpen ? styles.isOpen : ""}`}>
+        <div className={styles.body}>{props.children}</div>
       </div>
     </div>
-  )
+  );
 }
 
-export default SimpleCollapse
+export default SimpleCollapse;

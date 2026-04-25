@@ -50,11 +50,11 @@
 }
 
 .createDebateDialog {
-  &>div h6 {
+  & > div h6 {
     color: var(--cl-secondary-shade-1);
   }
 
-  &>div>button>span>svg {
+  & > div > button > span > svg {
     color: var(--cl-secondary-shade-1);
   }
 }

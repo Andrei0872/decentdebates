@@ -1,6 +1,6 @@
 export enum ArgumentType {
-  PRO = 'PRO',
-  CON = 'CON',
+  PRO = "PRO",
+  CON = "CON",
 }
 
 export interface DebateArgument {

@@ -2,7 +2,7 @@ interface GenericFn {
   (this: any, ...p: any[]): any;
 }
 
-export function debounce (this: any, fn: GenericFn, ms: number) {
+export function debounce(this: any, fn: GenericFn, ms: number) {
   let timeoutId: any = null;
 
   return function (this: any, ...args: any[]) {
@@ -14,5 +14,5 @@ export function debounce (this: any, fn: GenericFn, ms: number) {
       fn.apply(this, args);
       timeoutId = null;
     }, ms);
-  }
+  };
 }

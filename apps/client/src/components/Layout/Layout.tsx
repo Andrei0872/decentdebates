@@ -1,13 +1,13 @@
-import layoutStyles from './Layout.module.scss';
+import layoutStyles from "./Layout.module.scss";
 
-import Head from 'next/head';
-import { ReactNode } from 'react';
-import Navbar from '../Navbar/Navbar';
+import Head from "next/head";
+import { ReactNode } from "react";
+import Navbar from "../Navbar/Navbar";
 
-export const SITE_TITLE = 'Decent Debates';
+export const SITE_TITLE = "Decent Debates";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function Layout({ children }: Props) {
@@ -16,10 +16,7 @@ export default function Layout({ children }: Props) {
       <Head>
         <title>{SITE_TITLE}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="A place for healthy debates."
-        />
+        <meta name="description" content="A place for healthy debates." />
       </Head>
 
       <header className={layoutStyles.header}>
@@ -30,7 +27,12 @@ export default function Layout({ children }: Props) {
       <main className={layoutStyles.main}>{children}</main>
 
       <footer className={layoutStyles.footer}>
-        <p>Created by <a target='_blank' className='link' href="https://andreigatej.dev">Andrei Gatej</a></p>
+        <p>
+          Created by{" "}
+          <a target="_blank" className="link" href="https://andreigatej.dev">
+            Andrei Gatej
+          </a>
+        </p>
       </footer>
     </div>
   );

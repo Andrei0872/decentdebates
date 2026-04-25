@@ -26,7 +26,7 @@
 .debateTitleContainer {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
   color: var(--cl-secondary-shade-1);
 }
 
@@ -39,7 +39,7 @@
 
 .argInfo {
   display: flex;
-  gap: .8rem;
+  gap: 0.8rem;
   align-items: center;
 }
 
@@ -47,12 +47,12 @@
   font-size: 1.7rem;
 }
 
-.argTitle>input {
+.argTitle > input {
   font-size: inherit;
 }
 
 .argContent {
-  margin-block-start: .7rem;
+  margin-block-start: 0.7rem;
   width: var(--argument-content-width);
 }
 
@@ -68,7 +68,7 @@
   position: relative;
   overflow: hidden;
 
-  --width-transition-duration: .2s;
+  --width-transition-duration: 0.2s;
 }
 
 .leftPanel {
@@ -118,13 +118,12 @@
 
 .rightPanel .counterargumentTitle {
   border-bottom: 1px solid black;
-  padding: .2rem;
+  padding: 0.2rem;
 }
 
 .counterargumentEditorContainer {
-  padding: .2rem;
+  padding: 0.2rem;
 }
-
 
 .commenter {
   background: var(--cl-secondary-tint-1);
@@ -155,15 +154,17 @@
   margin-inline: auto;
   display: flex;
   justify-content: flex-end;
-  margin-block-start: .5rem;
+  margin-block-start: 0.5rem;
 }
 
-:where(.argUserInformation .addedBy, .argModeratorInformation .reviewedBy)>span {
+:where(.argUserInformation .addedBy, .argModeratorInformation .reviewedBy)
+  > span {
   font-style: italic;
   font-weight: 600;
 }
 
-.addedBy, .reviewedBy {
+.addedBy,
+.reviewedBy {
   color: var(--cl-secondary-shade-1);
 }
 
@@ -199,13 +200,13 @@
   width: var(--argument-content-width);
   margin-inline: auto;
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .rightPanelContent {
   border: 1px solid var(--cl-neutral-3);
   border-radius: 6px;
-  padding: 0.3rem .5rem;
+  padding: 0.3rem 0.5rem;
   background: var(--cl-secondary-tint-2);
 
   & .counterargumentTitle {

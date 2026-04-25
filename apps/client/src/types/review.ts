@@ -9,7 +9,7 @@ import { Tag } from "./tag";
 export enum ReviewItemType {
   MODERATOR,
   USER,
-};
+}
 
 export interface ArgumentAsModerator extends SharedArgumentAsModerator {
   reviewItemType: ReviewItemType.MODERATOR;

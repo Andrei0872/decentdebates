@@ -37,16 +37,18 @@ const initialState: DebatesState = {
 };
 
 export const debatesSlice = createSlice({
-  name: 'debates',
+  name: "debates",
   initialState,
   reducers: {
-    setDebates(state, action: PayloadAction<DebatesState['list'] | null>) {
+    setDebates(state, action: PayloadAction<DebatesState["list"] | null>) {
       state.list = action.payload;
     },
-    setCurrentDebate (state, action: PayloadAction<CurrentDebate | null>) {
-      state.crtDebate = action.payload ? { ...action.payload, expandedArgumentsIDs: [] } : null;
+    setCurrentDebate(state, action: PayloadAction<CurrentDebate | null>) {
+      state.crtDebate = action.payload
+        ? { ...action.payload, expandedArgumentsIDs: [] }
+        : null;
     },
-    addExpandedArgumentID (state, action: PayloadAction<{ id: number }>) {
+    addExpandedArgumentID(state, action: PayloadAction<{ id: number }>) {
       if (!state.crtDebate?.expandedArgumentsIDs) {
         return;
       }
@@ -54,20 +56,29 @@ export const debatesSlice = createSlice({
       state.crtDebate.expandedArgumentsIDs = [
         ...state.crtDebate.expandedArgumentsIDs,
         action.payload.id,
-      ]
+      ];
     },
-    removeExpandedArgumentID (state, action: PayloadAction<{ id: number }>) {
+    removeExpandedArgumentID(state, action: PayloadAction<{ id: number }>) {
       if (!state.crtDebate?.expandedArgumentsIDs) {
         return;
       }
 
-      state.crtDebate.expandedArgumentsIDs = state.crtDebate.expandedArgumentsIDs
-        .filter(id => id !== action.payload.id);
+      state.crtDebate.expandedArgumentsIDs =
+        state.crtDebate.expandedArgumentsIDs.filter(
+          (id) => id !== action.payload.id,
+        );
     },
   },
 });
 
-export const { setDebates, setCurrentDebate, addExpandedArgumentID, removeExpandedArgumentID } = debatesSlice.actions;
+export const {
+  setDebates,
+  setCurrentDebate,
+  addExpandedArgumentID,
+  removeExpandedArgumentID,
+} = debatesSlice.actions;
 
-export const selectCurrentDebate = (state: RootState) => state.debates.crtDebate;
-export const selectExpandedArgumentsIDs = (state: RootState) => state.debates.crtDebate?.expandedArgumentsIDs;
+export const selectCurrentDebate = (state: RootState) =>
+  state.debates.crtDebate;
+export const selectExpandedArgumentsIDs = (state: RootState) =>
+  state.debates.crtDebate?.expandedArgumentsIDs;

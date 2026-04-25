@@ -1,14 +1,14 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Pool } from 'pg';
-import { PG_PROVIDER_TOKEN } from '@decentdebates/db';
-import { UserCookieData } from '../user/user.model';
-import { AddCommentData, Comment, UpdateCommentData } from './comment.model';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Pool } from "pg";
+import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import { UserCookieData } from "../user/user.model";
+import { AddCommentData, Comment, UpdateCommentData } from "./comment.model";
 
 @Injectable()
 export class CommentService {
   private readonly logger = new Logger(CommentService.name);
 
-  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) { }
+  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) {}
 
   private logError(err: unknown) {
     this.logger.error(err instanceof Error ? err.message : String(err));
@@ -56,7 +56,7 @@ export class CommentService {
     try {
       const res = await client.query(sqlStr, values);
       if (!res.rowCount) {
-        throw new Error('Ticket and commenter are not connected.')
+        throw new Error("Ticket and commenter are not connected.");
       }
 
       return res.rows[0];
@@ -68,7 +68,10 @@ export class CommentService {
     }
   }
 
-  async getTicketComments(ticketId: string, user: UserCookieData): Promise<Comment[]> {
+  async getTicketComments(
+    ticketId: string,
+    user: UserCookieData,
+  ): Promise<Comment[]> {
     const sqlStr = `
       select
         tc.id "commentId",
@@ -85,11 +88,7 @@ export class CommentService {
       where t.id = $1 and (t.created_by = $2 or t.assigned_to = $3)
       order by tc.created_at asc
     `;
-    const values = [
-      ticketId,
-      user.id,
-      user.id,
-    ];
+    const values = [ticketId, user.id, user.id];
 
     const client = await this.pool.connect();
 
@@ -99,7 +98,7 @@ export class CommentService {
       return res.rows;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the comments.');
+      throw new Error("An error occurred while fetching the comments.");
     } finally {
       client.release();
     }
@@ -113,11 +112,7 @@ export class CommentService {
         modified_at = now()
       where id = $2 and commenter_id = $3
     `;
-    const values = [
-      commentData.content,
-      commentData.commentId,
-      user.id
-    ];
+    const values = [commentData.content, commentData.commentId, user.id];
 
     const client = await this.pool.connect();
 
@@ -126,7 +121,7 @@ export class CommentService {
       return res;
     } catch (err) {
       this.logError(err);
-      throw new Error('An error occurred while fetching the comments.');
+      throw new Error("An error occurred while fetching the comments.");
     } finally {
       client.release();
     }
@@ -171,7 +166,7 @@ export class CommentService {
     try {
       const res = await client.query(sqlStr, values);
       if (!res.rowCount) {
-        throw new Error('Ticket and commenter are not connected.')
+        throw new Error("Ticket and commenter are not connected.");
       }
 
       return res.rows[0];

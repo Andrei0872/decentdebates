@@ -1,1 +1,1 @@
-export type { Comment, UpdateCommentData } from '@decentdebates/shared-types';
+export type { Comment, UpdateCommentData } from "@decentdebates/shared-types";

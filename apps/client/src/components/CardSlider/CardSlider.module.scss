@@ -22,7 +22,7 @@
 .cardButton[class] {
   position: absolute;
   border-radius: 50%;
-  padding: .4rem;
+  padding: 0.4rem;
   border: 2px solid var(--cl-secondary);
 
   cursor: not-allowed;
@@ -32,13 +32,13 @@
 }
 
 .cardButton.buttonPrev {
-  left: .5rem;
+  left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
 .cardButton.buttonNext {
-  right: .5rem;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
 }
