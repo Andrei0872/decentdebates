@@ -26,6 +26,17 @@
         "^lint:fix"
       ]
     },
+    "format": {
+      "dependsOn": [
+        "^format"
+      ]
+    },
+    "format:fix": {
+      "cache": false,
+      "dependsOn": [
+        "^format:fix"
+      ]
+    },
     "start:prod": {
       "dependsOn": ["build"],
       "persistent": true,

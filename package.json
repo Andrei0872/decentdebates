@@ -8,6 +8,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
+    "format": "turbo run format",
+    "format:fix": "turbo run format:fix",
     "docker:up": "docker compose --env-file packages/db/.env up -d",
     "docker:wait": "bash ./scripts/wait-for-docker-services.sh",
     "docker:down": "docker compose --env-file packages/db/.env down",

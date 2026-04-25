@@ -10,6 +10,8 @@
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
     "lint": "eslint \"{src,data}/**/*.ts\" knexfile.ts --max-warnings 0",
     "lint:fix": "eslint \"{src,data}/**/*.ts\" knexfile.ts --fix",
+    "format": "prettier --check \"{src,data}/**/*.ts\" knexfile.ts",
+    "format:fix": "prettier --write \"{src,data}/**/*.ts\" knexfile.ts",
     "seed": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run",
     "seed:file": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run --specific"
   },
@@ -29,6 +31,7 @@
     "@types/node": "^22.0.0",
     "eslint": "^9.39.4",
     "knex": "^2.4.2",
+    "prettier": "^3.0.0",
     "typescript": "^5.7.0"
   }
 }
