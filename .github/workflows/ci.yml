@@ -13,8 +13,8 @@ env:
   PNPM_VERSION: '10.7.1'
 
 jobs:
-  check-client:
-    name: Checks / Client
+  checks-and-unit:
+    name: Checks + Unit Tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -28,32 +28,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
-        run: pnpm --filter client lint
+        run: pnpm turbo run lint
       - name: Format check
-        run: pnpm --filter client format
-
-  check-api:
-    name: Checks / API
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm --filter api lint
-      - name: Format check
-        run: pnpm --filter api format
+        run: pnpm turbo run format
+      - name: Unit tests
+        run: pnpm turbo run test:unit
 
   build:
     name: Build
-    needs: [check-client, check-api]
+    needs: [checks-and-unit]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -77,29 +60,8 @@ jobs:
             packages/*/dist
           retention-days: 1
 
-  test-client:
-    name: Test / Client (Unit)
-    needs: [build]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@v4
-        with:
-          name: build-output
-      - name: Unit tests
-        run: pnpm --filter client test:unit
-
-  test-api:
-    name: Test / API (Unit + Integration)
+  test-api-integration:
+    name: Test / API (Integration)
     needs: [build]
     runs-on: ubuntu-22.04
     services:
@@ -148,8 +110,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: build-output
-      - name: Unit tests
-        run: pnpm --filter api test:unit
       - name: Apply database schema
         run: |
           docker exec -i $(docker ps -q --filter ancestor=postgres:13.6) \
