@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.7.1'
+
+jobs:
+  check-client:
+    name: Checks / Client
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter client lint
+      - name: Format check
+        run: pnpm --filter client format
+
+  check-api:
+    name: Checks / API
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter api lint
+      - name: Format check
+        run: pnpm --filter api format
+
+  build:
+    name: Build
+    needs: [check-client, check-api]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            apps/*/dist
+            apps/*/.next
+            packages/*/dist
+          retention-days: 1
+
+  test-client:
+    name: Test / Client (Unit)
+    needs: [build]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+      - name: Unit tests
+        run: pnpm --filter client test:unit
+
+  test-api:
+    name: Test / API (Unit + Integration)
+    needs: [build]
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:13.6
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: decentdebates_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7.0.5
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 6379:6379
+    env:
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_DB: decentdebates_test
+      POSTGRES_DB_TEST: decentdebates_test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      REDIS_HOST: localhost
+      COOKIE_SECRET: ci-test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+      - name: Unit tests
+        run: pnpm --filter api test:unit
+      - name: Apply database schema
+        run: |
+          docker exec -i $(docker ps -q --filter ancestor=postgres:13.6) \
+            psql -U ci -d decentdebates_test < packages/db/schema.sql
+      - name: Integration tests
+        run: pnpm --filter api test:integration:only
