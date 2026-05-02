@@ -30,35 +30,8 @@ jobs:
       - name: Run checks
         run: pnpm turbo run lint format test:unit
 
-  build:
-    name: Build
-    needs: [checks-and-unit]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build
-        run: pnpm build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            apps/*/dist
-            apps/*/.next
-            packages/*/dist
-          retention-days: 1
-
   test-api-integration:
     name: Test / API (Integration)
-    needs: [build]
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -103,12 +76,47 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@v4
-        with:
-          name: build-output
+        # Temporary hack because: `API_TEST_ENV_FILE`.
+      - name: Write API test env
+        run: |
+          cat > apps/api/.env.test << EOF
+          POSTGRES_USER=$POSTGRES_USER
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          POSTGRES_DB=$POSTGRES_DB
+          POSTGRES_DB_TEST=$POSTGRES_DB_TEST
+          POSTGRES_HOST=$POSTGRES_HOST
+          POSTGRES_PORT=$POSTGRES_PORT
+          COOKIE_SECRET=$COOKIE_SECRET
+          EOF
       - name: Apply database schema
         run: |
           docker exec -i $(docker ps -q --filter ancestor=postgres:13.6) \
             psql -U ci -d decentdebates_test < packages/db/schema.sql
       - name: Integration tests
-        run: pnpm --filter api test:integration:only
+        run: pnpm turbo run test:integration:only
+
+  build:
+    name: Build
+    needs: [checks-and-unit, test-api-integration]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            apps/*/dist
+            apps/*/.next
+            packages/*/dist
+          retention-days: 1
