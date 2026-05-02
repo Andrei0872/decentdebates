@@ -37,6 +37,21 @@
         "^format:fix"
       ]
     },
+    "test:unit": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "test:integration:only": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "schema:apply": {
+      "dependsOn": [
+        "build"
+      ]
+    },
     "start:prod": {
       "dependsOn": ["build"],
       "persistent": true,
