@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -16,6 +16,7 @@ jobs:
   checks-and-unit:
     name: Checks + Unit Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -33,6 +34,7 @@ jobs:
   test-api-integration:
     name: Test / API (Integration)
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:13.6
@@ -97,6 +99,7 @@ jobs:
     name: Build
     needs: [checks-and-unit, test-api-integration]
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
