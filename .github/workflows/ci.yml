@@ -89,9 +89,7 @@ jobs:
           COOKIE_SECRET=$COOKIE_SECRET
           EOF
       - name: Apply database schema
-        run: |
-          docker exec -i $(docker ps -q --filter ancestor=postgres:13.6) \
-            psql -U ci -d decentdebates_test < packages/db/schema.sql
+        run: pnpm turbo run schema:apply
       - name: Integration tests
         run: pnpm turbo run test:integration:only
 
