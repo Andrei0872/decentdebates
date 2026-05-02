@@ -27,12 +27,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm turbo run lint
-      - name: Format check
-        run: pnpm turbo run format
-      - name: Unit tests
-        run: pnpm turbo run test:unit
+      - name: Run checks
+        run: pnpm turbo run lint format test:unit
 
   build:
     name: Build
