@@ -40,10 +40,12 @@ The project is a **pnpm + Turborepo monorepo** with three main packages:
 - **`apps/api`** — NestJS REST API. Handles authentication, debate logic, and manages persistent real-time connections.
 - **`packages/db`** — PostgreSQL schema, migrations, and seed scripts.
 
-**Two real-time mechanisms are used, deliberately:**
+At a high level:
 
-- **Server-Sent Events (SSE)** for user notifications.
-- **WebSockets (Socket.io)** for the moderator–author review session — bidirectional communication is required here, as both parties send and receive edits and comments interactively.
+- The REST API handles core business logic and persistence.
+- Redis is the session store — shared by both the REST API and the WebSocket gateway, so both layers use the same auth path.
+- The WebSocket gateway handles bidirectional moderation flows (comments, argument edits).
+- SSE handles lightweight user notifications (unidirectional, no Socket.io overhead).
 
 ```mermaid
 graph LR
@@ -69,8 +71,6 @@ graph LR
 
     style Browser fill:#1f6feb,color:#fff,stroke:#1f6feb
 ```
-
-The REST API and the WebSocket gateway are separate entry points but share the same session store. The gateway authenticates by reading the `sessionId` cookie and looking it up in Redis (the same store the REST API uses, so no separate auth mechanism is needed).
 
 ---
 
@@ -125,7 +125,6 @@ The schema covers users, debates, arguments, moderation states, and chat message
 
 - **CTEs** for readable, multi-step read queries (e.g. fetching a debate with its arguments and moderation status in one round trip)
 - **Transactions** for operations that must be atomic (e.g. submitting an argument and creating its initial moderation record)
-- **No ORM** — all queries are written in raw SQL for full control over performance and query shape
 
 ```mermaid
 %%{init: {'er': {'layoutDirection': 'LR', 'minEntityWidth': 160, 'entityPadding': 14}}}%%
