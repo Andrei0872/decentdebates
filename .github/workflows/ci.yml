@@ -112,11 +112,3 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            apps/*/dist
-            apps/*/.next
-            packages/*/dist
-          retention-days: 1
