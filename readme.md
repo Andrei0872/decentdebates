@@ -22,6 +22,8 @@ _More about this project, including the movations behind it and some demo pictur
 * `pnpm`
 * `docker`
 
+To test GitHub Actions workflows locally, see [docs/act.md](docs/act.md).
+
 ### The DB `.env` file
 
 These variables are going to be used to configure the local Postgres instance.
