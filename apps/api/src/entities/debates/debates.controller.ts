@@ -12,6 +12,7 @@ import {
   Res,
   SetMetadata,
   UsePipes,
+  UseInterceptors,
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import {
@@ -24,6 +25,7 @@ import {
   forkJoin,
   tap,
 } from "rxjs";
+import { TimingInterceptor } from "src/interceptors/timing.interceptor";
 import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { DebateDraftPipe } from "src/pipes/debate-draft.pipe";
 import { DebatesQueryPipe } from "src/pipes/debates-query.pipe";
@@ -107,6 +109,7 @@ export class DebatesController {
     );
   }
 
+  @UseInterceptors(TimingInterceptor)
   @SetMetadata("skipAuth", true)
   @Get("/:id")
   async getDebate(@Res() res: Response, @Param("id") debateId: string) {
