@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Inject,
   Param,
   Patch,
   Post,
@@ -26,7 +27,9 @@ import {
   tap,
 } from "rxjs";
 import { TimingInterceptor } from "src/interceptors/timing.interceptor";
+import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
+import { type RedisClientType } from "redis";
 import { DebateDraftPipe } from "src/pipes/debate-draft.pipe";
 import { DebatesQueryPipe } from "src/pipes/debates-query.pipe";
 import { isNumber } from "src/utils";
@@ -45,7 +48,10 @@ import { UpdateDraftDTO } from "./dtos/update-draft.dto";
 
 @Controller("debates")
 export class DebatesController {
-  constructor(private debatesService: DebatesService) {}
+  constructor(
+    private debatesService: DebatesService,
+    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
+  ) {}
 
   private getHttpErrorStatus(err: unknown) {
     return typeof err === "object" &&
@@ -112,9 +118,31 @@ export class DebatesController {
   @UseInterceptors(TimingInterceptor)
   @SetMetadata("skipAuth", true)
   @Get("/:id")
-  async getDebate(@Res() res: Response, @Param("id") debateId: string) {
+  async getDebate(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Param("id") debateId: string,
+  ) {
+    const cacheKey = `cache:debates:${debateId}`;
+
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (typeof cached === "string") {
+        (req as any).cacheHit = true;
+        return of(res.status(HttpStatus.OK).json(JSON.parse(cached)));
+      }
+    } catch {
+      // Redis unavailable — fall through to DB.
+    }
+
+    (req as any).cacheHit = false;
     return getDebates(this.debatesService.getDebateArguments(debateId)).pipe(
-      map((data) => res.status(HttpStatus.OK).json({ data: data })),
+      tap((data) => {
+        this.redis
+          .set(cacheKey, JSON.stringify({ data }), { EX: 60 })
+          .catch(() => {});
+      }),
+      map((data) => res.status(HttpStatus.OK).json({ data })),
       catchError((err) => {
         throw new HttpException(
           err instanceof Error ? err.message : String(err),

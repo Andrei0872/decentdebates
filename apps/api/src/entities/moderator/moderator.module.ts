@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { RedisModule } from "src/redis/redis.module";
 import { DebatesModule } from "../debates/debates.module";
 import { ModeratorController } from "./moderator.controller";
 import { ModeratorService } from "./moderator.service";
@@ -7,6 +8,6 @@ import { ModeratorService } from "./moderator.service";
   controllers: [ModeratorController],
   providers: [ModeratorService],
   exports: [ModeratorService],
-  imports: [DebatesModule],
+  imports: [DebatesModule, RedisModule],
 })
 export class ModeratorModule {}
