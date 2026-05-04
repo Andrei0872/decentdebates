@@ -72,16 +72,26 @@ interface BoardProps {
 }
 const Board: React.FC<BoardProps> = (props) => {
   const { header, cards } = props;
+  const canAcceptDrops = props.boardType !== BoardLists.ACCEPTED;
 
   const [, drop] = useDrop(() => ({
     accept: DNDItemTypes.CARD,
     drop: (item: DragItem) => {
+      if (!canAcceptDrops) {
+        return;
+      }
+
       props.itemDropped(item, props.boardType);
     },
   }));
 
   return (
-    <div className={styles.board} ref={drop as unknown as Ref<HTMLDivElement>}>
+    <div
+      className={styles.board}
+      ref={
+        canAcceptDrops ? (drop as unknown as Ref<HTMLDivElement>) : undefined
+      }
+    >
       <div className={styles.boardHeader}>{header}</div>
       <div className={styles.boardBody}>{cards}</div>
     </div>
@@ -236,6 +246,13 @@ function Activity() {
   }, [dispatch, router]);
 
   const onItemDropped = (item: DragItem, toBoardList: BoardLists) => {
+    if (
+      toBoardList === BoardLists.ACCEPTED ||
+      item.fromBoardList === toBoardList
+    ) {
+      return;
+    }
+
     // TODO: remove awkward `?? null` from below by having a guard here.
     const nextModeratorId = crtModerator?.id;
     const nextModeratorUsername = crtModerator?.username;

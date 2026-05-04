@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Inject,
   Param,
   Patch,
   Req,
@@ -37,6 +38,8 @@ import { ApproveDebateDTO } from "./dtos/approve-debate.dto";
 import { UpdateTicketDTO } from "./dtos/update-ticket.dto";
 import { UpdateTicketData } from "./moderator.model";
 import { ModeratorService } from "./moderator.service";
+import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { type RedisClientType } from "redis";
 
 @Controller("moderator")
 @UseGuards(RolesGuard)
@@ -46,6 +49,7 @@ export class ModeratorController {
     private moderatorService: ModeratorService,
     private debatesService: DebatesService,
     private eventEmitter: EventEmitter2,
+    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
   ) {}
 
   @Get("/activity")
@@ -228,6 +232,8 @@ export class ModeratorController {
           const {
             rows: [{ created_by: recipientId }],
           } = res;
+
+          this.redis.del(`cache:debates:${body.debateId}`).catch(() => {});
 
           this.eventEmitter.emitAsync(
             ArgumentTicketApproved.EVENT_NAME,
