@@ -47,8 +47,6 @@ export class ReviewGateway
   @WebSocketServer()
   server: SocketIOServer;
 
-  userSockets: Map<string, UserCookieData> = new Map();
-
   constructor(
     private reviewService: ReviewService,
     private commentService: CommentService,
@@ -92,7 +90,7 @@ export class ReviewGateway
       if (!content) {
         throw new WsException(`Comment's content can't be empty.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
       const ticketId = +this.getTicketIdFromSocket(socket);
 
       const commentData: AddCommentData = {
@@ -141,7 +139,7 @@ export class ReviewGateway
       if (!payload.content) {
         throw new WsException(`Comment's content can't be empty.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
 
       const result = await this.commentService.updateComment(user, payload);
       if (!result.rowCount) {
@@ -171,7 +169,7 @@ export class ReviewGateway
       if (!content) {
         throw new WsException(`Comment's content can't be empty.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
       const ticketId = +this.getTicketIdFromSocket(socket);
 
       const commentData: AddCommentData = {
@@ -221,7 +219,7 @@ export class ReviewGateway
       if (!payload.content) {
         throw new WsException(`Comment's content can't be empty.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
 
       const result = await this.commentService.updateComment(user, payload);
       if (!result.rowCount) {
@@ -250,7 +248,7 @@ export class ReviewGateway
       if (!payload.data) {
         throw new WsException(`Argument data is missing.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
       if (user.role !== UserRoles.USER) {
         throw new WsException("Only users can updated their own comment.");
       }
@@ -299,7 +297,7 @@ export class ReviewGateway
       if (!payload.data) {
         throw new WsException(`Debate data is missing.`);
       }
-      const user = this.userSockets.get(socket.id);
+      const user = socket.data.user as UserCookieData;
       if (user.role !== UserRoles.USER) {
         throw new WsException("Only users can updated their own debate.");
       }
@@ -337,15 +335,13 @@ export class ReviewGateway
   }
 
   private addUserToRoom(socket: Socket, user: UserCookieData) {
-    this.userSockets.set(socket.id, user);
+    socket.data.user = user;
 
     const roomIdentifier = this.getRoomIdentifier(socket);
     socket.join(roomIdentifier);
   }
 
   private removeUserFromRoom(socket: Socket, errorMessage = null) {
-    this.userSockets.delete(socket.id);
-
     const roomIdentifier = this.getRoomIdentifier(socket);
     socket.leave(roomIdentifier);
 
