@@ -130,6 +130,7 @@ const Card: React.FC<CardProps> = (props) => {
   // onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined}
   return (
     <div
+      onClick={hasRightsOnTicket ? () => props.cardClick(cardData) : undefined}
       data-testid="activity-card"
       className={`${styles.card} ${hasRightsOnTicket ? styles.canDrag : ""}`}
       ref={drag as unknown as Ref<HTMLDivElement>}
