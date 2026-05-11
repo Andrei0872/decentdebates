@@ -474,8 +474,8 @@ export default function ToolbarPlugin() {
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
+      editor.registerUpdateListener(() => {
+        editor.read(() => {
           updateToolbar();
         });
       }),
