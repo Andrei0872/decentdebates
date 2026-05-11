@@ -304,7 +304,7 @@ function Argument() {
 
   const user = useAppSelector(selectCurrentUser);
 
-  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(0);
   const [shouldDisplayRightPanel, setShouldDisplayRightPanel] = useState(false);
   const [argument, setArgument] = useState<
     ArgumentAsModerator | ArgumentAsUser | null
