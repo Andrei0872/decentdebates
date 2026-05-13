@@ -1,8 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { DbModule } from "@decentdebates/db";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./entities/user/user.module";
 import { SESSION_MIDDLEWARE_PROVIDER } from "./middlewares/session.middleware";
@@ -32,9 +30,7 @@ import { RedisModule } from "./redis/redis.module";
     RedisModule,
     EventEmitterModule.forRoot(),
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     SESSION_MIDDLEWARE_PROVIDER,
     {
       provide: APP_GUARD,

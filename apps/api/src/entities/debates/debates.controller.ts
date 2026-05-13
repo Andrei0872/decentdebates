@@ -15,6 +15,7 @@ import {
   UsePipes,
   UseInterceptors,
 } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import {
   from,
@@ -46,6 +47,7 @@ import { CreateArgumentDTO } from "./dtos/create-argument.dto";
 import { CreateDebateDTO } from "./dtos/create-debate.dto";
 import { UpdateDraftDTO } from "./dtos/update-draft.dto";
 
+@ApiTags("debates")
 @Controller("debates")
 export class DebatesController {
   constructor(

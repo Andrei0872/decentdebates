@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
@@ -42,6 +43,7 @@ import { UserCookieData, UserRoles } from "../user/user.model";
 import { NotificationsReadEvent } from "./notification.events";
 import { NotificationService } from "./notification.service";
 
+@ApiTags("notification")
 @Controller("notification")
 export class NotificationController {
   private readonly logger = new Logger(NotificationController.name);

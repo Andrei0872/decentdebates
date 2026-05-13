@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
@@ -17,6 +18,7 @@ import { UserCookieData, UserRoles } from "../user/user.model";
 import { UserService } from "../user/user.service";
 import { ReviewService } from "./review.service";
 
+@ApiTags("review")
 @Controller("review")
 export class ReviewController {
   constructor(

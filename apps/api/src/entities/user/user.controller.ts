@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
@@ -11,6 +12,7 @@ import { catchError, forkJoin, from, map, mergeAll, reduce } from "rxjs";
 import { UserCookieData } from "./user.model";
 import { UserService } from "./user.service";
 
+@ApiTags("user")
 @Controller("user")
 export class UserController {
   constructor(private userService: UserService) {}
