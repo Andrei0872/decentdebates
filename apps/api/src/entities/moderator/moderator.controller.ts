@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -41,6 +42,7 @@ import { ModeratorService } from "./moderator.service";
 import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { type RedisClientType } from "redis";
 
+@ApiTags("moderator")
 @Controller("moderator")
 @UseGuards(RolesGuard)
 @Roles(UserRoles.MODERATOR)

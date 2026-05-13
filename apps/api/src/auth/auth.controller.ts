@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
@@ -14,6 +15,7 @@ import { RegisterUserDTO } from "../entities/user/dtos/register-user.dto";
 import { LoginUserDTO } from "src/entities/user/dtos/login-user.dto";
 import { getPublicUser } from "src/entities/user/user.model";
 
+@ApiTags("auth")
 @SetMetadata("skipAuth", true)
 @Controller("auth")
 export class AuthController {

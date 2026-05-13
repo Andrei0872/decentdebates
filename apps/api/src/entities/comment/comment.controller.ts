@@ -1,3 +1,4 @@
+import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
@@ -12,6 +13,7 @@ import { from, map, catchError } from "rxjs";
 import { UserCookieData } from "../user/user.model";
 import { CommentService } from "./comment.service";
 
+@ApiTags("comment")
 @Controller("comment")
 export class CommentController {
   constructor(private commentService: CommentService) {}
