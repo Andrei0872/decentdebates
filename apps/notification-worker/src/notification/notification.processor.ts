@@ -40,7 +40,9 @@ export class NotificationProcessor extends WorkerHost {
         ? { kind: "generic-moderator" }
         : { kind: "ticket-participant", recipientId: data.recipientId };
 
-    await this.publisher.publish(NOTIFICATIONS_CHANNEL, JSON.stringify(msg));
+    await this.publisher.publish(NOTIFICATIONS_CHANNEL, JSON.stringify(msg)).catch((err) => {
+      this.logger.error(`Failed to publish notification: ${err instanceof Error ? err.message : String(err)}`);
+    });
   }
 
   private async insertForAllModerators(
