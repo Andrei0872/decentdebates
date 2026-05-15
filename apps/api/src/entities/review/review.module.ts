@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { BullModule } from "@nestjs/bullmq";
+import { NOTIFICATION_QUEUE } from "@decentdebates/shared-types";
 import { CommentModule } from "../comment/comment.module";
 import { ModeratorModule } from "../moderator/moderator.module";
 import { UserModule } from "../user/user.module";
@@ -16,6 +18,7 @@ import { RedisModule } from "src/redis/redis.module";
     UserModule,
     ModeratorModule,
     RedisModule,
+    BullModule.registerQueue({ name: NOTIFICATION_QUEUE }),
   ],
   controllers: [ReviewController],
 })

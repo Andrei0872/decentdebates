@@ -11,8 +11,9 @@ import { ModeratorModule } from "./entities/moderator/moderator.module";
 import { ReviewModule } from "./entities/review/review.module";
 import { CommentModule } from "./entities/comment/comment.module";
 import { NotificationModule } from "./entities/notification/notification.module";
-import { EventEmitterModule } from "@nestjs/event-emitter";
+import { BullModule } from "@nestjs/bullmq";
 import { RedisModule } from "./redis/redis.module";
+import { config } from "./config";
 
 @Module({
   imports: [
@@ -28,7 +29,12 @@ import { RedisModule } from "./redis/redis.module";
     CommentModule,
     NotificationModule,
     RedisModule,
-    EventEmitterModule.forRoot(),
+    BullModule.forRoot({
+      connection: {
+        host: config.REDIS_HOST,
+        port: 6379,
+      },
+    }),
   ],
   providers: [
     SESSION_MIDDLEWARE_PROVIDER,
