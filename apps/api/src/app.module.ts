@@ -34,6 +34,13 @@ import { config } from "./config";
         host: config.REDIS_HOST,
         port: 6379,
       },
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 1000,
+        },
+      },
     }),
   ],
   providers: [
