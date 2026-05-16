@@ -112,6 +112,18 @@ The schema lives in a single `schema.sql`. Knex is used only for its seed-script
 
 Lint, format, and tests (unit and integration) all run at the start of the pipeline and in parallel (Turborepo helps here). The build job is deliberately left last: if anything earlier fails, there's no point running a full build. This keeps feedback loops short and the CI queue from filling up with slow, ultimately pointless build runs.
 
+### Async notification delivery via BullMQ
+
+Notifications are decoupled from the HTTP request path. When a domain action occurs (ticket created, argument approved, review comment added), the API enqueues a BullMQ job and returns immediately — it does not write to the `notification` table directly.
+
+A separate headless process (`apps/notification-worker`) consumes the queue, performs the DB insert, and publishes a Redis pub/sub message that triggers the SSE push to connected clients.
+
+The key properties this buys:
+
+- **Durability** — jobs are persisted in Redis. If the API crashes after enqueuing but before the worker processes the job, the notification is not lost.
+- **Retry** — failed DB writes are retried automatically with configurable backoff, without any action from the caller.
+- **Request path isolation** — a slow or failing notification side effect cannot delay or break the HTTP response.
+
 ### Error and failure handling
 
 **HTTP layer**
@@ -120,7 +132,8 @@ Lint, format, and tests (unit and integration) all run at the start of the pipel
 - `RolesGuard` returns 403 when the user's role doesn't satisfy `@Roles(...)` on a handler.
 
 **WebSocket layer**
-- Each event handler is wrapped in try/catch; errors emit an `error` event back to the sender without disrupting other participants in the room.
+- Connection failures: the socket receives an `error` event and is disconnected.
+- Message handler failures: the sender is removed from the review room and receives an `error` event; other participants are not affected.
 
 ---
 
