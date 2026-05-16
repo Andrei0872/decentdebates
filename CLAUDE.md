@@ -114,3 +114,7 @@ Drag-and-drop (argument reordering) uses `react-dnd`.
 
 - Use the NestJS logger, not `console.log` / `console.error`.
 - Successful test runs should produce no routine log output.
+
+## Docs
+
+- When generating or updating documentation, use the codebase as the sole source of truth. Do not mention features, patterns, or capabilities that are not implemented. Do not use inflated or aspirational language to describe what the code does.
