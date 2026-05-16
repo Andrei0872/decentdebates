@@ -1,4 +1,4 @@
-import { EventEmitter2 } from "@nestjs/event-emitter";
+
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
 import {
@@ -21,7 +21,7 @@ describe("DebatesService integration", () => {
     await applySchema();
 
     pool = createTestPool();
-    service = new DebatesService(pool as any, {} as EventEmitter2);
+    service = new DebatesService(pool as any, {} as never);
 
     const userId = await createUser(pool, {
       username: "debates-user",

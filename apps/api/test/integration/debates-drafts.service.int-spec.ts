@@ -1,4 +1,3 @@
-import { EventEmitter2 } from "@nestjs/event-emitter";
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
 import { DebatesService } from "../../src/entities/debates/debates.service";
@@ -27,7 +26,7 @@ describe("DebatesService draft flow integration", () => {
     await applySchema();
 
     pool = createTestPool();
-    service = new DebatesService(pool as never, {} as EventEmitter2);
+    service = new DebatesService(pool as never, {} as never);
 
     userId = await createUser(pool, {
       username: "draft-user",

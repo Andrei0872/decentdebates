@@ -1,0 +1,16 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".int-spec.ts$",
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/../src/$1"
+  },
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
+  },
+  "transformIgnorePatterns": [
+    "/node_modules/",
+    "/packages/db/dist/"
+  ]
+}
