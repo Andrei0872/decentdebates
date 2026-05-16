@@ -22,7 +22,7 @@ A full-stack platform for structured, moderated debates. Users submit debates an
 | Layer | Technologies |
 |---|---|
 | **Frontend** | Next.js (SSR + React Server Components), React, TypeScript |
-| **Backend** | Node.js, NestJS, REST API |
+| **Backend** | Node.js, NestJS, REST API, BullMQ (async job queue) |
 | **Database** | PostgreSQL, Redis |
 | **Real-time** | WebSockets (Socket.io), Server-Sent Events |
 | **Auth** | Session-based (express-session + Redis), Role-Based Access Control (RBAC) |
@@ -34,40 +34,57 @@ A full-stack platform for structured, moderated debates. Users submit debates an
 
 ## Architecture
 
-The project is a **pnpm + Turborepo monorepo** with three main packages:
+The project is a **pnpm + Turborepo monorepo** with four main packages:
 
 - **`apps/client`** — Next.js frontend. SSR is used for debate pages; real-time UI (Kanban, chat) is client-side.
 - **`apps/api`** — NestJS REST API. Handles authentication, debate logic, and manages persistent real-time connections.
+- **`apps/notification-worker`** — Headless NestJS worker. Consumes notification jobs from the BullMQ queue, writes to the DB, and publishes delivery signals via Redis pub/sub.
 - **`packages/db`** — PostgreSQL schema, migrations, and seed scripts.
 
 At a high level:
 
-- The REST API handles core business logic and persistence.
-- Redis is the session store — shared by both the REST API and the WebSocket gateway, so both layers use the same auth path.
-- The WebSocket gateway handles bidirectional moderation flows (comments, argument edits).
-- SSE handles lightweight user notifications (unidirectional, no Socket.io overhead).
+- The REST API handles core business logic and persistence. When a domain action produces a notification (ticket created, argument approved, review comment added), it enqueues a BullMQ job instead of writing synchronously — keeping the request path fast and the notification delivery durable.
+- The notification worker runs as a separate process, consuming jobs from the queue, inserting notification rows, and publishing a Redis pub/sub message so connected SSE clients are pushed an update in real time.
+- Redis serves three roles: session store, BullMQ job queue, and pub/sub delivery bus.
+- The Review gateway handles bidirectional moderation flows (comments, argument edits) over WebSockets.
+- SSE handles lightweight user notifications (unidirectional).
 
 ```mermaid
-graph LR
+graph TB
     Browser
 
     subgraph NEST ["NestJS API :3001"]
         API["REST handlers"]
-        NS["NotificationService"]
+        NS["NotificationService\n(Redis subscriber)"]
     end
 
-    Redis[("Redis")]
+    subgraph GWS ["Review Gateway :3002"]
+        GW["WebSocket handlers"]
+    end
+
+    subgraph WORKER ["Notification Worker"]
+        NW["Job Processor"]
+    end
+
+    Redis[("Redis\n(sessions · BullMQ · pub/sub)")]
     PG[("PostgreSQL")]
 
-    Browser -->|HTTP| API
-    API -->|sessions| Redis
-    API -->|queries| PG
-    API -->|events| NS
+    Browser <-->|HTTP| API
+    Browser <-->|WebSocket| GW
     NS -->|SSE| Browser
 
-    Browser -->|WebSocket| GW["Review Gateway :3002"]
-    GW -->|session lookup| Redis
-    GW -->|broadcast| Browser
+    API -->|enqueue job| Redis
+    API -->|sessions| Redis
+    API -->|queries| PG
+
+    GW -->|sessions| Redis
+    GW -->|queries| PG
+
+    NW -->|dequeue job| Redis
+    NW -->|PUBLISH| Redis
+    NW -->|insert notification| PG
+
+    NS -->|SUBSCRIBE| Redis
 
     style Browser fill:#1f6feb,color:#fff,stroke:#1f6feb
 ```
