@@ -12,7 +12,8 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { EventEmitter2 } from "@nestjs/event-emitter";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 import { Request, Response } from "express";
 import {
   catchError,
@@ -41,6 +42,12 @@ import { UpdateTicketData } from "./moderator.model";
 import { ModeratorService } from "./moderator.service";
 import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { type RedisClientType } from "redis";
+import {
+  NOTIFICATION_JOB,
+  NOTIFICATION_QUEUE,
+  NotificationEvents,
+  NotificationJobPayload,
+} from "@decentdebates/shared-types";
 
 @ApiTags("moderator")
 @Controller("moderator")
@@ -50,7 +57,7 @@ export class ModeratorController {
   constructor(
     private moderatorService: ModeratorService,
     private debatesService: DebatesService,
-    private eventEmitter: EventEmitter2,
+    @InjectQueue(NOTIFICATION_QUEUE) private notificationsQueue: Queue,
     @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
   ) {}
 
@@ -187,16 +194,25 @@ export class ModeratorController {
             rows: [{ created_by: recipientId }],
           } = res;
 
-          this.eventEmitter.emitAsync(
-            DebateTicketApproved.EVENT_NAME,
-            new DebateTicketApproved(
-              +ticketId,
-              body.debateId,
-              body.debateTitle,
-              recipientId,
-              user.id,
-            ),
+          const debateApprovedEv = new DebateTicketApproved(
+            +ticketId,
+            body.debateId,
+            body.debateTitle,
+            recipientId,
+            user.id,
           );
+          debateApprovedEv
+            .getContent()
+            .then((content) =>
+              this.notificationsQueue.add(NOTIFICATION_JOB, {
+                kind: "ticket-participant",
+                title: debateApprovedEv.getTitle(),
+                content,
+                notificationEvent: NotificationEvents.DEBATE,
+                recipientId,
+              } satisfies NotificationJobPayload),
+            )
+            .catch(() => {});
         },
       }),
       map(() =>
@@ -237,18 +253,27 @@ export class ModeratorController {
 
           this.redis.del(`cache:debates:${body.debateId}`).catch(() => {});
 
-          this.eventEmitter.emitAsync(
-            ArgumentTicketApproved.EVENT_NAME,
-            new ArgumentTicketApproved(
-              +ticketId,
-              body.debateId,
-              body.debateTitle,
-              body.argumentId,
-              body.argumentTitle,
-              recipientId,
-              user.id,
-            ),
+          const argApprovedEv = new ArgumentTicketApproved(
+            +ticketId,
+            body.debateId,
+            body.debateTitle,
+            body.argumentId,
+            body.argumentTitle,
+            recipientId,
+            user.id,
           );
+          argApprovedEv
+            .getContent()
+            .then((content) =>
+              this.notificationsQueue.add(NOTIFICATION_JOB, {
+                kind: "ticket-participant",
+                title: argApprovedEv.getTitle(),
+                content,
+                notificationEvent: NotificationEvents.ARGUMENT,
+                recipientId,
+              } satisfies NotificationJobPayload),
+            )
+            .catch(() => {});
         },
       }),
       map(() =>

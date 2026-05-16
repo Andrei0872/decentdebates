@@ -28,8 +28,15 @@ import {
   ArgumentReviewNewComment,
   DebateReviewNewComment,
 } from "./review.events";
-import { EventEmitter2 } from "@nestjs/event-emitter";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 import { ArgumentUpdated, DebateTitleUpdated } from "../debates/debate.events";
+import {
+  NOTIFICATION_JOB,
+  NOTIFICATION_QUEUE,
+  NotificationEvents,
+  NotificationJobPayload,
+} from "@decentdebates/shared-types";
 import { shouldEmitRoutineLogs } from "src/logging";
 
 const PORT = 3002;
@@ -51,7 +58,7 @@ export class ReviewGateway
     private reviewService: ReviewService,
     private commentService: CommentService,
     private debatesService: DebatesService,
-    private eventEmitter: EventEmitter2,
+    @InjectQueue(NOTIFICATION_QUEUE) private notificationsQueue: Queue,
   ) {}
 
   afterInit(_server: any) {
@@ -107,16 +114,25 @@ export class ReviewGateway
         .to(roomIdentifier)
         .emit("comment/debate:create", { insertedComment });
 
-      this.eventEmitter.emitAsync(
-        DebateReviewNewComment.EVENT_NAME,
-        new DebateReviewNewComment(
-          ticketId,
-          insertedComment.commentId,
-          user,
-          payload.debateTitle,
-          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        ),
+      const debateCommentEv = new DebateReviewNewComment(
+        ticketId,
+        insertedComment.commentId,
+        user,
+        payload.debateTitle,
+        user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
+      debateCommentEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: debateCommentEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+            recipientId: debateCommentEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return {
         event: "comment/debate:create",
@@ -186,17 +202,26 @@ export class ReviewGateway
         .to(roomIdentifier)
         .emit("comment/argument:create", { insertedComment });
 
-      this.eventEmitter.emitAsync(
-        ArgumentReviewNewComment.EVENT_NAME,
-        new ArgumentReviewNewComment(
-          ticketId,
-          insertedComment.commentId,
-          user,
-          payload.debateTitle,
-          payload.argumentTitle,
-          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        ),
+      const argCommentEv = new ArgumentReviewNewComment(
+        ticketId,
+        insertedComment.commentId,
+        user,
+        payload.debateTitle,
+        payload.argumentTitle,
+        user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
+      argCommentEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: argCommentEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+            recipientId: argCommentEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return {
         event: "comment/argument:create",
@@ -269,16 +294,25 @@ export class ReviewGateway
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit("argument:update", payload.data);
 
-      this.eventEmitter.emitAsync(
-        ArgumentUpdated.EVENT_NAME,
-        new ArgumentUpdated(
-          payload.ticketId,
-          user,
-          payload.debateTitle,
-          payload.argumentTitle,
-          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        ),
+      const argUpdatedEv = new ArgumentUpdated(
+        payload.ticketId,
+        user,
+        payload.debateTitle,
+        payload.argumentTitle,
+        user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
+      argUpdatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: argUpdatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+            recipientId: argUpdatedEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return "OK";
     } catch (err) {
@@ -315,16 +349,25 @@ export class ReviewGateway
       const roomIdentifier = this.getRoomIdentifier(socket);
       socket.to(roomIdentifier).emit("debate:update", payload.data);
 
-      this.eventEmitter.emitAsync(
-        DebateTitleUpdated.EVENT_NAME,
-        new DebateTitleUpdated(
-          payload.ticketId,
-          user,
-          payload.oldTitle,
-          payload.data.title,
-          user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
-        ),
+      const debateUpdatedEv = new DebateTitleUpdated(
+        payload.ticketId,
+        user,
+        payload.oldTitle,
+        payload.data.title,
+        user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
+      debateUpdatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: debateUpdatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+            recipientId: debateUpdatedEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return "OK";
     } catch (err) {

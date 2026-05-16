@@ -44,3 +44,4 @@
 ## Docs
 
 - Local setup: [Spinning up the application](./readme.md#spinning-up-the-application).
+- When generating or updating documentation, use the codebase as the sole source of truth. Do not mention features, patterns, or capabilities that are not implemented. Do not use inflated or aspirational language to describe what the code does.

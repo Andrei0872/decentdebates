@@ -8,6 +8,7 @@ Monorepo with `pnpm` workspaces and Turborepo.
 
 - `apps/client` — Next.js frontend
 - `apps/api` — NestJS backend
+- `apps/notification-worker` — Headless NestJS worker; consumes BullMQ notification jobs, writes to DB, publishes Redis pub/sub signals
 - `packages/db` — Postgres schema, Knex seeds, DB bootstrapping (`DbModule` imported by the API)
 - `packages/shared-types` — Cross-app TypeScript contracts (no app code allowed here)
 - `packages/eslint-config` — Shared ESLint config
@@ -90,7 +91,7 @@ Domain modules under `src/entities/`: `debates`, `review`, `comment`, `moderator
 
 `packages/db` is imported as `DbModule` and handles all DB access via raw `pg` queries (no ORM by design — see README research notes).
 
-Real-time notifications are handled via Socket.io (`@nestjs/websockets`) and coordinated through `EventEmitterModule`.
+Real-time notifications use SSE. The API's `NotificationService` subscribes to a Redis pub/sub channel; when the notification worker publishes a message, `NotificationService` pushes it through a shared `Subject<NotificationMessage>` that SSE controllers subscribe to.
 
 ### Client (Next.js + Redux)
 
@@ -114,3 +115,7 @@ Drag-and-drop (argument reordering) uses `react-dnd`.
 
 - Use the NestJS logger, not `console.log` / `console.error`.
 - Successful test runs should produce no routine log output.
+
+## Docs
+
+- When generating or updating documentation, use the codebase as the sole source of truth. Do not mention features, patterns, or capabilities that are not implemented. Do not use inflated or aspirational language to describe what the code does.

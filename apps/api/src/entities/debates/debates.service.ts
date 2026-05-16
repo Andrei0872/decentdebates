@@ -1,7 +1,14 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { EventEmitter2 } from "@nestjs/event-emitter";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 import { Pool } from "pg";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import {
+  NOTIFICATION_JOB,
+  NOTIFICATION_QUEUE,
+  NotificationEvents,
+  NotificationJobPayload,
+} from "@decentdebates/shared-types";
 import { DebateAsModerator } from "../review/review.model";
 import { UserCookieData } from "../user/user.model";
 import { ArgumentTicketCreated, DebateTicketCreated } from "./debate.events";
@@ -45,7 +52,7 @@ export class DebatesService {
 
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
-    private eventEmitter: EventEmitter2,
+    @InjectQueue(NOTIFICATION_QUEUE) private notificationsQueue: Queue,
   ) {}
 
   private logError(err: unknown) {
@@ -164,10 +171,21 @@ export class DebatesService {
 
       await client.query("COMMIT");
 
-      this.eventEmitter.emitAsync(
-        DebateTicketCreated.EVENT_NAME,
-        new DebateTicketCreated(ticketId, debateData.title),
+      const debateCreatedEv = new DebateTicketCreated(
+        ticketId,
+        debateData.title,
       );
+      debateCreatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "generic-moderator",
+            title: debateCreatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+          } satisfies NotificationJobPayload),
+        )
+        .catch((err) => this.logError(err));
     } catch (err) {
       this.logError(err);
       await client.query("ROLLBACK");
@@ -266,10 +284,21 @@ export class DebatesService {
 
       await client.query("COMMIT");
 
-      this.eventEmitter.emitAsync(
-        ArgumentTicketCreated.EVENT_NAME,
-        new ArgumentTicketCreated(ticketId, argumentData.argumentDetails.title),
+      const argCreatedEv = new ArgumentTicketCreated(
+        ticketId,
+        argumentData.argumentDetails.title,
       );
+      argCreatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "generic-moderator",
+            title: argCreatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+          } satisfies NotificationJobPayload),
+        )
+        .catch((err) => this.logError(err));
     } catch (err) {
       this.logError(err);
       await client.query("ROLLBACK");
