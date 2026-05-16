@@ -121,15 +121,18 @@ export class ReviewGateway
         payload.debateTitle,
         user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
-      debateCommentEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "ticket-participant",
-          title: debateCommentEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.DEBATE,
-          recipientId: debateCommentEv.recipientId,
-        } satisfies NotificationJobPayload),
-      ).catch(() => {});
+      debateCommentEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: debateCommentEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+            recipientId: debateCommentEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return {
         event: "comment/debate:create",
@@ -207,15 +210,18 @@ export class ReviewGateway
         payload.argumentTitle,
         user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
-      argCommentEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "ticket-participant",
-          title: argCommentEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.ARGUMENT,
-          recipientId: argCommentEv.recipientId,
-        } satisfies NotificationJobPayload),
-      ).catch(() => {});
+      argCommentEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: argCommentEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+            recipientId: argCommentEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return {
         event: "comment/argument:create",
@@ -295,15 +301,18 @@ export class ReviewGateway
         payload.argumentTitle,
         user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
-      argUpdatedEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "ticket-participant",
-          title: argUpdatedEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.ARGUMENT,
-          recipientId: argUpdatedEv.recipientId,
-        } satisfies NotificationJobPayload),
-      ).catch(() => {});
+      argUpdatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: argUpdatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+            recipientId: argUpdatedEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return "OK";
     } catch (err) {
@@ -347,15 +356,18 @@ export class ReviewGateway
         payload.data.title,
         user.id === +payload.userId ? +payload.assignedToId : +payload.userId,
       );
-      debateUpdatedEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "ticket-participant",
-          title: debateUpdatedEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.DEBATE,
-          recipientId: debateUpdatedEv.recipientId,
-        } satisfies NotificationJobPayload),
-      ).catch(() => {});
+      debateUpdatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "ticket-participant",
+            title: debateUpdatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+            recipientId: debateUpdatedEv.recipientId,
+          } satisfies NotificationJobPayload),
+        )
+        .catch(() => {});
 
       return "OK";
     } catch (err) {

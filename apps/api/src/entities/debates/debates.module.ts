@@ -6,7 +6,10 @@ import { DebatesController } from "./debates.controller";
 import { DebatesService } from "./debates.service";
 
 @Module({
-  imports: [RedisModule, BullModule.registerQueue({ name: NOTIFICATION_QUEUE })],
+  imports: [
+    RedisModule,
+    BullModule.registerQueue({ name: NOTIFICATION_QUEUE }),
+  ],
   controllers: [DebatesController],
   providers: [DebatesService],
   exports: [DebatesService],

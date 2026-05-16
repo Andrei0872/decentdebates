@@ -201,15 +201,18 @@ export class ModeratorController {
             recipientId,
             user.id,
           );
-          debateApprovedEv.getContent().then((content) =>
-            this.notificationsQueue.add(NOTIFICATION_JOB, {
-              kind: "ticket-participant",
-              title: debateApprovedEv.getTitle(),
-              content,
-              notificationEvent: NotificationEvents.DEBATE,
-              recipientId,
-            } satisfies NotificationJobPayload),
-          ).catch(() => {});
+          debateApprovedEv
+            .getContent()
+            .then((content) =>
+              this.notificationsQueue.add(NOTIFICATION_JOB, {
+                kind: "ticket-participant",
+                title: debateApprovedEv.getTitle(),
+                content,
+                notificationEvent: NotificationEvents.DEBATE,
+                recipientId,
+              } satisfies NotificationJobPayload),
+            )
+            .catch(() => {});
         },
       }),
       map(() =>
@@ -259,15 +262,18 @@ export class ModeratorController {
             recipientId,
             user.id,
           );
-          argApprovedEv.getContent().then((content) =>
-            this.notificationsQueue.add(NOTIFICATION_JOB, {
-              kind: "ticket-participant",
-              title: argApprovedEv.getTitle(),
-              content,
-              notificationEvent: NotificationEvents.ARGUMENT,
-              recipientId,
-            } satisfies NotificationJobPayload),
-          ).catch(() => {});
+          argApprovedEv
+            .getContent()
+            .then((content) =>
+              this.notificationsQueue.add(NOTIFICATION_JOB, {
+                kind: "ticket-participant",
+                title: argApprovedEv.getTitle(),
+                content,
+                notificationEvent: NotificationEvents.ARGUMENT,
+                recipientId,
+              } satisfies NotificationJobPayload),
+            )
+            .catch(() => {});
         },
       }),
       map(() =>

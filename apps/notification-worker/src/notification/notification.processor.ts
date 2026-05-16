@@ -40,9 +40,13 @@ export class NotificationProcessor extends WorkerHost {
         ? { kind: "generic-moderator" }
         : { kind: "ticket-participant", recipientId: data.recipientId };
 
-    await this.publisher.publish(NOTIFICATIONS_CHANNEL, JSON.stringify(msg)).catch((err) => {
-      this.logger.error(`Failed to publish notification: ${err instanceof Error ? err.message : String(err)}`);
-    });
+    await this.publisher
+      .publish(NOTIFICATIONS_CHANNEL, JSON.stringify(msg))
+      .catch((err) => {
+        this.logger.error(
+          `Failed to publish notification: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      });
   }
 
   private async insertForAllModerators(
@@ -56,7 +60,11 @@ export class NotificationProcessor extends WorkerHost {
     `;
     const client = await this.pool.connect();
     try {
-      await client.query(sql, [data.title, data.content, data.notificationEvent]);
+      await client.query(sql, [
+        data.title,
+        data.content,
+        data.notificationEvent,
+      ]);
     } finally {
       client.release();
     }

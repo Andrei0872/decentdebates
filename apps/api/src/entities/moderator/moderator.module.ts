@@ -10,6 +10,10 @@ import { ModeratorService } from "./moderator.service";
   controllers: [ModeratorController],
   providers: [ModeratorService],
   exports: [ModeratorService],
-  imports: [DebatesModule, RedisModule, BullModule.registerQueue({ name: NOTIFICATION_QUEUE })],
+  imports: [
+    DebatesModule,
+    RedisModule,
+    BullModule.registerQueue({ name: NOTIFICATION_QUEUE }),
+  ],
 })
 export class ModeratorModule {}

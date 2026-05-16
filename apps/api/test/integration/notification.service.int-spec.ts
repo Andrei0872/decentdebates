@@ -6,10 +6,7 @@ import {
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
-import {
-  createNotification,
-  createUser,
-} from "../helpers/factories";
+import { createNotification, createUser } from "../helpers/factories";
 import { getNotificationIdsForRecipient } from "../helpers/queries";
 
 describe("NotificationService integration", () => {

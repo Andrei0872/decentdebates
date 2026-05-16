@@ -48,7 +48,11 @@ export class NotificationController {
         if (unreadNotifIds.length) {
           this.notificationService
             .markNotificationsAsRead(unreadNotifIds)
-            .catch((err) => this.logger.error(err instanceof Error ? err.message : String(err)));
+            .catch((err) =>
+              this.logger.error(
+                err instanceof Error ? err.message : String(err),
+              ),
+            );
         }
         return res.status(HttpStatus.OK).json(r);
       }),

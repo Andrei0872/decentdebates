@@ -171,15 +171,21 @@ export class DebatesService {
 
       await client.query("COMMIT");
 
-      const debateCreatedEv = new DebateTicketCreated(ticketId, debateData.title);
-      debateCreatedEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "generic-moderator",
-          title: debateCreatedEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.DEBATE,
-        } satisfies NotificationJobPayload),
-      ).catch((err) => this.logError(err));
+      const debateCreatedEv = new DebateTicketCreated(
+        ticketId,
+        debateData.title,
+      );
+      debateCreatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "generic-moderator",
+            title: debateCreatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.DEBATE,
+          } satisfies NotificationJobPayload),
+        )
+        .catch((err) => this.logError(err));
     } catch (err) {
       this.logError(err);
       await client.query("ROLLBACK");
@@ -278,15 +284,21 @@ export class DebatesService {
 
       await client.query("COMMIT");
 
-      const argCreatedEv = new ArgumentTicketCreated(ticketId, argumentData.argumentDetails.title);
-      argCreatedEv.getContent().then((content) =>
-        this.notificationsQueue.add(NOTIFICATION_JOB, {
-          kind: "generic-moderator",
-          title: argCreatedEv.getTitle(),
-          content,
-          notificationEvent: NotificationEvents.ARGUMENT,
-        } satisfies NotificationJobPayload),
-      ).catch((err) => this.logError(err));
+      const argCreatedEv = new ArgumentTicketCreated(
+        ticketId,
+        argumentData.argumentDetails.title,
+      );
+      argCreatedEv
+        .getContent()
+        .then((content) =>
+          this.notificationsQueue.add(NOTIFICATION_JOB, {
+            kind: "generic-moderator",
+            title: argCreatedEv.getTitle(),
+            content,
+            notificationEvent: NotificationEvents.ARGUMENT,
+          } satisfies NotificationJobPayload),
+        )
+        .catch((err) => this.logError(err));
     } catch (err) {
       this.logError(err);
       await client.query("ROLLBACK");

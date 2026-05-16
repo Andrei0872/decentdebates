@@ -30,7 +30,9 @@ async function collectEmissionsAfterPush(
   msg: NotificationMessage,
 ): Promise<any[]> {
   const emissions: any[] = [];
-  const sub = controller.notificationCount(req).subscribe((v) => emissions.push(v));
+  const sub = controller
+    .notificationCount(req)
+    .subscribe((v) => emissions.push(v));
 
   // allow the initial getUnreadCount promise to resolve
   await Promise.resolve();
@@ -55,7 +57,12 @@ describe("NotificationController — SSE filter", () => {
 
     it("streams to a moderator", async () => {
       const req = makeRequest({ id: 1, role: UserRoles.MODERATOR });
-      const emissions = await collectEmissionsAfterPush(controller, req, subject, msg);
+      const emissions = await collectEmissionsAfterPush(
+        controller,
+        req,
+        subject,
+        msg,
+      );
 
       // index 0 = initial unread count (see `mockService`), index 1 = notification push
       expect(emissions.length).toBe(2);
@@ -64,7 +71,12 @@ describe("NotificationController — SSE filter", () => {
 
     it("does not stream to a regular user", async () => {
       const req = makeRequest({ id: 1, role: UserRoles.USER });
-      const emissions = await collectEmissionsAfterPush(controller, req, subject, msg);
+      const emissions = await collectEmissionsAfterPush(
+        controller,
+        req,
+        subject,
+        msg,
+      );
 
       expect(emissions.length).toBe(1); // only the initial count
     });
@@ -72,11 +84,19 @@ describe("NotificationController — SSE filter", () => {
 
   describe("ticket-participant message", () => {
     const recipientId = 42;
-    const msg: NotificationMessage = { kind: "ticket-participant", recipientId };
+    const msg: NotificationMessage = {
+      kind: "ticket-participant",
+      recipientId,
+    };
 
     it("streams to the matching recipient", async () => {
       const req = makeRequest({ id: recipientId, role: UserRoles.USER });
-      const emissions = await collectEmissionsAfterPush(controller, req, subject, msg);
+      const emissions = await collectEmissionsAfterPush(
+        controller,
+        req,
+        subject,
+        msg,
+      );
 
       expect(emissions.length).toBe(2);
       expect(emissions[1]).toEqual({ data: { unreadCount: 1 } });
@@ -84,7 +104,12 @@ describe("NotificationController — SSE filter", () => {
 
     it("does not stream to a different user", async () => {
       const req = makeRequest({ id: 99, role: UserRoles.USER });
-      const emissions = await collectEmissionsAfterPush(controller, req, subject, msg);
+      const emissions = await collectEmissionsAfterPush(
+        controller,
+        req,
+        subject,
+        msg,
+      );
 
       expect(emissions.length).toBe(1);
     });
