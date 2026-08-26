@@ -22,7 +22,7 @@ import {
   Menu,
   MenuItem,
   OverlayToaster,
-  Popover,
+  PopoverNext,
   Position,
 } from "@blueprintjs/core";
 import { fetchDebateAsModerator, fetchDebateAsUser } from "@/utils/api/review";
@@ -441,7 +441,7 @@ function Debate() {
 
                       {c.commenterId === user?.id ? (
                         <div className={styles.commentActionsContainer}>
-                          <Popover
+                          <PopoverNext
                             interactionKind="click"
                             placement="right"
                             usePortal={false}
@@ -464,7 +464,7 @@ function Debate() {
                                 icon="more"
                               />
                             </span>
-                          </Popover>
+                          </PopoverNext>
                         </div>
                       ) : null}
                     </>

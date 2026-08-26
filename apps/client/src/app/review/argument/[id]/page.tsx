@@ -21,7 +21,7 @@ import {
   Menu,
   MenuItem,
   OverlayToaster,
-  Popover,
+  PopoverNext,
   Position,
 } from "@blueprintjs/core";
 import {
@@ -612,7 +612,7 @@ function Argument() {
 
                           {c.commenterId === user?.id ? (
                             <div className={styles.commentActionsContainer}>
-                              <Popover
+                              <PopoverNext
                                 interactionKind="click"
                                 placement="right"
                                 usePortal={false}
@@ -635,7 +635,7 @@ function Argument() {
                                     icon="more"
                                   />
                                 </span>
-                              </Popover>
+                              </PopoverNext>
                             </div>
                           ) : null}
                         </>

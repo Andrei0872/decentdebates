@@ -36,7 +36,7 @@ import {
   Menu,
   MenuItem,
   OverlayToaster,
-  Popover,
+  PopoverNext,
   Position,
 } from "@blueprintjs/core";
 import {
@@ -140,7 +140,7 @@ const Card: React.FC<CardProps> = (props) => {
 
         {cardData.boardList === BoardLists.IN_REVIEW && hasRightsOnTicket ? (
           <div className={styles.cardActionsContainer}>
-            <Popover
+            <PopoverNext
               interactionKind="click"
               placement="right"
               content={
@@ -162,7 +162,7 @@ const Card: React.FC<CardProps> = (props) => {
               >
                 <Icon icon="more" />
               </span>
-            </Popover>
+            </PopoverNext>
           </div>
         ) : null}
       </div>

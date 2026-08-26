@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon, Popover } from "@blueprintjs/core";
+import { Icon, PopoverNext } from "@blueprintjs/core";
 import styles from "./DebateArgument.module.scss";
 // import '@blueprintjs/popover2/src/blueprint-popover2.scss'
 // import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
@@ -34,7 +34,7 @@ function DebateArgument(props: Props) {
         <h3 className={styles.title}>{debateArgumentData.title}</h3>
         {additionalActions ? (
           <div className={styles.actions}>
-            <Popover
+            <PopoverNext
               interactionKind="click"
               placement="right"
               content={additionalActions}

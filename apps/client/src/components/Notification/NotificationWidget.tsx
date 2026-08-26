@@ -2,7 +2,13 @@
 
 import { Notification } from "@/types/notification";
 import { fetchNotifications } from "@/utils/api/notification";
-import { Icon, Spinner, SpinnerSize, Popover } from "@blueprintjs/core";
+import {
+  Classes,
+  Icon,
+  Spinner,
+  SpinnerSize,
+  PopoverNext,
+} from "@blueprintjs/core";
 import { MouseEvent, useEffect, useState } from "react";
 import RichEditor from "../RichEditor/RichEditor";
 import styles from "./NotificationWidget.module.scss";
@@ -95,21 +101,12 @@ function NotificationWidget() {
 
   return (
     <div>
-      <Popover
+      <PopoverNext
         interactionKind="click"
         placement="bottom"
         usePortal={true}
-        minimal={true}
-        modifiers={{
-          offset: {
-            fn(arg) {
-              // Might be an interesting adventure to explore why this works.
-              // Without this, the notifications list will be displayed outside the window,
-              // causing _x_ overflow.
-              arg.options.offset = [null, null];
-            },
-          },
-        }}
+        arrow={false}
+        popoverClassName={Classes.MINIMAL}
         content={
           isLoadingNotifications ? (
             <Spinner
