@@ -139,7 +139,10 @@ const Card: React.FC<CardProps> = (props) => {
         <h4 className={styles.ticketLabel}>#{cardData.ticketLabel}</h4>
 
         {cardData.boardList === BoardLists.IN_REVIEW && hasRightsOnTicket ? (
-          <div className={styles.cardActionsContainer}>
+          <div
+            onClick={(ev) => ev.stopPropagation()}
+            className={styles.cardActionsContainer}
+          >
             <PopoverNext
               interactionKind="click"
               placement="right"
