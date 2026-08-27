@@ -16,7 +16,7 @@ export const REDIS_STORE_TOKEN = "@REDIS_STORE_TOKEN";
         const client = createClient({
           socket: {
             host: config.REDIS_HOST,
-            port: 6379,
+            port: config.REDIS_PORT,
           },
         });
 

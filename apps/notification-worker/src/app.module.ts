@@ -11,7 +11,7 @@ import { config } from "./config";
     BullModule.forRoot({
       connection: {
         host: config.REDIS_HOST,
-        port: 6379,
+        port: config.REDIS_PORT,
       },
     }),
     BullModule.registerQueue({ name: NOTIFICATION_QUEUE }),

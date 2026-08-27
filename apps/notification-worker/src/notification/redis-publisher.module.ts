@@ -13,7 +13,7 @@ export const REDIS_PUBLISHER_TOKEN = "REDIS_PUBLISHER_TOKEN";
         const logger = new Logger("RedisPublisher");
         const client = new IORedis({
           host: config.REDIS_HOST,
-          port: 6379,
+          port: config.REDIS_PORT,
           maxRetriesPerRequest: null,
         });
         client.on("error", (err) => {
