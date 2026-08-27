@@ -65,7 +65,12 @@ pnpm --filter client test:unit
 # Client — unit in watch mode
 pnpm --filter client test:unit:watch
 
-# Client — E2E (Playwright)
+# API — E2E (bootstraps the app in-process; starts Docker automatically -- no running server needed)
+pnpm --filter api test:e2e
+
+# Client — E2E (Playwright). Requires the full stack already running (`pnpm run dev` or
+# `pnpm run start:prod:local`), a seeded DB, and apps/client/.env.test.local filled in.
+# Playwright starts nothing itself.
 pnpm --filter client test:e2e
 ```
 

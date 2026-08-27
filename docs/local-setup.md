@@ -78,3 +78,8 @@ pnpm run seed
 # Run a specific seed file:
 pnpm run seed:file -- 03_debates.js
 ```
+
+## Running tests
+
+- **API E2E** (`pnpm --filter api test:e2e`) is self-contained — it starts Docker and bootstraps the NestJS app in-process.
+- **Client E2E** (`pnpm --filter client test:e2e`) needs the full stack already running (`pnpm run dev`, or `pnpm run start:prod:local`) and a seeded database. Playwright does not start any server; `apps/client/.env.test.local` must also be filled in.
