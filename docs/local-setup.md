@@ -79,6 +79,13 @@ pnpm run seed
 pnpm run seed:file -- 03_debates.js
 ```
 
+## Documentation
+
+### API (Swagger)
+
+While the API runs in development mode (`pnpm run dev` or `pnpm run dev:api`), Swagger UI is served at [http://localhost:3001/docs](http://localhost:3001/docs) and the raw OpenAPI JSON at [http://localhost:3001/docs-json](http://localhost:3001/docs-json).
+
+The docs are only registered when `NODE_ENV` is unset or `development`.
 ## Running tests
 
 - **API E2E** (`pnpm --filter api test:e2e`) is self-contained — it starts Docker and bootstraps the NestJS app in-process.

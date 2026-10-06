@@ -5,6 +5,7 @@ import { parse } from "cookie";
 import * as cookieSignature from "cookie-signature";
 import { ConfigService } from "@nestjs/config";
 import { REDIS_STORE_TOKEN } from "src/redis/redis.module";
+import { getSessionCookieName } from "src/middlewares/session.middleware";
 import { UserCookieData } from "../user/user.model";
 
 const UNAUTHENTICATED_ERR = new WsException("Unauthenticated");
@@ -27,7 +28,8 @@ export class ReviewService {
     }
 
     const cookieValues = parse(cookieHeaderValue);
-    const { sessionId: signedSessionId } = cookieValues;
+    const signedSessionId =
+      cookieValues[getSessionCookieName(this.configService)];
     if (!signedSessionId) {
       throw UNAUTHENTICATED_ERR;
     }
