@@ -31,6 +31,14 @@ export type NotificationJobPayload =
       recipientId: number;
     };
 
+// Cross-cutting data carried alongside a job's payload. Optional so jobs
+// enqueued before it existed still process.
+export interface JobMeta {
+  requestId?: string;
+}
+
+export type NotificationJobData = NotificationJobPayload & { meta?: JobMeta };
+
 export type NotificationMessage =
   | { kind: "generic-moderator" }
   | { kind: "ticket-participant"; recipientId: number };
