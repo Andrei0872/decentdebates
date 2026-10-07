@@ -1,4 +1,5 @@
 import { ApiTags } from "@nestjs/swagger";
+import { shouldEmitRoutineLogs } from "src/logging";
 import {
   Controller,
   Get,
@@ -88,7 +89,9 @@ export class NotificationController {
       ),
     ).pipe(
       finalize(() => {
-        this.logger.debug("Notification count SSE stream closed.");
+        if (shouldEmitRoutineLogs()) {
+          this.logger.debug("Notification count SSE stream closed.");
+        }
       }),
       takeUntil(clientDisconnected$),
     );
