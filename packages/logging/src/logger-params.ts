@@ -27,6 +27,15 @@ export const REDACT_PATHS = [
   'res.headers["set-cookie"]',
 ];
 
+// Dev-only output.
+const PRETTY_OPTIONS = {
+  singleLine: true,
+  ignore: "pid,hostname,service,context,req,res,responseTime",
+  messageFormat:
+    "{if context}[{context}] {end}{msg}" +
+    "{if req.method} {req.method} {req.url} {res.statusCode} {responseTime}ms{end}",
+};
+
 // `id` is already declared on IncomingMessage by pino-http's type augmentation.
 type HttpRequest = IncomingMessage & {
   route?: { path?: string };
@@ -87,7 +96,7 @@ export function createLoggerModuleParams({
       transport: pretty
         ? {
             target: require.resolve("pino-pretty"),
-            options: { singleLine: true },
+            options: PRETTY_OPTIONS,
           }
         : undefined,
       genReqId,
@@ -102,8 +111,8 @@ export function createLoggerModuleParams({
           ? { route: req.route?.path, cacheHit: req.cacheHit }
           : {},
       serializers: {
-        req: (req: { id: string; method: string; url: string }) => ({
-          id: req.id,
+        // No `id`: the request ID is already on every line as `reqId`.
+        req: (req: { method: string; url: string }) => ({
           method: req.method,
           url: req.url,
         }),
