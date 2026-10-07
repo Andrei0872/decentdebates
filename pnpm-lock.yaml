@@ -289,6 +289,9 @@ importers:
       '@decentdebates/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@decentdebates/logging':
+        specifier: workspace:*
+        version: link:../../packages/logging
       '@decentdebates/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

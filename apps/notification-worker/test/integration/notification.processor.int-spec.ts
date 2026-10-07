@@ -6,6 +6,7 @@ import {
   NotificationJobPayload,
   NotificationMessage,
 } from "@decentdebates/shared-types";
+import { createLoggerModuleParams, PinoLogger } from "@decentdebates/logging";
 import { NotificationProcessor } from "../../src/notification/notification.processor";
 import { applySchema, createTestPool, recreateTestDatabase } from "../helpers/db";
 
@@ -61,7 +62,11 @@ describe("NotificationProcessor integration", () => {
     });
 
     mockPublisher = { publish: jest.fn<() => Promise<number>>().mockResolvedValue(1) };
-    processor = new NotificationProcessor(pool as never, mockPublisher as never);
+    processor = new NotificationProcessor(
+      pool as never,
+      mockPublisher as never,
+      new PinoLogger(createLoggerModuleParams({ serviceName: "notification-worker" })),
+    );
   });
 
   afterAll(async () => {

@@ -8,8 +8,6 @@ import { Observable } from "rxjs";
 import { generateRequestId, PinoLogger } from "@decentdebates/logging";
 import { runWithRequestId } from "src/request-context";
 
-// pino-http only sees HTTP requests. Socket.IO events arrive as frames on a
-// long-lived connection, so each handled event gets its own request ID here.
 @Injectable()
 export class WsRequestContextInterceptor implements NestInterceptor {
   constructor(private readonly pinoLogger: PinoLogger) {}

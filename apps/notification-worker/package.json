@@ -7,7 +7,7 @@
     "prebuild": "rm -rf dist",
     "dev": "nest start --watch",
     "build": "nest build",
-    "start:prod": "node dist/main",
+    "start:prod": "NODE_ENV=production node dist/main",
     "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --check \"src/**/*.ts\"",
@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@decentdebates/db": "workspace:*",
+    "@decentdebates/logging": "workspace:*",
     "@decentdebates/shared-types": "workspace:*",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.0",

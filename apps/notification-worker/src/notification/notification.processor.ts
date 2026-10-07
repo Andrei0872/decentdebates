@@ -1,11 +1,13 @@
 import { Inject, Logger } from "@nestjs/common";
-import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { OnWorkerEvent, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
 import { Pool } from "pg";
 import IORedis from "ioredis";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
+import { PinoLogger } from "@decentdebates/logging";
 import {
   NOTIFICATION_QUEUE,
+  NotificationJobData,
   NotificationJobPayload,
   NotificationMessage,
 } from "@decentdebates/shared-types";
@@ -22,11 +24,39 @@ export class NotificationProcessor extends WorkerHost {
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
     @Inject(REDIS_PUBLISHER_TOKEN) private publisher: IORedis,
+    private pinoLogger: PinoLogger,
   ) {
     super();
+    this.pinoLogger.setContext(NotificationProcessor.name);
   }
 
-  async process(job: Job<NotificationJobPayload>): Promise<void> {
+  process(job: Job<NotificationJobData>): Promise<void> {
+    return this.pinoLogger.runInContext(() => this.handle(job), {
+      bindings: jobBindings(job),
+    });
+  }
+
+  @OnWorkerEvent("completed")
+  onCompleted(job: Job<NotificationJobData>) {
+    this.pinoLogger.info(
+      { ...jobBindings(job), durationMs: job.finishedOn - job.processedOn },
+      "job completed",
+    );
+  }
+
+  @OnWorkerEvent("failed")
+  onFailed(job: Job<NotificationJobData> | undefined, err: Error) {
+    this.pinoLogger.error(
+      {
+        ...(job ? jobBindings(job) : {}),
+        err,
+        willRetry: job ? job.attemptsMade < job.opts.attempts : false,
+      },
+      "job failed",
+    );
+  }
+
+  private async handle(job: Job<NotificationJobData>): Promise<void> {
     const { data } = job;
 
     if (data.kind === "generic-moderator") {
@@ -89,4 +119,13 @@ export class NotificationProcessor extends WorkerHost {
       client.release();
     }
   }
+}
+
+function jobBindings(job: Job<NotificationJobData>) {
+  return {
+    jobId: job.id,
+    queue: job.queueName,
+    attempt: job.attemptsStarted,
+    reqId: job.data.meta?.requestId,
+  };
 }

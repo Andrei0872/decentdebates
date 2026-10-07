@@ -111,7 +111,6 @@ export function createLoggerModuleParams({
           ? { route: req.route?.path, cacheHit: req.cacheHit }
           : {},
       serializers: {
-        // No `id`: the request ID is already on every line as `reqId`.
         req: (req: { method: string; url: string }) => ({
           method: req.method,
           url: req.url,

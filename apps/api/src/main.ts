@@ -16,8 +16,6 @@ const PORT = 3001;
 const logger = new Logger("Bootstrap");
 
 async function bootstrap() {
-  // Buffer Nest's boot logs until the pino-backed logger is attached, so they
-  // are written as JSON too.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(PinoNestLogger));
 
