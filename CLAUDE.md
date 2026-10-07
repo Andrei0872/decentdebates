@@ -45,11 +45,18 @@ pnpm run seed:file -- 03_debates.js   # run a single seed file
 
 # Reset the DB (wipes volumes and restarts Postgres)
 pnpm run db:reset
+
+# Production builds on the host (Docker for Postgres/Redis, then built apps)
+pnpm run start:prod:local       # api, notification-worker and client
+pnpm run start:prod:local:api   # api and notification-worker only
 ```
 
 ### Running tests
 
 ```bash
+# Unit tests of every package that has them
+pnpm test:unit
+
 # API — unit (from apps/api or root)
 pnpm --filter api test:unit
 
@@ -105,6 +112,11 @@ State is managed with Redux Toolkit. Slices live in `src/store/slices/`: `debate
 The rich-text editor throughout the app is Lexical (`@lexical/react`).
 
 Drag-and-drop (argument reordering) uses `react-dnd`.
+
+## Working conventions
+
+- Run and verify through the scripts in `package.json` / `turbo.json`; don't invoke `node dist/...` or tool binaries directly. If a workflow has no script, say so and propose one.
+- Don't write to the dev database (registering users, creating debates) to verify behavior without asking first.
 
 ## Testing conventions
 
