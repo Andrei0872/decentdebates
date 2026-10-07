@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { enqueueNotification } from "src/entities/notification/notification-queue";
 import { Request, Response } from "express";
 import {
   catchError,
@@ -43,10 +44,8 @@ import { ModeratorService } from "./moderator.service";
 import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { type RedisClientType } from "redis";
 import {
-  NOTIFICATION_JOB,
   NOTIFICATION_QUEUE,
   NotificationEvents,
-  NotificationJobPayload,
 } from "@decentdebates/shared-types";
 
 @ApiTags("moderator")
@@ -204,13 +203,13 @@ export class ModeratorController {
           debateApprovedEv
             .getContent()
             .then((content) =>
-              this.notificationsQueue.add(NOTIFICATION_JOB, {
+              enqueueNotification(this.notificationsQueue, {
                 kind: "ticket-participant",
                 title: debateApprovedEv.getTitle(),
                 content,
                 notificationEvent: NotificationEvents.DEBATE,
                 recipientId,
-              } satisfies NotificationJobPayload),
+              }),
             )
             .catch(() => {});
         },
@@ -265,13 +264,13 @@ export class ModeratorController {
           argApprovedEv
             .getContent()
             .then((content) =>
-              this.notificationsQueue.add(NOTIFICATION_JOB, {
+              enqueueNotification(this.notificationsQueue, {
                 kind: "ticket-participant",
                 title: argApprovedEv.getTitle(),
                 content,
                 notificationEvent: NotificationEvents.ARGUMENT,
                 recipientId,
-              } satisfies NotificationJobPayload),
+              }),
             )
             .catch(() => {});
         },

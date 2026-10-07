@@ -13,7 +13,6 @@ import {
   Res,
   SetMetadata,
   UsePipes,
-  UseInterceptors,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
@@ -27,7 +26,6 @@ import {
   forkJoin,
   tap,
 } from "rxjs";
-import { TimingInterceptor } from "src/interceptors/timing.interceptor";
 import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { type RedisClientType } from "redis";
@@ -117,7 +115,6 @@ export class DebatesController {
     );
   }
 
-  @UseInterceptors(TimingInterceptor)
   @SetMetadata("skipAuth", true)
   @Get("/:id")
   async getDebate(

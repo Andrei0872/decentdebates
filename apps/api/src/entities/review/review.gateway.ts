@@ -1,4 +1,5 @@
-import { Logger } from "@nestjs/common";
+import { Logger, UseInterceptors } from "@nestjs/common";
+import { WsRequestContextInterceptor } from "src/interceptors/ws-request-context.interceptor";
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -30,17 +31,17 @@ import {
 } from "./review.events";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { enqueueNotification } from "src/entities/notification/notification-queue";
 import { ArgumentUpdated, DebateTitleUpdated } from "../debates/debate.events";
 import {
-  NOTIFICATION_JOB,
   NOTIFICATION_QUEUE,
   NotificationEvents,
-  NotificationJobPayload,
 } from "@decentdebates/shared-types";
 import { shouldEmitRoutineLogs } from "src/logging";
 
 const PORT = 3002;
 
+@UseInterceptors(WsRequestContextInterceptor)
 @WebSocketGateway(PORT, {
   namespace: "review",
   cors: { origin: config.CLIENT_URL, credentials: true },
@@ -124,13 +125,13 @@ export class ReviewGateway
       debateCommentEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "ticket-participant",
             title: debateCommentEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.DEBATE,
             recipientId: debateCommentEv.recipientId,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch(() => {});
 
@@ -213,13 +214,13 @@ export class ReviewGateway
       argCommentEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "ticket-participant",
             title: argCommentEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.ARGUMENT,
             recipientId: argCommentEv.recipientId,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch(() => {});
 
@@ -304,13 +305,13 @@ export class ReviewGateway
       argUpdatedEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "ticket-participant",
             title: argUpdatedEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.ARGUMENT,
             recipientId: argUpdatedEv.recipientId,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch(() => {});
 
@@ -359,13 +360,13 @@ export class ReviewGateway
       debateUpdatedEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "ticket-participant",
             title: debateUpdatedEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.DEBATE,
             recipientId: debateUpdatedEv.recipientId,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch(() => {});
 

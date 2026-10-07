@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { DbModule } from "@decentdebates/db";
 import { AuthModule } from "./auth/auth.module";
@@ -14,9 +14,12 @@ import { NotificationModule } from "./entities/notification/notification.module"
 import { BullModule } from "@nestjs/bullmq";
 import { RedisModule } from "./redis/redis.module";
 import { config } from "./config";
+import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
+import { RequestContextMiddleware } from "./request-context";
 
 @Module({
   imports: [
+    LoggerModule.forRoot(createLoggerModuleParams({ serviceName: "api" })),
     DbModule,
     AuthModule,
     UserModule,
@@ -51,6 +54,10 @@ import { config } from "./config";
     },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   constructor(private moduleRef: ModuleRef) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes("{*splat}");
+  }
 }

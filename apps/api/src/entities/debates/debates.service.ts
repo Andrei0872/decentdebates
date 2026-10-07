@@ -1,13 +1,12 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { enqueueNotification } from "src/entities/notification/notification-queue";
 import { Pool } from "pg";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
 import {
-  NOTIFICATION_JOB,
   NOTIFICATION_QUEUE,
   NotificationEvents,
-  NotificationJobPayload,
 } from "@decentdebates/shared-types";
 import { DebateAsModerator } from "../review/review.model";
 import { UserCookieData } from "../user/user.model";
@@ -178,12 +177,12 @@ export class DebatesService {
       debateCreatedEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "generic-moderator",
             title: debateCreatedEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.DEBATE,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch((err) => this.logError(err));
     } catch (err) {
@@ -291,12 +290,12 @@ export class DebatesService {
       argCreatedEv
         .getContent()
         .then((content) =>
-          this.notificationsQueue.add(NOTIFICATION_JOB, {
+          enqueueNotification(this.notificationsQueue, {
             kind: "generic-moderator",
             title: argCreatedEv.getTitle(),
             content,
             notificationEvent: NotificationEvents.ARGUMENT,
-          } satisfies NotificationJobPayload),
+          }),
         )
         .catch((err) => this.logError(err));
     } catch (err) {

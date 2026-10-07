@@ -1,4 +1,5 @@
 import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger as PinoNestLogger } from "@decentdebates/logging";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
@@ -15,9 +16,10 @@ const PORT = 3001;
 const logger = new Logger("Bootstrap");
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: ["error", "warn", "log"],
-  });
+  // Buffer Nest's boot logs until the pino-backed logger is attached, so they
+  // are written as JSON too.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(PinoNestLogger));
 
   app.useGlobalPipes(
     new ValidationPipe({

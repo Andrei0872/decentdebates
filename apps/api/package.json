@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@decentdebates/db": "workspace:*",
+    "@decentdebates/logging": "workspace:*",
     "@decentdebates/shared-types": "workspace:*",
     "@lexical/link": "^0.9.2",
     "@nestjs/bullmq": "^11.0.4",
