@@ -30,6 +30,9 @@
       "@parcel/watcher",
       "bcrypt",
       "unrs-resolver"
+    ],
+    "ignoredBuiltDependencies": [
+      "msgpackr-extract"
     ]
   }
 }
