@@ -17,7 +17,7 @@
     "seed:file": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run --specific"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@decentdebates/eslint-config": "workspace:*",
     "@types/bcrypt": "^5.0.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "eslint": "^9.39.4",
     "knex": "^2.4.2",
     "prettier": "^3.0.0",

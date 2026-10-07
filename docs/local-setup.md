@@ -2,6 +2,7 @@
 
 ## Prerequisites
 
+- Node.js 24 (`.nvmrc`; with nvm: `nvm use`)
 - `pnpm`
 - `docker`
 

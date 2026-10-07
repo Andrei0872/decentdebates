@@ -29,7 +29,7 @@
     "@lexical/selection": "^0.43.0",
     "@lexical/utils": "^0.43.0",
     "@reduxjs/toolkit": "^2.11.2",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "axios": "^1.15.0",

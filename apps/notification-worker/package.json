@@ -16,7 +16,7 @@
     "test:integration:only": "jest --config ./test/jest-integration.json --runInBand"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@decentdebates/db": "workspace:*",
@@ -37,7 +37,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@types/jest": "^29.5.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.6.5",
     "eslint": "^9.39.4",
     "jest": "^29.7.0",
