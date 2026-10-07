@@ -1,0 +1,55 @@
+{
+  "name": "@decentdebates/logging",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:clean": "rm -rf dist && tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings 0",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --check \"src/**/*.ts\"",
+    "format:fix": "prettier --write \"src/**/*.ts\"",
+    "test:unit": "jest"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "jest": {
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "nestjs-pino": "5.3.1",
+    "pino": "10.4.0",
+    "pino-http": "11.0.0"
+  },
+  "optionalDependencies": {
+    "pino-pretty": "13.2.0"
+  },
+  "devDependencies": {
+    "@decentdebates/eslint-config": "workspace:*",
+    "@nestjs/common": "^11.0.8",
+    "@nestjs/core": "^11.0.8",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.4",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.8",
+    "@nestjs/core": "^11.0.8",
+    "rxjs": "^7.1.0"
+  }
+}
