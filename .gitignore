@@ -1,11 +1,60 @@
-packages/db/.env
-apps/api/.env
+# Patterns without a leading slash apply at every depth, so they cover every
+# workspace, including new ones.
 
-node_modules
-.pnpm-store
-.turbo
-apps/api/node_modules
-apps/client/node_modules
-packages/db/node_modules
-apps/client/test-results
+# Dependencies
+node_modules/
+.pnpm-store/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+*.tsbuildinfo
+.turbo/
+
+# Environment files (`*.example` files are committed)
+.env
+.env.test
+.env*.local
+
+# Tests
+coverage/
+.nyc_output/
+apps/client/test-results/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Claude Code
 .claude/settings.local.json
+
+# Next.js (apps/client)
+apps/client/.next/
+apps/client/out/
+apps/client/build/
+apps/client/next-env.d.ts
+apps/client/.vercel
+*.pem
