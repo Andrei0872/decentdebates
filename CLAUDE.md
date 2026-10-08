@@ -49,7 +49,16 @@ pnpm run db:reset
 # Production builds on the host (Docker for Postgres/Redis, then built apps)
 pnpm run start:prod:local       # api, notification-worker and client
 pnpm run start:prod:local:api   # api and notification-worker only
+
+# api and notification-worker built as Docker images and run in containers
+# (compose profile `app`) against the compose Postgres/Redis
+pnpm run start:prod:containers
+
+# Stop all compose services, including profiled ones
+pnpm run docker:down
 ```
+
+Dockerfiles: `apps/api/Dockerfile`, `apps/notification-worker/Dockerfile` (build context: repo root).
 
 ### Running tests
 

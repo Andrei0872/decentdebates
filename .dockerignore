@@ -1,0 +1,29 @@
+# Build context for apps/api/Dockerfile and apps/notification-worker/Dockerfile
+# (context: repo root). Dependencies and build output are produced inside the
+# image, so local copies are excluded.
+
+**/node_modules
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+.pnpm-store
+
+# Environment files: env vars are passed at runtime (see docker-compose.yml).
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Client build output and test artifacts
+apps/client/.next
+apps/client/out
+apps/client/test-results
+**/coverage
+
+.git
+.github
+.vscode
+.claude
+docs
+**/*.log
+**/.DS_Store

@@ -11,18 +11,19 @@
     "format": "turbo run format",
     "format:fix": "turbo run format:fix",
     "test:unit": "turbo run test:unit",
-    "docker:up": "docker compose --env-file packages/db/.env up -d",
+    "docker:up": "docker compose up -d",
     "docker:wait": "bash ./scripts/wait-for-docker-services.sh",
-    "docker:down": "docker compose --env-file packages/db/.env down",
-    "db:logs": "docker compose --env-file packages/db/.env logs -f",
-    "db:reset": "docker compose --env-file packages/db/.env down -v && docker compose --env-file packages/db/.env up -d",
+    "docker:down": "docker compose --profile '*' down",
+    "db:logs": "docker compose logs -f",
+    "db:reset": "corepack pnpm run docker:down -v && corepack pnpm run docker:up",
     "seed": "corepack pnpm --filter @decentdebates/db run seed",
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file",
     "start:prod:local": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod",
-    "start:prod:local:api": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod --filter api --filter notification-worker"
+    "start:prod:local:api": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod --filter api --filter notification-worker",
+    "start:prod:containers": "docker compose --profile app --profile o11y up --build"
   },
   "devDependencies": {
-    "turbo": "^2.9.6"
+    "turbo": "2.9.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
