@@ -4,7 +4,7 @@
     {
       "cwd": "${workspaceFolder}/apps/api",
       "name": "NestJS debugging + set-up process",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
@@ -15,7 +15,7 @@
     {
       "cwd": "${workspaceFolder}/apps/client",
       "name": "Next.js debugging + set-up process",
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [
