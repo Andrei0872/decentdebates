@@ -55,7 +55,8 @@
     "start:prod": {
       "dependsOn": ["build"],
       "persistent": true,
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["OTEL_*"]
     }
   }
 }
