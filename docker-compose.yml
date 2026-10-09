@@ -5,6 +5,12 @@ x-app: &app
     POSTGRES_PORT: "5432"
     REDIS_HOST: redis
     REDIS_PORT: "6379"
+    # Telemetry stays off until the collector (o11y profile) exists. Flip to
+    # "false" once it does; the endpoint already points at it.
+    OTEL_SDK_DISABLED: "true"
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=prod-local
   depends_on:
     db:
       condition: service_healthy
@@ -49,6 +55,8 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
     image: decentdebates-api:local
     env_file:
       - packages/db/.env
@@ -63,6 +71,8 @@ services:
     build:
       context: .
       dockerfile: apps/notification-worker/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
     image: decentdebates-notification-worker:local
     env_file:
       - packages/db/.env

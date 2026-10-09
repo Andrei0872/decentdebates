@@ -20,7 +20,7 @@
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file",
     "start:prod:local": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod",
     "start:prod:local:api": "corepack pnpm run docker:up && corepack pnpm run docker:wait && turbo run start:prod --filter api --filter notification-worker",
-    "start:prod:containers": "docker compose --profile app --profile o11y up --build"
+    "start:prod:containers": "GIT_SHA=$(git rev-parse --short HEAD) docker compose --profile app --profile o11y up --build"
   },
   "devDependencies": {
     "turbo": "2.9.6"

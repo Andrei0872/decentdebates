@@ -15,6 +15,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { RedisModule } from "./redis/redis.module";
 import { config } from "./config";
 import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
+import { createBullMqTelemetry } from "@decentdebates/telemetry";
 import { RequestContextMiddleware } from "./request-context";
 
 @Module({
@@ -37,6 +38,7 @@ import { RequestContextMiddleware } from "./request-context";
         host: config.REDIS_HOST,
         port: config.REDIS_PORT,
       },
+      telemetry: createBullMqTelemetry(),
       defaultJobOptions: {
         attempts: 3,
         backoff: {

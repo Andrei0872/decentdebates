@@ -31,11 +31,13 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
   pnpm --filter api deploy --prod --legacy --store-dir /pnpm/store /prod/api
 
 FROM ${NODE_IMAGE} AS runtime
+ARG GIT_SHA=unknown
 ENV NODE_ENV=production
+ENV SERVICE_VERSION=$GIT_SHA
 WORKDIR /app
 COPY --from=build --chown=node:node /prod/api/package.json ./
 COPY --from=build --chown=node:node /prod/api/node_modules ./node_modules
 COPY --from=build --chown=node:node /prod/api/dist ./dist
 USER node
 EXPOSE 3001 3002
-CMD ["node", "dist/main"]
+CMD ["node", "--require", "./dist/instrumentation", "dist/main"]

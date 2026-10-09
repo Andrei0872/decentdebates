@@ -34,10 +34,12 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
   pnpm --filter notification-worker deploy --prod --legacy --store-dir /pnpm/store /prod/notification-worker
 
 FROM ${NODE_IMAGE} AS runtime
+ARG GIT_SHA=unknown
 ENV NODE_ENV=production
+ENV SERVICE_VERSION=$GIT_SHA
 WORKDIR /app
 COPY --from=build --chown=node:node /prod/notification-worker/package.json ./
 COPY --from=build --chown=node:node /prod/notification-worker/node_modules ./node_modules
 COPY --from=build --chown=node:node /prod/notification-worker/dist ./dist
 USER node
-CMD ["node", "dist/main"]
+CMD ["node", "--require", "./dist/instrumentation", "dist/main"]

@@ -11,6 +11,7 @@ Monorepo with `pnpm` workspaces and Turborepo.
 - `apps/notification-worker` — Headless NestJS worker; consumes BullMQ notification jobs, writes to DB, publishes Redis pub/sub signals
 - `packages/db` — Postgres schema, Knex seeds, DB bootstrapping (`DbModule` imported by the API)
 - `packages/shared-types` — Cross-app TypeScript contracts (no app code allowed here)
+- `packages/telemetry` — OpenTelemetry SDK setup (`initTelemetry`, loaded via each app's `src/instrumentation.ts`), BullMQ telemetry and queue-depth metrics
 - `packages/eslint-config` — Shared ESLint config
 
 ## Boundaries

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import * as fs from "fs";
 import * as path from "path";
 import { Pool } from "pg";
+import { registerPoolMetrics } from "./pool-metrics";
 
 const LOGGER_CONTEXT = "DB";
 
@@ -44,6 +45,8 @@ const PG_PROVIDER: FactoryProvider<Pool> = {
       pool.end();
       process.exit(1);
     }
+
+    registerPoolMetrics(pool);
 
     return pool;
   },
