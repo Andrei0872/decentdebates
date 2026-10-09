@@ -123,8 +123,15 @@ The rich-text editor throughout the app is Lexical (`@lexical/react`).
 
 Drag-and-drop (argument reordering) uses `react-dnd`.
 
+## Purpose
+
+Besides shipping the product, this project is a vehicle for learning product and software engineering (e.g. observability, reliability, deployment). Explanations of the why matter as much as the code.
+
 ## Working conventions
 
+- Implement according to standard practice for the tool or domain. When in doubt, or when there are several reasonable options, pick one and state that an alternative exists, with a one-line description of it and why it wasn't chosen.
+- In explanations, use common software engineering terminology where it fits (e.g. stopgap, module preloading, red herring, decorator, backpressure) and briefly gloss terms on first use.
+- No redundant comments: don't restate what a name or signature already says (e.g. `/** Whether X is enabled. */` above `isXEnabled()`). Comment only the non-obvious why: constraints, ordering requirements, trade-offs.
 - Run and verify through the scripts in `package.json` / `turbo.json`; don't invoke `node dist/...` or tool binaries directly. If a workflow has no script, say so and propose one.
 - Don't write to the dev database (registering users, creating debates) to verify behavior without asking first.
 
@@ -140,7 +147,6 @@ Drag-and-drop (argument reordering) uses `react-dnd`.
 
 ## Logging
 
-- Use the NestJS logger, not `console.log` / `console.error`.
 - Successful test runs should produce no routine log output.
 
 ## Docs
