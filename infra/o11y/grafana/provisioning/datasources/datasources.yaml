@@ -1,0 +1,50 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      derivedFields:
+        # `trace_id` is structured metadata, set by Loki's OTLP endpoint from
+        # the log record's trace context.
+        - name: trace_id
+          matcherType: label
+          matcherRegex: trace_id
+          datasourceUid: tempo
+          url: "$${__value.raw}"
+          urlDisplayLabel: View trace
+
+  - name: Tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    editable: false
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: "-5m"
+        spanEndTimeShift: "5m"
+        tags:
+          - key: service.name
+            value: service_name
+        # The trace ID is structured metadata, not part of the log line, so the
+        # default `|= "<trace id>"` line filter would match nothing.
+        customQuery: true
+        query: '{$${__tags}} | trace_id="$${__trace.traceId}"'
+      lokiSearch:
+        datasourceUid: loki

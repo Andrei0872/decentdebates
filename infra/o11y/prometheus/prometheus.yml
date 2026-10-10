@@ -1,0 +1,15 @@
+# No scrape_configs: app metrics are pushed over OTLP and the infrastructure
+# exporters are scraped by the collector, which forwards them the same way.
+
+storage:
+  tsdb:
+    # OTLP pushes from several sources (and collector retries) can arrive
+    # slightly out of order, which Prometheus rejects by default.
+    out_of_order_time_window: 30m
+
+otlp:
+  # `service.name` and `service.instance.id` already become `job` and
+  # `instance`. Everything else stays on `target_info` unless promoted here.
+  promote_resource_attributes:
+    - service.version
+    - deployment.environment

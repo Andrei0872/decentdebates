@@ -5,17 +5,36 @@ x-app: &app
     POSTGRES_PORT: "5432"
     REDIS_HOST: redis
     REDIS_PORT: "6379"
-    # Telemetry stays off until the collector (o11y profile) exists. Flip to
-    # "false" once it does; the endpoint already points at it.
-    OTEL_SDK_DISABLED: "true"
+    OTEL_SDK_DISABLED: "false"
     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=prod-local
+    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DEPLOYMENT_ENVIRONMENT:-prod-local}
+  # The collector's filelog receiver reads these labels from each log line's
+  # `attrs` to set the same resource attributes the OTel SDK puts on metrics
+  # and traces.
+  logging:
+    driver: json-file
+    options:
+      labels: service.name,service.version,deployment.environment
+      max-size: 10m
+      max-file: "3"
   depends_on:
     db:
       condition: service_healthy
     redis:
       condition: service_healthy
+    otel-collector:
+      condition: service_started
+      required: false
+  networks:
+    - decent_debates_dev
+
+x-app-labels: &app-labels
+  service.version: ${GIT_SHA:-unknown}
+  deployment.environment: ${DEPLOYMENT_ENVIRONMENT:-prod-local}
+
+x-o11y: &o11y
+  profiles: [o11y]
   networks:
     - decent_debates_dev
 
@@ -58,6 +77,9 @@ services:
       args:
         GIT_SHA: ${GIT_SHA:-unknown}
     image: decentdebates-api:local
+    labels:
+      <<: *app-labels
+      service.name: api
     env_file:
       - packages/db/.env
       - apps/api/.env
@@ -74,8 +96,119 @@ services:
       args:
         GIT_SHA: ${GIT_SHA:-unknown}
     image: decentdebates-notification-worker:local
+    labels:
+      <<: *app-labels
+      service.name: notification-worker
     env_file:
       - packages/db/.env
+
+  otel-collector:
+    <<: *o11y
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    user: "0"
+    environment:
+      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-prod-local}
+    volumes:
+      - ./infra/o11y/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      # On Docker Desktop this resolves inside its Linux VM, not on the macOS host.
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - otel_collector_storage:/var/lib/otelcol/file_storage
+    ports:
+      # For apps run on the host (`start:prod:local` with OTEL_SDK_DISABLED=false).
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
+  prometheus:
+    <<: *o11y
+    image: prom/prometheus:v3.15.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --storage.tsdb.retention.size=2GB
+      - --web.enable-otlp-receiver
+    volumes:
+      - ./infra/o11y/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    healthcheck:
+      test: "wget -q --spider http://localhost:9090/-/ready"
+      interval: 5s
+      retries: 20
+    ports:
+      - "9090:9090"
+
+  loki:
+    <<: *o11y
+    image: grafana/loki:3.7.8
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./infra/o11y/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  tempo:
+    <<: *o11y
+    image: grafana/tempo:2.10.8
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./infra/o11y/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
+  grafana:
+    <<: *o11y
+    image: grafana/grafana:13.2.3
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./infra/o11y/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/o11y/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    healthcheck:
+      test: "wget -q --spider http://localhost:3000/api/health"
+      interval: 5s
+      retries: 20
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    ports:
+      # 3000 is the Next.js client.
+      - "3030:3000"
+
+  postgres-exporter:
+    <<: *o11y
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+    env_file:
+      - packages/db/.env
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        DATA_SOURCE_URI="db:5432/$${POSTGRES_DB}?sslmode=disable"
+        DATA_SOURCE_USER="$${POSTGRES_USER}"
+        DATA_SOURCE_PASS="$${POSTGRES_PASSWORD}"
+        exec /bin/postgres_exporter
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis-exporter:
+    <<: *o11y
+    image: oliver006/redis_exporter:v1.93.0
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
 
   # Might need this to quickly generate a UML.
   # pgadmin:
@@ -92,6 +225,11 @@ services:
 
 volumes:
   database_decent_debates_dev:
+  otel_collector_storage:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:
   # database_decent_debates_pgadmin:
 
 networks:

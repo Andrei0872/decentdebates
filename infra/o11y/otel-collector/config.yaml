@@ -1,0 +1,175 @@
+extensions:
+  # Persists filelog read offsets so a collector restart neither re-ingests
+  # nor skips container logs.
+  file_storage:
+    directory: /var/lib/otelcol/file_storage
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Docker's json-file driver writes one JSON envelope per line:
+  # {"log": "<pino JSON line>\n", "stream": "stdout", "time": "...", "attrs": {...}}.
+  # `attrs` holds the container labels listed in the `logging.options.labels`
+  # of docker-compose.yml; only the app containers set it.
+  file_log:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: beginning
+    storage: file_storage
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout_type: gotime
+          layout: "2006-01-02T15:04:05.999999999Z07:00"
+      - type: filter
+        expr: 'attributes.attrs == nil or attributes.attrs["service.name"] == nil'
+      - type: move
+        from: attributes.attrs["service.name"]
+        to: resource["service.name"]
+      - type: move
+        from: attributes.attrs["service.version"]
+        to: resource["service.version"]
+      - type: move
+        from: attributes.attrs["deployment.environment"]
+        to: resource["deployment.environment"]
+      - type: move
+        from: attributes.stream
+        to: attributes["log.iostream"]
+      - type: remove
+        field: attributes.attrs
+      - type: remove
+        field: attributes.time
+      # Not every stdout/stderr line is pino JSON (e.g. a crash stack trace,
+      # OTel SDK diagnostics); those are kept as plain text bodies.
+      - type: json_parser
+        if: 'attributes.log matches "^\\s*\\{"'
+        parse_from: attributes.log
+        parse_to: attributes.pino
+        timestamp:
+          parse_from: attributes.pino.time
+          layout_type: gotime
+          layout: "2006-01-02T15:04:05.999Z07:00"
+        severity:
+          parse_from: attributes.pino.level
+        # Set by the OTel pino instrumentation for lines written inside a span.
+        trace:
+          trace_id:
+            parse_from: attributes.pino.trace_id
+          span_id:
+            parse_from: attributes.pino.span_id
+          trace_flags:
+            parse_from: attributes.pino.trace_flags
+      - type: router
+        default: plain
+        routes:
+          - expr: "attributes.pino != nil"
+            output: pino
+      - id: pino
+        type: move
+        from: attributes.pino.msg
+        to: body
+        on_error: send_quiet
+      - type: move
+        from: attributes.pino.hostname
+        to: resource["service.instance.id"]
+        on_error: send_quiet
+      # Already on the resource, or carried by the log record itself.
+      - type: remove
+        field: attributes.pino.service
+        on_error: send_quiet
+      - type: remove
+        field: attributes.pino.level
+        on_error: send_quiet
+      - type: remove
+        field: attributes.pino.time
+        on_error: send_quiet
+      - type: remove
+        field: attributes.pino.trace_id
+        on_error: send_quiet
+      - type: remove
+        field: attributes.pino.span_id
+        on_error: send_quiet
+      - type: remove
+        field: attributes.pino.trace_flags
+        on_error: send_quiet
+      - type: flatten
+        field: attributes.pino
+        on_error: send_quiet
+      - type: remove
+        field: attributes.log
+        output: done
+      - id: plain
+        type: move
+        from: attributes.log
+        to: body
+      - id: done
+        type: noop
+
+  # Infrastructure exporters are scraped (pull); the apps push their own
+  # metrics over OTLP.
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: postgres-exporter
+          scrape_interval: 15s
+          static_configs:
+            - targets: [postgres-exporter:9187]
+        - job_name: redis-exporter
+          scrape_interval: 15s
+          static_configs:
+            - targets: [redis-exporter:9121]
+        - job_name: otel-collector
+          scrape_interval: 15s
+          static_configs:
+            - targets: [localhost:8888]
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 400
+    spike_limit_mib: 100
+  batch: {}
+  # The scraped exporters don't know the deployment they run in.
+  resource/deployment:
+    attributes:
+      - key: deployment.environment
+        value: ${env:DEPLOYMENT_ENVIRONMENT}
+        action: insert
+
+exporters:
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+  otlp_http/prometheus:
+    endpoint: http://prometheus:9090/api/v1/otlp
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+service:
+  extensions: [file_storage]
+  telemetry:
+    logs:
+      level: warn
+  pipelines:
+    logs:
+      receivers: [file_log]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/loki]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/prometheus]
+    metrics/infra:
+      receivers: [prometheus]
+      processors: [memory_limiter, resource/deployment, batch]
+      exporters: [otlp_http/prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_grpc/tempo]
