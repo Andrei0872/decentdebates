@@ -1,8 +1,4 @@
 import type { Instrumentation } from "@opentelemetry/instrumentation";
-import {
-  ExpressInstrumentation,
-  ExpressLayerType,
-} from "@opentelemetry/instrumentation-express";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { IORedisInstrumentation } from "@opentelemetry/instrumentation-ioredis";
 import { NestInstrumentation } from "@opentelemetry/instrumentation-nestjs-core";
@@ -16,16 +12,6 @@ import { RuntimeNodeInstrumentation } from "@opentelemetry/instrumentation-runti
 export function createInstrumentations(): Instrumentation[] {
   return [
     new HttpInstrumentation(),
-    // Only used for the route template that names server spans
-    // (`GET /api/debates/:id`) and labels HTTP metrics. Its per-layer spans
-    // are off; the Nest instrumentation already traces controller handlers.
-    new ExpressInstrumentation({
-      ignoreLayersType: [
-        ExpressLayerType.MIDDLEWARE,
-        ExpressLayerType.ROUTER,
-        ExpressLayerType.REQUEST_HANDLER,
-      ],
-    }),
     new NestInstrumentation(),
     new PgInstrumentation({ requireParentSpan: true }),
     // ioredis: BullMQ (both apps) and the worker's publisher.

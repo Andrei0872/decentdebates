@@ -4,7 +4,7 @@ import { DbModule } from "@decentdebates/db";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./entities/user/user.module";
 import { SESSION_MIDDLEWARE_PROVIDER } from "./middlewares/session.middleware";
-import { APP_GUARD, ModuleRef } from "@nestjs/core";
+import { APP_GUARD, APP_INTERCEPTOR, ModuleRef } from "@nestjs/core";
 import { AuthenticateGuard } from "./guards/authenticate.guard";
 import { DebatesModule } from "./entities/debates/debates.module";
 import { ModeratorModule } from "./entities/moderator/moderator.module";
@@ -17,6 +17,7 @@ import { config } from "./config";
 import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
 import { createBullMqTelemetry } from "@decentdebates/telemetry";
 import { RequestContextMiddleware } from "./request-context";
+import { HttpRouteInterceptor } from "./interceptors/http-route.interceptor";
 
 @Module({
   imports: [
@@ -53,6 +54,10 @@ import { RequestContextMiddleware } from "./request-context";
     {
       provide: APP_GUARD,
       useClass: AuthenticateGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpRouteInterceptor,
     },
   ],
 })
