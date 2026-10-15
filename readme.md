@@ -106,7 +106,7 @@ All database access goes through raw `pg` queries. The reasons:
 - avoid subtle and unexpected bugs
 - better understanding of what the database is actually doing
 
-The schema lives in a single `schema.sql`. Knex is used only for its seed-script runner.
+The schema is managed with Knex migrations (`packages/db/migrations`), written as raw SQL via `knex.raw`. Knex is used only as a migration and seed runner, not as a query builder.
 
 ### CI: fail-fast strategy
 
@@ -145,7 +145,7 @@ The key properties this buys:
 | Integration | Jest + real Postgres + Redis | Service layer, DB queries, auth flows end-to-end |
 | E2E | Playwright | Full user journeys (auth, debate submission, review flow) |
 
-On the backend, integration tests are the primary focus: they bootstrap the full NestJS app, apply `schema.sql` from scratch, and test actual isolated flows without stubbing — catching schema/query issues that unit tests can't surface.
+On the backend, integration tests are the primary focus: they bootstrap the full NestJS app, run the migrations against a fresh database, and test actual isolated flows without stubbing — catching schema/query issues that unit tests can't surface.
 
 ---
 

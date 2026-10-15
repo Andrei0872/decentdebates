@@ -26,6 +26,8 @@ x-app: &app
     otel-collector:
       condition: service_started
       required: false
+    migrate:
+      condition: service_completed_successfully
   networks:
     - decent_debates_dev
 
@@ -51,7 +53,6 @@ services:
       retries: 20
     volumes:
       - database_decent_debates_dev:/var/lib/postgresql/data
-      - ./packages/db:/docker-entrypoint-initdb.d/
     networks:
       - decent_debates_dev
     ports:
@@ -67,6 +68,26 @@ services:
       retries: 20
     ports:
       - "6379:6379"
+
+  # Runs pending migrations once per `up`, then exits; the app services wait
+  # for it to succeed.
+  migrate:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: packages/db/Dockerfile
+    image: decentdebates-migrate:local
+    env_file:
+      - packages/db/.env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - decent_debates_dev
 
   api:
     <<: *app

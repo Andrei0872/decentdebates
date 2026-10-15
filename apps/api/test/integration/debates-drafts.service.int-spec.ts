@@ -3,7 +3,7 @@ import type { Pool } from "pg";
 import { DebatesService } from "../../src/entities/debates/debates.service";
 import { ArgumentType } from "../../src/entities/debates/debates.model";
 import {
-  applySchema,
+  runMigrations,
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
@@ -23,7 +23,7 @@ describe("DebatesService draft flow integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
     service = new DebatesService(pool as never, {} as never);

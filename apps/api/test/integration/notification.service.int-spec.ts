@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
 import { NotificationService } from "../../src/entities/notification/notification.service";
 import {
-  applySchema,
+  runMigrations,
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
@@ -16,7 +16,7 @@ describe("NotificationService integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
     service = new NotificationService(pool as never, {} as never);

@@ -5,7 +5,7 @@ import {
   TagsMatchingStrategy,
 } from "../../src/entities/debates/debates.service";
 import {
-  applySchema,
+  runMigrations,
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
@@ -17,7 +17,7 @@ describe("DebatesService integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
     service = new DebatesService(pool as any, {} as never);

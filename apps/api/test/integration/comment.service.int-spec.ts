@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
 import { CommentService } from "../../src/entities/comment/comment.service";
 import {
-  applySchema,
+  runMigrations,
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
@@ -29,7 +29,7 @@ describe("CommentService integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
     service = new CommentService(pool as never);

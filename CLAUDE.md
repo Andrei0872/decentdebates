@@ -44,8 +44,12 @@ pnpm format:fix
 pnpm run seed
 pnpm run seed:file -- 03_debates.js   # run a single seed file
 
-# Reset the DB (wipes volumes and restarts Postgres)
+# Reset the DB (wipes volumes, restarts Postgres, runs migrations)
 pnpm run db:reset
+
+# Migrations (packages/db/migrations; `dev`/`start:prod:local*` run db:migrate first)
+pnpm run db:migrate                 # apply pending migrations
+pnpm run db:migrate:make -- <name>  # new migration file
 
 # Production builds on the host (Docker for Postgres/Redis, then built apps)
 pnpm run start:prod:local       # api, notification-worker and client

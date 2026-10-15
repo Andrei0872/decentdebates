@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
 import { ModeratorService } from "../../src/entities/moderator/moderator.service";
 import {
-  applySchema,
+  runMigrations,
   createTestPool,
   recreateTestDatabase,
 } from "../helpers/db";
@@ -26,7 +26,7 @@ describe("ModeratorService integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
     service = new ModeratorService(pool as never);

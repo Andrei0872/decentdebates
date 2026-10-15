@@ -8,7 +8,6 @@ const REPO_ROOT = path.resolve(__dirname, "../../../..");
 const DB_ENV_FILE = path.resolve(REPO_ROOT, "packages/db/.env");
 const API_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env");
 const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
-const SCHEMA_FILE = path.resolve(REPO_ROOT, "packages/db/schema.sql");
 const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, "packages/db/package.json");
 const requireFromDbPackage = createRequire(DB_PACKAGE_JSON);
 
@@ -18,12 +17,18 @@ function createKnexClient(config: PoolConfig) {
   const knexFactory = requireFromDbPackage("knex") as (
     options: Record<string, unknown>,
   ) => {
+    migrate: { latest: () => Promise<unknown> };
     destroy: () => Promise<void>;
+  };
+  // The built knexfile, so tests run the same migration files as deploys.
+  const { default: knexConfig } = requireFromDbPackage("./dist/knexfile") as {
+    default: { migrations: Record<string, unknown> };
   };
 
   return knexFactory({
     client: "pg",
     connection: config,
+    migrations: knexConfig.migrations,
   });
 }
 
@@ -126,14 +131,13 @@ export async function recreateTestDatabase() {
   }
 }
 
-export async function applySchema() {
-  const pool = createTestPool();
-  const schemaSql = fs.readFileSync(SCHEMA_FILE, "utf8");
+export async function runMigrations() {
+  const db = createKnexClient(getConnectionConfig(getTestDatabaseName()));
 
   try {
-    await pool.query(schemaSql);
+    await db.migrate.latest();
   } finally {
-    await pool.end();
+    await db.destroy();
   }
 }
 
@@ -150,7 +154,7 @@ export async function runSeeds() {
 export async function resetTestDatabase() {
   loadTestEnv();
   await recreateTestDatabase();
-  await applySchema();
+  await runMigrations();
   await runSeeds();
 }
 

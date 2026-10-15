@@ -1,4 +1,5 @@
-# Build context for apps/api/Dockerfile and apps/notification-worker/Dockerfile
+# Build context for apps/api/Dockerfile, apps/notification-worker/Dockerfile
+# and packages/db/Dockerfile
 # (context: repo root). Dependencies and build output are produced inside the
 # image, so local copies are excluded.
 

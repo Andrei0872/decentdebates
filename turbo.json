@@ -47,11 +47,6 @@
         "^build"
       ]
     },
-    "schema:apply": {
-      "dependsOn": [
-        "build"
-      ]
-    },
     "start:prod": {
       "dependsOn": ["build"],
       "persistent": true,

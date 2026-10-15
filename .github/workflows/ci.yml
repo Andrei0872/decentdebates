@@ -90,8 +90,6 @@ jobs:
           POSTGRES_PORT=$POSTGRES_PORT
           COOKIE_SECRET=$COOKIE_SECRET
           EOF
-      - name: Apply database schema
-        run: pnpm turbo run schema:apply
       - name: Integration tests
         run: pnpm turbo run test:integration:only
 
