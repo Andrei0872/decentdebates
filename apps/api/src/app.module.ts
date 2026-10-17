@@ -19,6 +19,10 @@ import { createBullMqTelemetry } from "@decentdebates/telemetry";
 import { RequestContextMiddleware } from "./request-context";
 import { HttpRouteInterceptor } from "./interceptors/http-route.interceptor";
 import { validateEnv } from "./env";
+import {
+  THROTTLER_GUARD_PROVIDER,
+  THROTTLER_IMPORT,
+} from "./guards/throttler.guard";
 
 @Module({
   imports: [
@@ -30,6 +34,7 @@ import { validateEnv } from "./env";
       envFilePath: ".env",
       validate: validateEnv,
     }),
+    THROTTLER_IMPORT,
     DebatesModule,
     ModeratorModule,
     ReviewModule,
@@ -57,6 +62,7 @@ import { validateEnv } from "./env";
       provide: APP_GUARD,
       useClass: AuthenticateGuard,
     },
+    THROTTLER_GUARD_PROVIDER,
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpRouteInterceptor,

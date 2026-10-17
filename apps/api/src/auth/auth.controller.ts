@@ -9,14 +9,18 @@ import {
   Res,
   SetMetadata,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { Response, Request } from "express";
 import { AuthService } from "./auth.service";
 import { RegisterUserDTO } from "../entities/user/dtos/register-user.dto";
 import { LoginUserDTO } from "src/entities/user/dtos/login-user.dto";
 import { getPublicUser } from "src/entities/user/user.model";
 
+export const AUTH_THROTTLE = { ttl: 60_000, limit: 10 };
+
 @ApiTags("auth")
 @SetMetadata("skipAuth", true)
+@Throttle({ default: AUTH_THROTTLE })
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
