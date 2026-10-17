@@ -18,6 +18,7 @@ import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
 import { createBullMqTelemetry } from "@decentdebates/telemetry";
 import { RequestContextMiddleware } from "./request-context";
 import { HttpRouteInterceptor } from "./interceptors/http-route.interceptor";
+import { validateEnv } from "./env";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HttpRouteInterceptor } from "./interceptors/http-route.interceptor";
     UserModule,
     ConfigModule.forRoot({
       envFilePath: ".env",
+      validate: validateEnv,
     }),
     DebatesModule,
     ModeratorModule,
