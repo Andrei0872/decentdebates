@@ -22,6 +22,7 @@ let started = false;
 
 export interface InitTelemetryOptions {
   serviceName: string;
+  ignoreIncomingPaths?: string[];
 }
 
 /**
@@ -29,7 +30,10 @@ export interface InitTelemetryOptions {
  * own modules are loaded, so it is called from each app's `instrumentation.ts`
  * (`node --require`).
  */
-export function initTelemetry({ serviceName }: InitTelemetryOptions) {
+export function initTelemetry({
+  serviceName,
+  ignoreIncomingPaths = [],
+}: InitTelemetryOptions) {
   if (started) {
     return;
   }
@@ -48,7 +52,7 @@ export function initTelemetry({ serviceName }: InitTelemetryOptions) {
       [ATTR_SERVICE_VERSION]: process.env.SERVICE_VERSION || "unknown",
       [ATTR_DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || "development",
     }),
-    instrumentations: createInstrumentations(),
+    instrumentations: createInstrumentations({ ignoreIncomingPaths }),
     sampler: new DropIdleWorkerSpansSampler(),
     views: METRIC_VIEWS,
     // Logs go to stdout (pino) and are collected from there.

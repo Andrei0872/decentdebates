@@ -13,6 +13,8 @@ import { CommentModule } from "./entities/comment/comment.module";
 import { NotificationModule } from "./entities/notification/notification.module";
 import { BullModule } from "@nestjs/bullmq";
 import { RedisModule } from "./redis/redis.module";
+import { HealthModule } from "./health/health.module";
+import { PROBE_PATHS } from "./health/health.paths";
 import { config } from "./config";
 import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
 import { createBullMqTelemetry } from "@decentdebates/telemetry";
@@ -26,7 +28,12 @@ import {
 
 @Module({
   imports: [
-    LoggerModule.forRoot(createLoggerModuleParams({ serviceName: "api" })),
+    LoggerModule.forRoot(
+      createLoggerModuleParams({
+        serviceName: "api",
+        ignorePaths: PROBE_PATHS,
+      }),
+    ),
     DbModule,
     AuthModule,
     UserModule,
@@ -41,6 +48,7 @@ import {
     CommentModule,
     NotificationModule,
     RedisModule,
+    HealthModule,
     BullModule.forRoot({
       connection: {
         host: config.REDIS_HOST,

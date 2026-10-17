@@ -9,9 +9,18 @@ import { RuntimeNodeInstrumentation } from "@opentelemetry/instrumentation-runti
 
 // Listed explicitly instead of `auto-instrumentations-node`, which also
 // enables fs, dns, net and others that only add noise here.
-export function createInstrumentations(): Instrumentation[] {
+export function createInstrumentations({
+  ignoreIncomingPaths,
+}: {
+  ignoreIncomingPaths: string[];
+}): Instrumentation[] {
+  const ignored = new Set(ignoreIncomingPaths);
+
   return [
-    new HttpInstrumentation(),
+    new HttpInstrumentation({
+      ignoreIncomingRequestHook: (req) =>
+        ignored.has((req.url ?? "").split("?")[0]),
+    }),
     new NestInstrumentation(),
     new PgInstrumentation({ requireParentSpan: true }),
     // ioredis: BullMQ (both apps) and the worker's publisher.

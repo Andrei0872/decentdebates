@@ -81,10 +81,13 @@ export function createBaseLoggerOptions({
 
 export function createLoggerModuleParams({
   serviceName,
+  ignorePaths = [],
 }: {
   serviceName: string;
+  ignorePaths?: string[];
 }): Params {
   const level = resolveLevel();
+  const ignored = new Set(ignorePaths);
   const pretty = process.env.NODE_ENV !== "production" && level !== "silent";
 
   return {
@@ -100,6 +103,9 @@ export function createLoggerModuleParams({
           }
         : undefined,
       genReqId,
+      autoLogging: {
+        ignore: (req) => ignored.has((req.url ?? "").split("?")[0]),
+      },
       // Logs emitted during a request carry only `reqId`, not the full
       // request object. The completion line still has `req` and `res`.
       quietReqLogger: true,

@@ -82,4 +82,18 @@ describe("createLoggerModuleParams", () => {
 
     expect(pinoHttp).toMatchObject({ level: "silent", transport: undefined });
   });
+
+  it("skips the completion log line only for ignored paths", () => {
+    const { pinoHttp } = createLoggerModuleParams({
+      serviceName: "api",
+      ignorePaths: ["/api/health"],
+    });
+    const { ignore } = (
+      pinoHttp as { autoLogging: { ignore: (req: { url: string }) => boolean } }
+    ).autoLogging;
+
+    expect(ignore({ url: "/api/health" })).toBe(true);
+    expect(ignore({ url: "/api/health?probe=1" })).toBe(true);
+    expect(ignore({ url: "/api/healthz" })).toBe(false);
+  });
 });
