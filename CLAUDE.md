@@ -135,7 +135,9 @@ Besides shipping the product, this project is a vehicle for learning product and
 
 - Implement according to standard practice for the tool or domain. When in doubt, or when there are several reasonable options, pick one and state that an alternative exists, with a one-line description of it and why it wasn't chosen.
 - In explanations, use common software engineering terminology where it fits (e.g. stopgap, module preloading, red herring, decorator, backpressure) and briefly gloss terms on first use.
-- No redundant comments: don't restate what a name or signature already says (e.g. `/** Whether X is enabled. */` above `isXEnabled()`). Comment only the non-obvious why: constraints, ordering requirements, trade-offs.
+- No redundant comments. Default to none; add one only when the why isn't evident from the code: a constraint, an ordering requirement, a trade-off, a workaround.
+  - Don't restate what a name or signature already says (e.g. `/** Whether X is enabled. */` above `isXEnabled()`).
+  - Don't describe what the code does, narrate framework behavior, or list downstream effects; state only the non-obvious reason, as briefly as possible.
 - Run and verify through the scripts in `package.json` / `turbo.json`; don't invoke `node dist/...` or tool binaries directly. If a workflow has no script, say so and propose one.
 - Don't write to the dev database (registering users, creating debates) to verify behavior without asking first.
 
