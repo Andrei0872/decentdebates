@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createRequire } from "module";
 import { Pool, type PoolConfig } from "pg";
+import { migrateLatest } from "@decentdebates/db";
 import { seed as seedDebates } from "../../../../packages/db/data/seeds/03_debates";
 
 const REPO_ROOT = path.resolve(__dirname, "../../../..");
@@ -17,19 +18,10 @@ function createKnexClient(config: PoolConfig) {
   const knexFactory = requireFromDbPackage("knex") as (
     options: Record<string, unknown>,
   ) => {
-    migrate: { latest: () => Promise<unknown> };
     destroy: () => Promise<void>;
   };
-  // The built knexfile, so tests run the same migration files as deploys.
-  const { default: knexConfig } = requireFromDbPackage("./dist/knexfile") as {
-    default: { migrations: Record<string, unknown> };
-  };
 
-  return knexFactory({
-    client: "pg",
-    connection: config,
-    migrations: knexConfig.migrations,
-  });
+  return knexFactory({ client: "pg", connection: config });
 }
 
 function maybeLoadEnv(pathname: string, override = false) {
@@ -132,13 +124,7 @@ export async function recreateTestDatabase() {
 }
 
 export async function runMigrations() {
-  const db = createKnexClient(getConnectionConfig(getTestDatabaseName()));
-
-  try {
-    await db.migrate.latest();
-  } finally {
-    await db.destroy();
-  }
+  await migrateLatest(getConnectionConfig(getTestDatabaseName()));
 }
 
 export async function runSeeds() {

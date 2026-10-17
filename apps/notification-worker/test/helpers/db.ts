@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Pool, type PoolConfig } from "pg";
+import { migrateLatest } from "@decentdebates/db";
 
 const REPO_ROOT = path.resolve(__dirname, "../../../..");
 const DB_ENV_FILE = path.resolve(REPO_ROOT, "packages/db/.env");
 const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
-const SCHEMA_FILE = path.resolve(REPO_ROOT, "packages/db/schema.sql");
 
 let envLoaded = false;
 
@@ -93,12 +93,6 @@ export async function recreateTestDatabase() {
   }
 }
 
-export async function applySchema() {
-  const pool = createTestPool();
-  const schemaSql = fs.readFileSync(SCHEMA_FILE, "utf8");
-  try {
-    await pool.query(schemaSql);
-  } finally {
-    await pool.end();
-  }
+export async function runMigrations() {
+  await migrateLatest(getConnectionConfig(getTestDatabaseName()));
 }

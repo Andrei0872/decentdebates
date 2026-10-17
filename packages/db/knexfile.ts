@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
+import { MIGRATIONS_CONFIG } from "./src/migrate";
 
 const SOURCE_ENV_FILE = path.resolve(__dirname, ".env");
 const DIST_ENV_FILE = path.resolve(__dirname, "../.env");
@@ -14,10 +15,7 @@ dotenv.config({
 
 export default {
   client: "pg",
-  migrations: {
-    directory: path.resolve(__dirname, "migrations"),
-    loadExtensions: [".js"],
-  },
+  migrations: MIGRATIONS_CONFIG,
   seeds: {
     directory: path.resolve(__dirname, "data/seeds"),
     loadExtensions: [".js"],

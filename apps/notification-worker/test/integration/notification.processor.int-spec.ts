@@ -8,7 +8,7 @@ import {
 } from "@decentdebates/shared-types";
 import { createLoggerModuleParams, PinoLogger } from "@decentdebates/logging";
 import { NotificationProcessor } from "../../src/notification/notification.processor";
-import { applySchema, createTestPool, recreateTestDatabase } from "../helpers/db";
+import { createTestPool, recreateTestDatabase, runMigrations } from "../helpers/db";
 
 const NOTIFICATIONS_CHANNEL = "notifications";
 
@@ -42,7 +42,7 @@ describe("NotificationProcessor integration", () => {
 
   beforeAll(async () => {
     await recreateTestDatabase();
-    await applySchema();
+    await runMigrations();
 
     pool = createTestPool();
 
