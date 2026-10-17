@@ -9,6 +9,8 @@ x-app: &app
     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
     OTEL_RESOURCE_ATTRIBUTES: deployment.environment=${DEPLOYMENT_ENVIRONMENT:-prod-local}
+  # Above the apps' shutdown budget (15s close + 5s telemetry flush).
+  stop_grace_period: 25s
   # The collector's filelog receiver reads these labels from each log line's
   # `attrs` to set the same resource attributes the OTel SDK puts on metrics
   # and traces.

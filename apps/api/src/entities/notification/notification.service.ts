@@ -42,10 +42,11 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  // Ends open SSE responses; otherwise the HTTP server's close waits on them.
   async onModuleDestroy() {
-    await this.subscriber.unsubscribe(NOTIFICATIONS_CHANNEL);
-    await this.subscriber.disconnect();
     this._notifications$.complete();
+    await this.subscriber.unsubscribe(NOTIFICATIONS_CHANNEL);
+    await this.subscriber.close();
   }
 
   private logError(err: unknown) {

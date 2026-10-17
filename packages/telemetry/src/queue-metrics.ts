@@ -1,4 +1,4 @@
-import { metrics } from "@opentelemetry/api";
+import { metrics, type ObservableCallback } from "@opentelemetry/api";
 
 // Structural type so this package does not need a runtime dependency on bullmq.
 export interface QueueLike {
@@ -12,15 +12,17 @@ const DEPTH_STATES = ["waiting", "prioritized", "delayed", "active", "failed"];
  * Reports the number of jobs per queue and state (`bullmq.queue.jobs`), read
  * from Redis each time metrics are collected. Register it in one service per
  * queue (the consumer) to avoid duplicate series.
+ *
+ * Unregister before the queues close: the shutdown flush collects once more.
  */
-export function registerQueueDepthMetrics(queues: QueueLike[]) {
+export function registerQueueDepthMetrics(queues: QueueLike[]): () => void {
   const meter = metrics.getMeter("@decentdebates/telemetry");
   const gauge = meter.createObservableGauge("bullmq.queue.jobs", {
     description: "Number of jobs in the queue by state",
     unit: "{job}",
   });
 
-  gauge.addCallback(async (result) => {
+  const callback: ObservableCallback = async (result) => {
     await Promise.all(
       queues.map(async (queue) => {
         const counts = await queue.getJobCounts(...DEPTH_STATES);
@@ -32,5 +34,8 @@ export function registerQueueDepthMetrics(queues: QueueLike[]) {
         }
       }),
     );
-  });
+  };
+
+  gauge.addCallback(callback);
+  return () => gauge.removeCallback(callback);
 }

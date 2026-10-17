@@ -9,6 +9,8 @@ import { getSessionCookieName } from "./middlewares/session.middleware";
 import { config } from "./config";
 import { setupApp } from "./app.setup";
 import { shouldEmitRoutineLogs } from "./logging";
+import { handleShutdownSignals } from "@decentdebates/telemetry";
+import { closeApp } from "./shutdown";
 
 const PORT = 3001;
 const logger = new Logger("Bootstrap");
@@ -20,6 +22,7 @@ async function bootstrap() {
   app.useLogger(app.get(PinoNestLogger));
 
   setupApp(app);
+  handleShutdownSignals({ close: () => closeApp(app), logger });
 
   if (config.SWAGGER_ENABLED) {
     const swaggerConfig = new DocumentBuilder()
