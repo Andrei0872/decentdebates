@@ -45,7 +45,7 @@ export class ReviewService {
 
     return new Promise((res, rej) => {
       this.sessionStore.get(sessionId, (err, sess) => {
-        if (err || !sess.user) {
+        if (err || !sess?.user) {
           rej(UNAUTHENTICATED_ERR);
           return;
         }
