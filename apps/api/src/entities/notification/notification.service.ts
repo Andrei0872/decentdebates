@@ -10,7 +10,8 @@ import { type RedisClientType } from "redis";
 import { Subject } from "rxjs";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
 import { NotificationMessage } from "@decentdebates/shared-types";
-import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { config } from "src/config";
+import { connectRedis } from "src/redis/redis.module";
 import { UserCookieData } from "../user/user.model";
 import { Notification } from "./notificatin.model";
 
@@ -24,14 +25,13 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
 
   readonly notifications$ = this._notifications$.asObservable();
 
-  constructor(
-    @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
-    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
-  ) {}
+  constructor(@Inject(PG_PROVIDER_TOKEN) private pool: Pool) {}
 
   async onModuleInit() {
-    this.subscriber = this.redis.duplicate() as RedisClientType;
-    await this.subscriber.connect();
+    // The worker publishes on the queue instance.
+    this.subscriber = await connectRedis("pubsub", {
+      url: config.REDIS_QUEUE_URL,
+    });
     await this.subscriber.subscribe(NOTIFICATIONS_CHANNEL, (raw) => {
       try {
         const msg: NotificationMessage = JSON.parse(raw);

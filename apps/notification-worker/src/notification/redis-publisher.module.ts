@@ -11,9 +11,7 @@ export const REDIS_PUBLISHER_TOKEN = "REDIS_PUBLISHER_TOKEN";
       provide: REDIS_PUBLISHER_TOKEN,
       useFactory: () => {
         const logger = new Logger("RedisPublisher");
-        const client = new IORedis({
-          host: config.REDIS_HOST,
-          port: config.REDIS_PORT,
+        const client = new IORedis(config.REDIS_QUEUE_URL, {
           maxRetriesPerRequest: null,
         });
         client.on("error", (err) => {

@@ -50,10 +50,7 @@ import {
     RedisModule,
     HealthModule,
     BullModule.forRoot({
-      connection: {
-        host: config.REDIS_HOST,
-        port: config.REDIS_PORT,
-      },
+      connection: { url: config.REDIS_QUEUE_URL },
       telemetry: createBullMqTelemetry(),
       defaultJobOptions: {
         attempts: 3,

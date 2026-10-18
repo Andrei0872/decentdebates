@@ -25,7 +25,7 @@ export function createInstrumentations({
     new PgInstrumentation({ requireParentSpan: true }),
     // ioredis: BullMQ (both apps) and the worker's publisher.
     new IORedisInstrumentation({ requireParentSpan: true }),
-    // node-redis: the API's session store and pub/sub subscriber.
+    // node-redis: the API's session store, cache and pub/sub subscriber.
     new RedisInstrumentation({ requireParentSpan: true }),
     // Adds `trace_id`/`span_id`/`trace_flags` to every log line written inside
     // a span. Logs leave the process via stdout, not via the OTel logs SDK.

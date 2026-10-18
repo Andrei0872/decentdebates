@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SERVICES=(db redis)
+SERVICES=(db redis-sessions redis-queue redis-cache)
 
 wait_for_service() {
   local service="$1"

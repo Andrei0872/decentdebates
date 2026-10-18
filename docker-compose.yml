@@ -3,8 +3,9 @@ x-app: &app
   environment:
     POSTGRES_HOST: db
     POSTGRES_PORT: "5432"
-    REDIS_HOST: redis
-    REDIS_PORT: "6379"
+    REDIS_SESSIONS_URL: redis://redis-sessions:6379
+    REDIS_QUEUE_URL: redis://redis-queue:6379
+    REDIS_CACHE_URL: redis://redis-cache:6379
     OTEL_SDK_DISABLED: "false"
     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -23,7 +24,11 @@ x-app: &app
   depends_on:
     db:
       condition: service_healthy
-    redis:
+    redis-sessions:
+      condition: service_healthy
+    redis-queue:
+      condition: service_healthy
+    redis-cache:
       condition: service_healthy
     otel-collector:
       condition: service_started
@@ -36,6 +41,15 @@ x-app: &app
 x-app-labels: &app-labels
   service.version: ${GIT_SHA:-unknown}
   deployment.environment: ${DEPLOYMENT_ENVIRONMENT:-prod-local}
+
+x-redis: &redis
+  image: redis:7.0.5
+  networks:
+    - decent_debates_dev
+  healthcheck:
+    test: "redis-cli ping"
+    interval: 1s
+    retries: 20
 
 x-o11y: &o11y
   profiles: [o11y]
@@ -60,16 +74,46 @@ services:
     ports:
       - "5432:5432"
 
-  redis:
-    image: redis:7.0.5
-    networks:
-      - decent_debates_dev
-    healthcheck:
-      test: "redis-cli ping"
-      interval: 1s
-      retries: 20
+  # Sessions all carry a TTL, so when full, `volatile-lru` logs out the
+  # longest-idle users instead of rejecting new logins.
+  redis-sessions:
+    <<: *redis
+    command: >-
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy volatile-lru
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_sessions_decent_debates_dev:/data
     ports:
       - "6379:6379"
+
+  # BullMQ requires `noeviction`: evicting any of a queue's keys corrupts it.
+  redis-queue:
+    <<: *redis
+    command: >-
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_queue_decent_debates_dev:/data
+    ports:
+      - "6380:6379"
+
+  # Every key can be rebuilt from Postgres, so no persistence.
+  redis-cache:
+    <<: *redis
+    command: >-
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    ports:
+      - "6381:6379"
 
   # Runs pending migrations once per `up`, then exits; the app services wait
   # for it to succeed.
@@ -227,10 +271,13 @@ services:
   redis-exporter:
     <<: *o11y
     image: oliver006/redis_exporter:v1.93.0
-    environment:
-      REDIS_ADDR: redis://redis:6379
+    # Targets come from the collector's scrape config (`/scrape?target=`).
     depends_on:
-      redis:
+      redis-sessions:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+      redis-cache:
         condition: service_healthy
 
   # Might need this to quickly generate a UML.
@@ -248,6 +295,8 @@ services:
 
 volumes:
   database_decent_debates_dev:
+  redis_sessions_decent_debates_dev:
+  redis_queue_decent_debates_dev:
   otel_collector_storage:
   prometheus_data:
   loki_data:

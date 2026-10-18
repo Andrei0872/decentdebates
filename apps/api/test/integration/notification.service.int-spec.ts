@@ -19,7 +19,7 @@ describe("NotificationService integration", () => {
     await runMigrations();
 
     pool = createTestPool();
-    service = new NotificationService(pool as never, {} as never);
+    service = new NotificationService(pool as never);
 
     userId = await createUser(pool, {
       username: "notif-user",

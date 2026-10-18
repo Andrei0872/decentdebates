@@ -121,8 +121,19 @@ receivers:
             - targets: [postgres-exporter:9187]
         - job_name: redis-exporter
           scrape_interval: 15s
+          metrics_path: /scrape
           static_configs:
-            - targets: [redis-exporter:9121]
+            - targets:
+                - redis://redis-sessions:6379
+                - redis://redis-queue:6379
+                - redis://redis-cache:6379
+          relabel_configs:
+            - source_labels: [__address__]
+              target_label: __param_target
+            - source_labels: [__param_target]
+              target_label: instance
+            - target_label: __address__
+              replacement: redis-exporter:9121
         - job_name: otel-collector
           scrape_interval: 15s
           static_configs:

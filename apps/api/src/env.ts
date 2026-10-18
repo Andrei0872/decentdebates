@@ -12,8 +12,9 @@ const envSchema = z
     SESSION_COOKIE_SECURE: z.stringbool().optional(),
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
     CLIENT_URL: z.url().optional(),
-    REDIS_HOST: z.string().min(1).optional(),
-    REDIS_PORT: z.coerce.number().int().positive().optional(),
+    REDIS_SESSIONS_URL: z.url().optional(),
+    REDIS_QUEUE_URL: z.url().optional(),
+    REDIS_CACHE_URL: z.url().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") {

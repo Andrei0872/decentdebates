@@ -26,7 +26,7 @@ import {
   forkJoin,
   tap,
 } from "rxjs";
-import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { REDIS_CACHE_CLIENT_TOKEN } from "src/redis/redis.module";
 import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { type RedisClientType } from "redis";
 import { DebateDraftPipe } from "src/pipes/debate-draft.pipe";
@@ -50,7 +50,7 @@ import { UpdateDraftDTO } from "./dtos/update-draft.dto";
 export class DebatesController {
   constructor(
     private debatesService: DebatesService,
-    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
+    @Inject(REDIS_CACHE_CLIENT_TOKEN) private cache: RedisClientType,
   ) {}
 
   private getHttpErrorStatus(err: unknown) {
@@ -125,7 +125,7 @@ export class DebatesController {
     const cacheKey = `cache:debates:${debateId}`;
 
     try {
-      const cached = await this.redis.get(cacheKey);
+      const cached = await this.cache.get(cacheKey);
       if (typeof cached === "string") {
         (req as any).cacheHit = true;
         return of(res.status(HttpStatus.OK).json(JSON.parse(cached)));
@@ -137,7 +137,7 @@ export class DebatesController {
     (req as any).cacheHit = false;
     return getDebates(this.debatesService.getDebateArguments(debateId)).pipe(
       tap((data) => {
-        this.redis
+        this.cache
           .set(cacheKey, JSON.stringify({ data }), { EX: 60 })
           .catch(() => {});
       }),

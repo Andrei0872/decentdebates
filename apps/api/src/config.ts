@@ -8,8 +8,10 @@
 
 export const config = {
   CLIENT_URL: process.env.CLIENT_URL ?? "http://localhost:3000",
-  REDIS_HOST: process.env.REDIS_HOST ?? "localhost",
-  REDIS_PORT: Number(process.env.REDIS_PORT ?? 6379),
+  REDIS_SESSIONS_URL:
+    process.env.REDIS_SESSIONS_URL ?? "redis://localhost:6379",
+  REDIS_QUEUE_URL: process.env.REDIS_QUEUE_URL ?? "redis://localhost:6380",
+  REDIS_CACHE_URL: process.env.REDIS_CACHE_URL ?? "redis://localhost:6381",
   SWAGGER_ENABLED:
     Boolean(process.env.NODE_ENV) === false ||
     process.env.NODE_ENV.toLowerCase() === "development",

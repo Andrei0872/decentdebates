@@ -2,7 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import * as request from "supertest";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
-import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { REDIS_SESSIONS_CLIENT_TOKEN } from "src/redis/redis.module";
 import { HealthController } from "./health.controller";
 
 describe("HealthController", () => {
@@ -16,7 +16,7 @@ describe("HealthController", () => {
       controllers: [HealthController],
       providers: [
         { provide: PG_PROVIDER_TOKEN, useValue: { query: deps.query } },
-        { provide: REDIS_CLIENT_TOKEN, useValue: { ping: deps.ping } },
+        { provide: REDIS_SESSIONS_CLIENT_TOKEN, useValue: { ping: deps.ping } },
       ],
     }).compile();
 
@@ -38,7 +38,7 @@ describe("HealthController", () => {
 
     expect(res.body).toEqual({
       status: "unavailable",
-      checks: { postgres: "down", redis: "up" },
+      checks: { postgres: "down", redisSessions: "up" },
     });
   });
 
@@ -50,6 +50,6 @@ describe("HealthController", () => {
 
     const res = await request(app.getHttpServer()).get("/ready").expect(503);
 
-    expect(res.body.checks).toEqual({ postgres: "up", redis: "down" });
+    expect(res.body.checks).toEqual({ postgres: "up", redisSessions: "down" });
   });
 });

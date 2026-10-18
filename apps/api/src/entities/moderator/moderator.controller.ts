@@ -41,7 +41,7 @@ import { ApproveDebateDTO } from "./dtos/approve-debate.dto";
 import { UpdateTicketDTO } from "./dtos/update-ticket.dto";
 import { UpdateTicketData } from "./moderator.model";
 import { ModeratorService } from "./moderator.service";
-import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { REDIS_CACHE_CLIENT_TOKEN } from "src/redis/redis.module";
 import { type RedisClientType } from "redis";
 import {
   NOTIFICATION_QUEUE,
@@ -57,7 +57,7 @@ export class ModeratorController {
     private moderatorService: ModeratorService,
     private debatesService: DebatesService,
     @InjectQueue(NOTIFICATION_QUEUE) private notificationsQueue: Queue,
-    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
+    @Inject(REDIS_CACHE_CLIENT_TOKEN) private cache: RedisClientType,
   ) {}
 
   @Get("/activity")
@@ -250,7 +250,7 @@ export class ModeratorController {
             rows: [{ created_by: recipientId }],
           } = res;
 
-          this.redis.del(`cache:debates:${body.debateId}`).catch(() => {});
+          this.cache.del(`cache:debates:${body.debateId}`).catch(() => {});
 
           const argApprovedEv = new ArgumentTicketApproved(
             +ticketId,

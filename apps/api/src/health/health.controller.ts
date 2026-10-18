@@ -9,7 +9,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { Pool } from "pg";
 import { type RedisClientType } from "redis";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
-import { REDIS_CLIENT_TOKEN } from "src/redis/redis.module";
+import { REDIS_SESSIONS_CLIENT_TOKEN } from "src/redis/redis.module";
 
 // Below probe timeouts, so a hung dependency yields 503, not a probe timeout.
 const CHECK_TIMEOUT_MS = 1_000;
@@ -22,7 +22,7 @@ type CheckStatus = "up" | "down";
 export class HealthController {
   constructor(
     @Inject(PG_PROVIDER_TOKEN) private pool: Pool,
-    @Inject(REDIS_CLIENT_TOKEN) private redis: RedisClientType,
+    @Inject(REDIS_SESSIONS_CLIENT_TOKEN) private sessions: RedisClientType,
   ) {}
 
   @Get("health")
@@ -32,13 +32,15 @@ export class HealthController {
 
   @Get("ready")
   async ready() {
-    const [postgres, redis] = await Promise.all([
+    // Only hard dependencies: the API serves requests without the cache (DB
+    // fallback) and without the queue (notifications degrade).
+    const [postgres, redisSessions] = await Promise.all([
       check(() => this.pool.query("select 1")),
-      check(() => this.redis.ping()),
+      check(() => this.sessions.ping()),
     ]);
-    const checks = { postgres, redis };
+    const checks = { postgres, redisSessions };
 
-    if (postgres === "down" || redis === "down") {
+    if (postgres === "down" || redisSessions === "down") {
       throw new ServiceUnavailableException({ status: "unavailable", checks });
     }
     return { status: "ok", checks };

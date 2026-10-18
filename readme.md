@@ -45,7 +45,10 @@ At a high level:
 
 - The REST API handles core business logic and persistence. When a domain action produces a notification (ticket created, argument approved, review comment added), it enqueues a BullMQ job instead of writing synchronously — keeping the request path fast and the notification delivery durable.
 - The notification worker runs as a separate process, consuming jobs from the queue, inserting notification rows, and publishing a Redis pub/sub message so connected SSE clients are pushed an update in real time.
-- Redis serves three roles: session store, BullMQ job queue, and pub/sub delivery bus.
+- Redis runs as three instances, one per role, because each needs a different eviction policy:
+  - `redis-sessions`: session store. `volatile-lru`, AOF persistence.
+  - `redis-queue`: BullMQ job queue and the pub/sub delivery bus. `noeviction` (required by BullMQ), AOF persistence.
+  - `redis-cache`: response cache (`GET /debates/:id`). `allkeys-lru`, no persistence.
 - The Review gateway handles bidirectional moderation flows (comments, argument edits) over WebSockets.
 - SSE handles lightweight user notifications (unidirectional).
 
@@ -66,25 +69,28 @@ graph TB
         NW["Job Processor"]
     end
 
-    Redis[("Redis\n(sessions · BullMQ · pub/sub)")]
+    RS[("Redis sessions")]
+    RQ[("Redis queue\n(BullMQ · pub/sub)")]
+    RC[("Redis cache")]
     PG[("PostgreSQL")]
 
     Browser <-->|HTTP| API
     Browser <-->|WebSocket| GW
     NS -->|SSE| Browser
 
-    API -->|enqueue job| Redis
-    API -->|sessions| Redis
+    API -->|enqueue job| RQ
+    API -->|sessions| RS
+    API -->|cache| RC
     API -->|queries| PG
 
-    GW -->|sessions| Redis
+    GW -->|sessions| RS
     GW -->|queries| PG
 
-    NW -->|dequeue job| Redis
-    NW -->|PUBLISH| Redis
+    NW -->|dequeue job| RQ
+    NW -->|PUBLISH| RQ
     NW -->|insert notification| PG
 
-    NS -->|SUBSCRIBE| Redis
+    NS -->|SUBSCRIBE| RQ
 
     style Browser fill:#1f6feb,color:#fff,stroke:#1f6feb
 ```
@@ -120,7 +126,7 @@ A separate headless process (`apps/notification-worker`) consumes the queue, per
 
 The key properties this buys:
 
-- **Durability** — jobs are persisted in Redis. If the API crashes after enqueuing but before the worker processes the job, the notification is not lost.
+- **Durability** — jobs are persisted in Redis (AOF, fsync every second). If the API crashes after enqueuing but before the worker processes the job, the notification is not lost; a Redis restart loses at most the last second of writes.
 - **Retry** — failed DB writes are retried automatically with configurable backoff, without any action from the caller.
 - **Request path isolation** — a slow or failing notification side effect cannot delay or break the HTTP response.
 
