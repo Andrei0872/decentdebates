@@ -10,7 +10,7 @@ import { shouldEmitRoutineLogs } from "src/logging";
 
 export const REDIS_SESSIONS_CLIENT_TOKEN = "@REDIS_SESSIONS_CLIENT_TOKEN";
 export const REDIS_CACHE_CLIENT_TOKEN = "@REDIS_CACHE_CLIENT_TOKEN";
-export const REDIS_STORE_TOKEN = "@REDIS_STORE_TOKEN";
+export const SESSION_STORE_TOKEN = "@SESSION_STORE_TOKEN";
 
 export async function connectRedis(
   name: string,
@@ -52,7 +52,7 @@ export async function connectRedis(
         }),
     },
     {
-      provide: REDIS_STORE_TOKEN,
+      provide: SESSION_STORE_TOKEN,
       useFactory: (client: RedisClientType) => new RedisStore({ client }),
       inject: [REDIS_SESSIONS_CLIENT_TOKEN],
     },
@@ -60,7 +60,7 @@ export async function connectRedis(
   exports: [
     REDIS_SESSIONS_CLIENT_TOKEN,
     REDIS_CACHE_CLIENT_TOKEN,
-    REDIS_STORE_TOKEN,
+    SESSION_STORE_TOKEN,
   ],
 })
 export class RedisModule {}

@@ -1,7 +1,7 @@
 import * as session from "express-session";
 import { FactoryProvider } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { REDIS_STORE_TOKEN } from "src/redis/redis.module";
+import { SESSION_STORE_TOKEN } from "src/redis/redis.module";
 
 export const SESSION_MIDDLEWARE_TOKEN = "@SESSION_MIDDLEWARE_TOKEN";
 
@@ -14,9 +14,9 @@ export function getSessionCookieName(cs: ConfigService): string {
 
 export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
   provide: SESSION_MIDDLEWARE_TOKEN,
-  useFactory: (cs: ConfigService, redisStore: session.Store) => {
+  useFactory: (cs: ConfigService, sessionStore: session.Store) => {
     const sessionMiddleware = session({
-      store: redisStore,
+      store: sessionStore,
       secret: cs.get("COOKIE_SECRET"),
       saveUninitialized: false,
       resave: false,
@@ -33,5 +33,5 @@ export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
     });
     return sessionMiddleware;
   },
-  inject: [ConfigService, REDIS_STORE_TOKEN],
+  inject: [ConfigService, SESSION_STORE_TOKEN],
 };
