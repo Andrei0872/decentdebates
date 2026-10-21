@@ -2,14 +2,14 @@ import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Req,
   Res,
 } from "@nestjs/common";
 import { Request, Response } from "express";
-import { from, map, catchError } from "rxjs";
+import { from, map } from "rxjs";
 import { UserCookieData } from "../user/user.model";
 import { CommentService } from "./comment.service";
 
@@ -22,19 +22,12 @@ export class CommentController {
   async getTicketComments(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
     return from(this.commentService.getTicketComments(ticketId, user)).pipe(
       map((comments) => res.status(HttpStatus.OK).json({ data: comments })),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 }

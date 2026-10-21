@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -16,16 +17,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
-import {
-  from,
-  map,
-  catchError,
-  mergeAll,
-  defer,
-  of,
-  forkJoin,
-  tap,
-} from "rxjs";
+import { from, map, defer, of, forkJoin, tap } from "rxjs";
 import { REDIS_CACHE_CLIENT_TOKEN } from "src/redis/redis.module";
 import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { type RedisClientType } from "redis";
@@ -53,15 +45,6 @@ export class DebatesController {
     @Inject(REDIS_CACHE_CLIENT_TOKEN) private cache: RedisClientType,
   ) {}
 
-  private getHttpErrorStatus(err: unknown) {
-    return typeof err === "object" &&
-      err !== null &&
-      "status" in err &&
-      typeof err.status === "number"
-      ? err.status
-      : HttpStatus.BAD_REQUEST;
-  }
-
   @SetMetadata("skipAuth", true)
   @Get("/")
   async getAll(
@@ -83,12 +66,6 @@ export class DebatesController {
         }),
       ),
       map((debates) => res.status(HttpStatus.OK).json({ data: debates })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -106,12 +83,6 @@ export class DebatesController {
           .status(HttpStatus.CREATED)
           .json({ message: "Debate successfully proposed." }),
       ),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -120,7 +91,7 @@ export class DebatesController {
   async getDebate(
     @Res() res: Response,
     @Req() req: Request,
-    @Param("id") debateId: string,
+    @Param("id", ParseIntPipe) debateId: number,
   ) {
     const cacheKey = `cache:debates:${debateId}`;
 
@@ -142,12 +113,6 @@ export class DebatesController {
           .catch(() => {});
       }),
       map((data) => res.status(HttpStatus.OK).json({ data })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          this.getHttpErrorStatus(err),
-        );
-      }),
     );
   }
 
@@ -155,19 +120,18 @@ export class DebatesController {
   @Get("/:debateId/argument/:argumentId")
   async getDebateArgument(
     @Res() res: Response,
-    @Param("debateId") debateId: string,
-    @Param("argumentId") argumentId: string,
+    @Param("debateId", ParseIntPipe) debateId: number,
+    @Param("argumentId", ParseIntPipe) argumentId: number,
   ) {
     return from(
       this.debatesService.getDebateArgument(debateId, argumentId),
     ).pipe(
-      mergeAll(),
-      map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
+      map(([arg]) => {
+        if (!arg) {
+          throw new EntityNotFoundError("argument");
+        }
+
+        return res.status(HttpStatus.OK).json({ data: arg });
       }),
     );
   }
@@ -193,12 +157,6 @@ export class DebatesController {
           .status(HttpStatus.CREATED)
           .json({ message: "The argument has been successfully created." }),
       ),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -230,12 +188,6 @@ export class DebatesController {
           .status(HttpStatus.CREATED)
           .json({ message: "Draft successfully saved." }),
       ),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -256,7 +208,7 @@ export class DebatesController {
     const shouldIncludeDebate = !!includeDebate && includeDebate === "true";
     const getDebate$ = defer(() =>
       shouldIncludeDebate
-        ? getDebates(this.debatesService.getDebateArguments(debateId))
+        ? getDebates(this.debatesService.getDebateArguments(+debateId))
         : of(null),
     );
 
@@ -267,12 +219,6 @@ export class DebatesController {
         }
       }),
       map((data) => res.status(HttpStatus.OK).json({ data })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          this.getHttpErrorStatus(err),
-        );
-      }),
     );
   }
 
@@ -298,12 +244,6 @@ export class DebatesController {
           .status(HttpStatus.OK)
           .json({ message: "Draft successfully updated." }),
       ),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -329,12 +269,6 @@ export class DebatesController {
           .status(HttpStatus.CREATED)
           .json({ message: "The draft has been submitted successfully." }),
       ),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 }

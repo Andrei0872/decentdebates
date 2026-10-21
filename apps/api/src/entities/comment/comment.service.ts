@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { Pool } from "pg";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
 import { UserCookieData } from "../user/user.model";
@@ -56,7 +57,7 @@ export class CommentService {
     try {
       const res = await client.query(sqlStr, values);
       if (!res.rowCount) {
-        throw new Error("Ticket and commenter are not connected.");
+        throw new EntityNotFoundError("ticket");
       }
 
       return res.rows[0];
@@ -69,7 +70,7 @@ export class CommentService {
   }
 
   async getTicketComments(
-    ticketId: string,
+    ticketId: number,
     user: UserCookieData,
   ): Promise<Comment[]> {
     const sqlStr = `
@@ -166,7 +167,7 @@ export class CommentService {
     try {
       const res = await client.query(sqlStr, values);
       if (!res.rowCount) {
-        throw new Error("Ticket and commenter are not connected.");
+        throw new EntityNotFoundError("ticket");
       }
 
       return res.rows[0];

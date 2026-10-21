@@ -3,21 +3,21 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Inject,
   Param,
+  ParseIntPipe,
   Patch,
   Req,
   Res,
   UseGuards,
 } from "@nestjs/common";
+import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 import { enqueueNotification } from "src/entities/notification/notification-queue";
 import { Request, Response } from "express";
 import {
-  catchError,
   filter,
   forkJoin,
   from,
@@ -97,13 +97,6 @@ export class ModeratorController {
       ),
       reduce((acc, crt) => [...acc, crt], []),
       map((r) => res.status(HttpStatus.OK).json({ data: r })),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 
@@ -112,7 +105,7 @@ export class ModeratorController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() body: UpdateTicketDTO,
-    @Param("id") id: string,
+    @Param("id", ParseIntPipe) id: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
@@ -124,33 +117,24 @@ export class ModeratorController {
 
     return from(this.moderatorService.updateTicket(ticket)).pipe(
       map(() => res.status(HttpStatus.NO_CONTENT).end()),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 
   @Get("debates/:debateId/argument/:argumentId")
   async getDebateArgument(
     @Res() res: Response,
-    @Param("debateId") debateId: string,
-    @Param("argumentId") argumentId: string,
+    @Param("debateId", ParseIntPipe) debateId: number,
+    @Param("argumentId", ParseIntPipe) argumentId: number,
   ) {
     return from(
       this.debatesService.getDebateArgumentAsModerator(debateId, argumentId),
     ).pipe(
-      mergeAll(),
-      map((arg) => res.status(HttpStatus.OK).json({ data: arg })),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      map(([arg]) => {
+        if (!arg) {
+          throw new EntityNotFoundError("argument");
         }
 
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
+        return res.status(HttpStatus.OK).json({ data: arg });
       }),
     );
   }
@@ -158,17 +142,10 @@ export class ModeratorController {
   @Get("/debate/:ticketId")
   async getDebateByTicketId(
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     return from(this.debatesService.getDebateByTicketId(ticketId)).pipe(
       map((debate) => res.status(HttpStatus.OK).json({ debate })),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 
@@ -176,7 +153,7 @@ export class ModeratorController {
   async approveDebate(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
     @Body() body: ApproveDebateDTO,
   ) {
     const user = (req as any).session.user as UserCookieData;
@@ -184,7 +161,7 @@ export class ModeratorController {
     return from(this.moderatorService.approveTicket(user, ticketId)).pipe(
       tap((res) => {
         if (!res.rowCount) {
-          throw new Error("Wrong attempt to update the debate.");
+          throw new EntityNotFoundError("ticket");
         }
       }),
       tap({
@@ -219,13 +196,6 @@ export class ModeratorController {
           .status(HttpStatus.OK)
           .json({ message: "The debate has been approved." }),
       ),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 
@@ -233,7 +203,7 @@ export class ModeratorController {
   async approveArgument(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
     @Body() body: ApproveArgumentDTO,
   ) {
     const user = (req as any).session.user as UserCookieData;
@@ -241,7 +211,7 @@ export class ModeratorController {
     return from(this.moderatorService.approveTicket(user, ticketId)).pipe(
       tap((res) => {
         if (!res.rowCount) {
-          throw new Error("Wrong attempt to update the argument.");
+          throw new EntityNotFoundError("ticket");
         }
       }),
       tap({
@@ -280,13 +250,6 @@ export class ModeratorController {
           .status(HttpStatus.OK)
           .json({ message: "The argument has been approved." }),
       ),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 }

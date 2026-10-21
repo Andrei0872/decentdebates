@@ -178,7 +178,7 @@ export class UserService {
 
   async getDebateAsUser(
     user: UserCookieData,
-    ticketId: string,
+    ticketId: number,
   ): Promise<DebateAsUser> {
     const sqlStr = `
       with debates_tags as (
@@ -232,7 +232,7 @@ export class UserService {
 
   async getArgumentAsUser(
     user: UserCookieData,
-    ticketId: string,
+    ticketId: number,
   ): Promise<ArgumentAsUser> {
     const sqlStr = `
       select

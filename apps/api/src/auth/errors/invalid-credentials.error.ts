@@ -1,9 +1,7 @@
-const ERROR_MESSAGE = "Invalid credentials.";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
-export class InvalidCredentialsError extends Error {
-  status = 400;
-
+export class InvalidCredentialsError extends HttpException {
   constructor() {
-    super(ERROR_MESSAGE);
+    super("Invalid credentials.", HttpStatus.UNAUTHORIZED);
   }
 }

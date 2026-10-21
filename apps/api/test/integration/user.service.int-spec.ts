@@ -134,7 +134,7 @@ describe("UserService integration", () => {
   it("returns the debate review view for the debate owner", async () => {
     const debate = await service.getDebateAsUser(
       { id: userId, username: "activity-user", role: "USER" as never },
-      String(acceptedDebateTicketId),
+      acceptedDebateTicketId,
     );
 
     expect(debate).toEqual(
@@ -149,7 +149,7 @@ describe("UserService integration", () => {
   it("returns the argument review view for the argument owner", async () => {
     const argument = await service.getArgumentAsUser(
       { id: userId, username: "activity-user", role: "USER" as never },
-      String(acceptedArgumentTicketId),
+      acceptedArgumentTicketId,
     );
 
     expect(argument).toEqual(

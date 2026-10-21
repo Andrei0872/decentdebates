@@ -32,7 +32,7 @@ export type ModeratorActivity =
   | ModeratorActivityDebate;
 
 export interface UpdateTicketData {
-  ticketId: string;
+  ticketId: number;
   ticketData: UpdateTicketDTO;
   userId: number;
 }

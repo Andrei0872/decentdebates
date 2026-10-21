@@ -2,7 +2,6 @@ import { ApiTags } from "@nestjs/swagger";
 import {
   Body,
   Controller,
-  HttpException,
   HttpStatus,
   Post,
   Req,
@@ -31,21 +30,13 @@ export class AuthController {
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    try {
-      const user = await this.authService.register(registerUserDTO);
+    const user = await this.authService.register(registerUserDTO);
 
-      (req as any).session.user = this.authService.getUserCookieFields(user);
+    (req as any).session.user = this.authService.getUserCookieFields(user);
 
-      return res.status(HttpStatus.CREATED).json({
-        message: "User successfully registered.",
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new HttpException(err.message, 400);
-      }
-
-      throw new HttpException(String(err), 400);
-    }
+    return res.status(HttpStatus.CREATED).json({
+      message: "User successfully registered.",
+    });
   }
 
   @Post("login")
@@ -54,20 +45,12 @@ export class AuthController {
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    try {
-      const user = await this.authService.login(loginUserDTO);
+    const user = await this.authService.login(loginUserDTO);
 
-      (req as any).session.user = this.authService.getUserCookieFields(user);
+    (req as any).session.user = this.authService.getUserCookieFields(user);
 
-      return res.status(HttpStatus.CREATED).json({
-        data: getPublicUser(user),
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new HttpException(err.message, 400);
-      }
-
-      throw new HttpException(String(err), 400);
-    }
+    return res.status(HttpStatus.CREATED).json({
+      data: getPublicUser(user),
+    });
   }
 }

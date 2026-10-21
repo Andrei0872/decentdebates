@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import { Pool } from "pg";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
 import { UserService } from "src/entities/user/user.service";
@@ -9,6 +9,7 @@ import { InvalidCredentialsError } from "./errors/invalid-credentials.error";
 import { PublicUser, UserCookieData } from "src/entities/user/user.model";
 
 const SALT_OR_ROUNDS = 10;
+const PG_UNIQUE_VIOLATION = "23505";
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,11 @@ export class AuthService {
         registerUserDTO.password,
       );
       return await this.userService.insertOne(registerUserDTO);
-    } catch {
+    } catch (err) {
+      if ((err as { code?: string }).code === PG_UNIQUE_VIOLATION) {
+        throw new ConflictException("The username or email is already taken.");
+      }
+
       throw new Error("An error occurred while registering the user.");
     }
   }

@@ -3,7 +3,6 @@ import { shouldEmitRoutineLogs } from "src/logging";
 import {
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Logger,
   MessageEvent,
@@ -13,7 +12,6 @@ import {
 } from "@nestjs/common";
 import { Request, Response } from "express";
 import {
-  catchError,
   concat,
   filter,
   finalize,
@@ -56,12 +54,6 @@ export class NotificationController {
             );
         }
         return res.status(HttpStatus.OK).json(r);
-      }),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
       }),
     );
   }

@@ -194,7 +194,7 @@ export class DebatesService {
     }
   }
 
-  async getDebateArguments(debateId: string): Promise<DebateArgument[]> {
+  async getDebateArguments(debateId: number): Promise<DebateArgument[]> {
     const sqlStr = `
       select
         a.debate_id "debateId",
@@ -310,8 +310,8 @@ export class DebatesService {
   }
 
   async getDebateArgument(
-    debateId: string,
-    argumentId: string,
+    debateId: number,
+    argumentId: number,
   ): Promise<DebateArgument[]> {
     const sqlStr = `
       select
@@ -353,8 +353,8 @@ export class DebatesService {
   }
 
   async getDebateArgumentAsModerator(
-    debateId: string,
-    argumentId: string,
+    debateId: number,
+    argumentId: number,
   ): Promise<DebateArgument[]> {
     const sqlStr = `
       select
@@ -555,7 +555,7 @@ export class DebatesService {
     }
   }
 
-  async getDebateByTicketId(ticketId: string): Promise<DebateAsModerator> {
+  async getDebateByTicketId(ticketId: number): Promise<DebateAsModerator> {
     const sqlStr = `
       with debates_tags as (
         select

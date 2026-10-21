@@ -3,6 +3,7 @@ import { Test } from "@nestjs/testing";
 import * as request from "supertest";
 import { AUTH_THROTTLE, AuthController } from "src/auth/auth.controller";
 import { AuthService } from "src/auth/auth.service";
+import { InvalidCredentialsError } from "src/auth/errors/invalid-credentials.error";
 import {
   DEFAULT_THROTTLE,
   THROTTLER_GUARD_PROVIDER,
@@ -39,7 +40,9 @@ describe("MutationThrottlerGuard", () => {
         THROTTLER_GUARD_PROVIDER,
         {
           provide: AuthService,
-          useValue: { login: () => Promise.reject(new Error("bad creds")) },
+          useValue: {
+            login: () => Promise.reject(new InvalidCredentialsError()),
+          },
         },
       ],
     }).compile();
@@ -75,7 +78,7 @@ describe("MutationThrottlerGuard", () => {
         .send({ emailOrUsername: "nobody", password: "wrong" }),
     );
 
-    expect(statuses.slice(0, -1)).toEqual(Array(AUTH_THROTTLE.limit).fill(400));
+    expect(statuses.slice(0, -1)).toEqual(Array(AUTH_THROTTLE.limit).fill(401));
     expect(statuses.at(-1)).toBe(429);
   });
 

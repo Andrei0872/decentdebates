@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { Pool } from "pg";
 import { PG_PROVIDER_TOKEN } from "@decentdebates/db";
 import { ArgumentAsModerator, DebateAsModerator } from "../review/review.model";
@@ -122,7 +123,7 @@ export class ModeratorService {
 
   async getArgumentAsModerator(
     user: UserCookieData,
-    ticketId: string,
+    ticketId: number,
   ): Promise<ArgumentAsModerator> {
     const sqlStr = `
       select
@@ -165,7 +166,7 @@ export class ModeratorService {
 
   async getDebateAsModerator(
     user: UserCookieData,
-    ticketId: string,
+    ticketId: number,
   ): Promise<DebateAsModerator> {
     const sqlStr = `
       with debates_tags as (
@@ -240,21 +241,22 @@ export class ModeratorService {
 
     const client = await this.pool.connect();
 
+    let rowCount: number | null;
     try {
-      const res = await client.query(sqlStr, values);
-
-      if (!res.rowCount) {
-        throw new Error("Wrong attempt to update the ticket.");
-      }
+      ({ rowCount } = await client.query(sqlStr, values));
     } catch (err) {
       this.logError(err);
       throw new Error("An error occurred while updated the ticket.");
     } finally {
       client.release();
     }
+
+    if (!rowCount) {
+      throw new EntityNotFoundError("ticket");
+    }
   }
 
-  async approveTicket(user: UserCookieData, ticketId: string) {
+  async approveTicket(user: UserCookieData, ticketId: number) {
     const sqlStr = `
       update ticket 
       set

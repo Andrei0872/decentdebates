@@ -42,7 +42,7 @@ describe("Auth (e2e)", () => {
         emailOrUsername: SEEDED_USER_CREDENTIALS.emailOrUsername,
         password: "wrong-password",
       })
-      .expect(400);
+      .expect(401);
   });
 
   it("allows an authenticated user to access a protected route", async () => {

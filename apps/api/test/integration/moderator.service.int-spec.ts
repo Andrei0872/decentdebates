@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
+import { EntityNotFoundError } from "../../src/errors/EntityNotFoundError";
 import { ModeratorService } from "../../src/entities/moderator/moderator.service";
 import {
   runMigrations,
@@ -130,7 +131,7 @@ describe("ModeratorService integration", () => {
         username: "moderator-one",
         role: "MODERATOR" as never,
       },
-      String(debateTicketId),
+      debateTicketId,
     );
 
     expect(debate).toEqual(
@@ -149,7 +150,7 @@ describe("ModeratorService integration", () => {
         username: "moderator-one",
         role: "MODERATOR" as never,
       },
-      String(argumentTicketId),
+      argumentTicketId,
     );
 
     expect(argument).toEqual(
@@ -169,7 +170,7 @@ describe("ModeratorService integration", () => {
 
     await service.updateTicket({
       userId: moderatorId,
-      ticketId: String(pendingTicketId),
+      ticketId: pendingTicketId,
       ticketData: {
         boardList: "IN REVIEW",
       },
@@ -192,7 +193,7 @@ describe("ModeratorService integration", () => {
 
     await service.updateTicket({
       userId: moderatorId,
-      ticketId: String(assignedTicketId),
+      ticketId: assignedTicketId,
       ticketData: {
         boardList: "PENDING",
       },
@@ -216,11 +217,11 @@ describe("ModeratorService integration", () => {
     await expect(
       service.updateTicket({
         userId: secondModeratorId,
-        ticketId: String(assignedTicketId),
+        ticketId: assignedTicketId,
         ticketData: {
           boardList: "ACCEPTED",
         },
       }),
-    ).rejects.toThrow("An error occurred while updated the ticket.");
+    ).rejects.toBeInstanceOf(EntityNotFoundError);
   });
 });

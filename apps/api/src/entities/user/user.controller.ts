@@ -1,14 +1,7 @@
 import { ApiTags } from "@nestjs/swagger";
-import {
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Req,
-  Res,
-} from "@nestjs/common";
+import { Controller, Get, HttpStatus, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
-import { catchError, forkJoin, from, map, mergeAll, reduce } from "rxjs";
+import { forkJoin, from, map, mergeAll, reduce } from "rxjs";
 import { UserCookieData } from "./user.model";
 import { UserService } from "./user.service";
 
@@ -43,13 +36,6 @@ export class UserController {
       mergeAll(),
       reduce((acc, crt) => [...acc, crt], []),
       map((r) => res.status(HttpStatus.OK).json({ data: r })),
-      catchError((err) => {
-        if (err instanceof Error) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-
-        throw new HttpException(String(err), HttpStatus.BAD_REQUEST);
-      }),
     );
   }
 }

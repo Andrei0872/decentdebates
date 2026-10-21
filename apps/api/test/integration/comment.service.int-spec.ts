@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import type { Pool } from "pg";
+import { EntityNotFoundError } from "../../src/errors/EntityNotFoundError";
 import { CommentService } from "../../src/entities/comment/comment.service";
 import {
   runMigrations,
@@ -115,7 +116,7 @@ describe("CommentService integration", () => {
         content: "Outsider comment",
         commenterId: outsiderId,
       }),
-    ).rejects.toThrow("Ticket and commenter are not connected.");
+    ).rejects.toBeInstanceOf(EntityNotFoundError);
   });
 
   it("returns ticket comments only to connected participants", async () => {
@@ -125,7 +126,7 @@ describe("CommentService integration", () => {
       commenterId: moderatorId,
     });
 
-    const comments = await service.getTicketComments(String(debateTicketId), {
+    const comments = await service.getTicketComments(debateTicketId, {
       id: userId,
       username: "comment-user",
       role: "USER" as never,

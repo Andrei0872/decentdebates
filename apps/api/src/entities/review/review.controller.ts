@@ -2,15 +2,16 @@ import { ApiTags } from "@nestjs/swagger";
 import {
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Req,
   Res,
   UseGuards,
 } from "@nestjs/common";
+import { EntityNotFoundError } from "src/errors/EntityNotFoundError";
 import { Request, Response } from "express";
-import { catchError, from, map, tap } from "rxjs";
+import { from, map, tap } from "rxjs";
 import { Roles } from "src/decorators/roles.decorator";
 import { RolesGuard } from "src/guards/roles.guard";
 import { ModeratorService } from "../moderator/moderator.service";
@@ -33,7 +34,7 @@ export class ReviewController {
   async getArgumentAsModerator(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
@@ -42,18 +43,10 @@ export class ReviewController {
     ).pipe(
       tap((data) => {
         if (!data) {
-          throw new Error(
-            "The ticket has no moderator assigned or the moderator is not the one assigned to the ticket.",
-          );
+          throw new EntityNotFoundError("ticket");
         }
       }),
       map((data) => res.status(HttpStatus.OK).json({ data })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -63,7 +56,7 @@ export class ReviewController {
   async getDebateAsModerator(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
@@ -72,9 +65,7 @@ export class ReviewController {
     ).pipe(
       tap((data) => {
         if (!data) {
-          throw new Error(
-            "The ticket has no moderator assigned or the moderator is not the one assigned to the ticket.",
-          );
+          throw new EntityNotFoundError("ticket");
         }
       }),
       map((rawDebate) => {
@@ -89,12 +80,6 @@ export class ReviewController {
         };
       }),
       map((debate) => res.status(HttpStatus.OK).json({ debate })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -104,14 +89,14 @@ export class ReviewController {
   async getDebateAsUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
     return from(this.userService.getDebateAsUser(user, ticketId)).pipe(
       tap((data) => {
         if (!data) {
-          throw new Error("This user is not assigned to this ticket.");
+          throw new EntityNotFoundError("ticket");
         }
       }),
       map((rawDebate) => {
@@ -126,12 +111,6 @@ export class ReviewController {
         };
       }),
       map((debate) => res.status(HttpStatus.OK).json({ debate })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 
@@ -141,23 +120,17 @@ export class ReviewController {
   async getArgumentAsUser(
     @Req() req: Request,
     @Res() res: Response,
-    @Param("ticketId") ticketId: string,
+    @Param("ticketId", ParseIntPipe) ticketId: number,
   ) {
     const user = (req as any).session.user as UserCookieData;
 
     return from(this.userService.getArgumentAsUser(user, ticketId)).pipe(
       tap((data) => {
         if (!data) {
-          throw new Error("This user is not assigned to this ticket.");
+          throw new EntityNotFoundError("ticket");
         }
       }),
       map((data) => res.status(HttpStatus.OK).json({ data })),
-      catchError((err) => {
-        throw new HttpException(
-          err instanceof Error ? err.message : String(err),
-          HttpStatus.BAD_REQUEST,
-        );
-      }),
     );
   }
 }
