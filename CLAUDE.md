@@ -133,7 +133,9 @@ Besides shipping the product, this project is a vehicle for learning product and
 
 ## Working conventions
 
-- Implement according to standard practice for the tool or domain. When in doubt, or when there are several reasonable options, pick one and state that an alternative exists, with a one-line description of it and why it wasn't chosen.
+- Always follow the standard, idiomatic industry practice for the tool or domain, in code, tests and design alike.
+  - When the standard approach is unclear, or several approaches are reasonable, don't pick one: ask first, presenting each option with its trade-offs (ups and downs).
+- When a prompt contains questions, answer them first, before implementing anything, unless the prompt explicitly says to implement right away.
 - In explanations, use common software engineering terminology where it fits (e.g. stopgap, module preloading, red herring, decorator, backpressure) and briefly gloss terms on first use.
 - No redundant comments. Default to none; add one only when the why isn't evident from the code: a constraint, an ordering requirement, a trade-off, a workaround.
   - Don't restate what a name or signature already says (e.g. `/** Whether X is enabled. */` above `isXEnabled()`).
