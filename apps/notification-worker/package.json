@@ -12,7 +12,7 @@
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --check \"src/**/*.ts\"",
     "format:fix": "prettier --write \"src/**/*.ts\"",
-    "test:integration": "corepack pnpm -C ../.. run docker:up && corepack pnpm -C ../.. run docker:wait && corepack pnpm run test:integration:only",
+    "test:integration": "corepack pnpm -C ../.. run docker:test:up && corepack pnpm run test:integration:only",
     "test:integration:only": "jest --config ./test/jest-integration.json --runInBand"
   },
   "engines": {

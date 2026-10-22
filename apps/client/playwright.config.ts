@@ -12,6 +12,12 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
   },
+  webServer: {
+    command: 'corepack pnpm -C ../.. run start:prod:local:client',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
+  },
   projects: [
     {
       name: 'chromium',

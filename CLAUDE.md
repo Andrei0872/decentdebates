@@ -51,16 +51,24 @@ pnpm run db:reset
 pnpm run db:migrate                 # apply pending migrations
 pnpm run db:migrate:make -- <name>  # new migration file
 
-# Production builds on the host (Docker for Postgres/Redis, then built apps)
-pnpm run start:prod:local       # api, notification-worker and client
-pnpm run start:prod:local:api   # api and notification-worker only
+# Production builds on the host, against the prod-local compose project's
+# Postgres/Redis (same host ports as dev, so stop dev's with `docker:down` first)
+pnpm run start:prod:local         # api, notification-worker and client
+pnpm run start:prod:local:api     # api and notification-worker only
+pnpm run start:prod:local:client  # client only
 
 # api and notification-worker built as Docker images and run in containers
-# (compose profile `app`) against the compose Postgres/Redis
+# (compose profile `app`), plus the o11y stack, in the prod-local compose project
 pnpm run start:prod:containers
 
-# Stop all compose services, including profiled ones
-pnpm run docker:down
+# Compose projects: dev (`decentdebates`), prod-local (`decentdebates-prodlocal`),
+# test (`decentdebates-test`, `docker-compose.test.yml`: other host ports, data on tmpfs)
+pnpm run docker:up                # dev
+pnpm run docker:down              # dev, including profiled services
+pnpm run docker:prod-local:up
+pnpm run docker:prod-local:down
+pnpm run docker:test:up
+pnpm run docker:test:down
 ```
 
 Dockerfiles: `apps/api/Dockerfile`, `apps/notification-worker/Dockerfile` (build context: repo root).
@@ -74,10 +82,10 @@ pnpm test:unit
 # API — unit (from apps/api or root)
 pnpm --filter api test:unit
 
-# API — integration (requires Docker; starts it automatically)
+# API — integration (starts the test compose project automatically)
 pnpm --filter api test:integration
 
-# API — integration only (Docker must already be running)
+# API — integration only (`docker:test:up` must already have run)
 pnpm --filter api test:integration:only
 
 # Client — unit
@@ -86,12 +94,13 @@ pnpm --filter client test:unit
 # Client — unit in watch mode
 pnpm --filter client test:unit:watch
 
-# API — E2E (bootstraps the app in-process; starts Docker automatically -- no running server needed)
+# API — E2E (bootstraps the app in-process; starts the test compose project automatically -- no running server needed)
 pnpm --filter api test:e2e
 
-# Client — E2E (Playwright). Requires the full stack already running (`pnpm run dev` or
-# `pnpm run start:prod:local`), a seeded DB, and apps/client/.env.test.local filled in.
-# Playwright starts nothing itself.
+# Client — E2E (Playwright). Requires the prod-local backend already running
+# (`start:prod:local:api` or `start:prod:containers`), seeded, and apps/client/.env.test.local
+# filled in. Playwright starts the client itself (`start:prod:local:client`); outside CI it
+# reuses whatever already serves :3000.
 pnpm --filter client test:e2e
 ```
 
@@ -103,7 +112,7 @@ Unit spec files: `*.spec.ts` (under `src/`). Integration spec files: `*.int-spec
 |---|---|
 | `packages/db/.env` | Local Postgres connection (copy from `.env.example`) |
 | `apps/api/.env` | API config incl. `COOKIE_SECRET` (copy from `.env.example`) |
-| `apps/api/.env.test` | Test overrides for integration tests (copy from `.env.test.example`) |
+| `apps/api/.env.test` | Test overrides pointing the API and worker tests at the test compose project (copy from `.env.test.example`; required) |
 | `apps/client/.env.development` | Dev server URLs |
 | `apps/client/.env.test.local` | E2E credentials (fill in after copying) |
 

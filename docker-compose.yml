@@ -1,3 +1,5 @@
+name: decentdebates
+
 # Settings shared by the containerized (backend) services.
 x-app: &app
   environment:

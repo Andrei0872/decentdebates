@@ -8,4 +8,4 @@ GIT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 export GIT_SHA
 
 cd "$ROOT_DIR"
-exec docker compose --profile app --profile o11y up --build "$@"
+exec docker compose -p decentdebates-prodlocal --profile app --profile o11y up --build "$@"

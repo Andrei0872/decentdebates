@@ -12,6 +12,15 @@ const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
 const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, "packages/db/package.json");
 const requireFromDbPackage = createRequire(DB_PACKAGE_JSON);
 
+// Without these, the tests fall back to apps/api/.env and would wipe the dev
+// Redis instances.
+const REQUIRED_TEST_ENV_KEYS = [
+  "POSTGRES_PORT",
+  "REDIS_SESSIONS_URL",
+  "REDIS_QUEUE_URL",
+  "REDIS_CACHE_URL",
+];
+
 let envLoaded = false;
 
 function createKnexClient(config: PoolConfig) {
@@ -25,8 +34,10 @@ function createKnexClient(config: PoolConfig) {
 }
 
 function maybeLoadEnv(pathname: string, override = false) {
+  const loadedKeys = new Set<string>();
+
   if (!fs.existsSync(pathname)) {
-    return;
+    return loadedKeys;
   }
 
   const lines = fs.readFileSync(pathname, "utf8").split(/\r?\n/);
@@ -51,8 +62,11 @@ function maybeLoadEnv(pathname: string, override = false) {
 
     if (override || process.env[key] === undefined) {
       process.env[key] = value;
+      loadedKeys.add(key);
     }
   }
+
+  return loadedKeys;
 }
 
 function quoteIdentifier(identifier: string) {
@@ -66,7 +80,16 @@ export function loadTestEnv() {
 
   maybeLoadEnv(DB_ENV_FILE);
   maybeLoadEnv(API_ENV_FILE);
-  maybeLoadEnv(API_TEST_ENV_FILE, true);
+  const testEnvKeys = maybeLoadEnv(API_TEST_ENV_FILE, true);
+
+  const missingKeys = REQUIRED_TEST_ENV_KEYS.filter(
+    (key) => !testEnvKeys.has(key),
+  );
+  if (missingKeys.length > 0) {
+    throw new Error(
+      `${API_TEST_ENV_FILE} must set ${missingKeys.join(", ")}; copy it from .env.test.example.`,
+    );
+  }
 
   const baseDbName = process.env.POSTGRES_DB ?? "decentdebates";
   process.env.POSTGRES_DB =

@@ -5,12 +5,13 @@ import { AppModule } from "../../src/app.module";
 import { setupApp } from "../../src/app.setup";
 import { closeApp } from "../../src/shutdown";
 import { loadTestEnv, resetTestDatabase } from "./db";
+import { flushTestRedis } from "./redis";
 
-export async function createTestApp(options?: { resetDb?: boolean }) {
+export async function createTestApp(options?: { reset?: boolean }) {
   loadTestEnv();
 
-  if (options?.resetDb !== false) {
-    await resetTestDatabase();
+  if (options?.reset !== false) {
+    await Promise.all([resetTestDatabase(), flushTestRedis()]);
   }
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {

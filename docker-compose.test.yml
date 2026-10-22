@@ -1,0 +1,28 @@
+services:
+  db:
+    restart: "no"
+    volumes: !reset []
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports: !override
+      - "15432:5432"
+
+  redis-sessions:
+    volumes: !reset []
+    tmpfs:
+      - /data
+    ports: !override
+      - "16379:6379"
+
+  redis-queue:
+    volumes: !reset []
+    tmpfs:
+      - /data
+    ports: !override
+      - "16380:6379"
+
+  redis-cache:
+    tmpfs:
+      - /data
+    ports: !override
+      - "16381:6379"
