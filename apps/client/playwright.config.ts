@@ -15,7 +15,7 @@ export default defineConfig({
   webServer: {
     command: 'corepack pnpm -C ../.. run start:prod:local:client',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 180_000,
   },
   projects: [
