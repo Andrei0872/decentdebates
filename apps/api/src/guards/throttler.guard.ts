@@ -1,10 +1,11 @@
 import { ExecutionContext, Injectable, Provider } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { config } from "src/config";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
-export const DEFAULT_THROTTLE = { ttl: 60_000, limit: 30 };
+export const DEFAULT_THROTTLE = { ttl: 60_000, limit: config.THROTTLE_LIMIT };
 
 @Injectable()
 export class MutationThrottlerGuard extends ThrottlerGuard {

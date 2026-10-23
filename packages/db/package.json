@@ -8,16 +8,17 @@
     "build": "tsc -p tsconfig.json",
     "build:clean": "rm -rf dist && tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
-    "lint": "eslint \"{src,data,migrations}/**/*.ts\" knexfile.ts --max-warnings 0",
-    "lint:fix": "eslint \"{src,data,migrations}/**/*.ts\" knexfile.ts --fix",
-    "format": "prettier --check \"{src,data,migrations}/**/*.ts\" knexfile.ts",
-    "format:fix": "prettier --write \"{src,data,migrations}/**/*.ts\" knexfile.ts",
+    "lint": "eslint \"{src,data,migrations}/**/*.ts\" \"knexfile*.ts\" --max-warnings 0",
+    "lint:fix": "eslint \"{src,data,migrations}/**/*.ts\" \"knexfile*.ts\" --fix",
+    "format": "prettier --check \"{src,data,migrations}/**/*.ts\" \"knexfile*.ts\"",
+    "format:fix": "prettier --write \"{src,data,migrations}/**/*.ts\" \"knexfile*.ts\"",
     "migrate:latest": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js migrate:latest",
     "migrate:rollback": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js migrate:rollback",
     "migrate:status": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js migrate:status",
     "migrate:make": "knex --knexfile dist/knexfile.js migrate:make -x ts --migrations-directory ../migrations",
     "seed": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run",
-    "seed:file": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run --specific"
+    "seed:file": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.js seed:run --specific",
+    "seed:load": "tsc -p tsconfig.json && knex --knexfile dist/knexfile.load.js seed:run"
   },
   "engines": {
     "node": ">=24"

@@ -12,6 +12,8 @@ export const config = {
     process.env.REDIS_SESSIONS_URL ?? "redis://localhost:6379",
   REDIS_QUEUE_URL: process.env.REDIS_QUEUE_URL ?? "redis://localhost:6380",
   REDIS_CACHE_URL: process.env.REDIS_CACHE_URL ?? "redis://localhost:6381",
+  THROTTLE_LIMIT: Number(process.env.THROTTLE_LIMIT ?? 30),
+  AUTH_THROTTLE_LIMIT: Number(process.env.AUTH_THROTTLE_LIMIT ?? 10),
   SWAGGER_ENABLED:
     Boolean(process.env.NODE_ENV) === false ||
     process.env.NODE_ENV.toLowerCase() === "development",

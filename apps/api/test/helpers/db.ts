@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createRequire } from "module";
 import { Pool, type PoolConfig } from "pg";
+import { z } from "zod";
 import { migrateLatest } from "@decentdebates/db";
 import { seed as seedDebates } from "../../../../packages/db/data/seeds/03_debates";
 
@@ -12,14 +13,14 @@ const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
 const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, "packages/db/package.json");
 const requireFromDbPackage = createRequire(DB_PACKAGE_JSON);
 
-// Without these, the tests fall back to apps/api/.env and would wipe the dev
-// Redis instances.
-const REQUIRED_TEST_ENV_KEYS = [
-  "POSTGRES_PORT",
-  "REDIS_SESSIONS_URL",
-  "REDIS_QUEUE_URL",
-  "REDIS_CACHE_URL",
-];
+// Validated on the file alone: once merged, apps/api/.env would fill in the
+// dev Redis URLs and the tests would wipe the dev instances.
+const testEnvSchema = z.object({
+  POSTGRES_PORT: z.string().regex(/^\d+$/, "Expected a port number"),
+  REDIS_SESSIONS_URL: z.url(),
+  REDIS_QUEUE_URL: z.url(),
+  REDIS_CACHE_URL: z.url(),
+});
 
 let envLoaded = false;
 
@@ -33,11 +34,11 @@ function createKnexClient(config: PoolConfig) {
   return knexFactory({ client: "pg", connection: config });
 }
 
-function maybeLoadEnv(pathname: string, override = false) {
-  const loadedKeys = new Set<string>();
+function parseEnvFile(pathname: string) {
+  const vars: Record<string, string> = {};
 
   if (!fs.existsSync(pathname)) {
-    return loadedKeys;
+    return vars;
   }
 
   const lines = fs.readFileSync(pathname, "utf8").split(/\r?\n/);
@@ -60,13 +61,18 @@ function maybeLoadEnv(pathname: string, override = false) {
       .trim()
       .replace(/^['"]|['"]$/g, "");
 
-    if (override || process.env[key] === undefined) {
-      process.env[key] = value;
-      loadedKeys.add(key);
-    }
+    vars[key] = value;
   }
 
-  return loadedKeys;
+  return vars;
+}
+
+function applyEnv(vars: Record<string, string>, override = false) {
+  for (const [key, value] of Object.entries(vars)) {
+    if (override || process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
 }
 
 function quoteIdentifier(identifier: string) {
@@ -78,18 +84,17 @@ export function loadTestEnv() {
     return;
   }
 
-  maybeLoadEnv(DB_ENV_FILE);
-  maybeLoadEnv(API_ENV_FILE);
-  const testEnvKeys = maybeLoadEnv(API_TEST_ENV_FILE, true);
-
-  const missingKeys = REQUIRED_TEST_ENV_KEYS.filter(
-    (key) => !testEnvKeys.has(key),
-  );
-  if (missingKeys.length > 0) {
+  const testEnv = parseEnvFile(API_TEST_ENV_FILE);
+  const result = testEnvSchema.safeParse(testEnv);
+  if (!result.success) {
     throw new Error(
-      `${API_TEST_ENV_FILE} must set ${missingKeys.join(", ")}; copy it from .env.test.example.`,
+      `Invalid ${API_TEST_ENV_FILE} (copy it from .env.test.example):\n${z.prettifyError(result.error)}`,
     );
   }
+
+  applyEnv(parseEnvFile(DB_ENV_FILE));
+  applyEnv(parseEnvFile(API_ENV_FILE));
+  applyEnv(testEnv, true);
 
   const baseDbName = process.env.POSTGRES_DB ?? "decentdebates";
   process.env.POSTGRES_DB =

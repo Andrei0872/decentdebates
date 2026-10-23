@@ -14,8 +14,9 @@ import { AuthService } from "./auth.service";
 import { RegisterUserDTO } from "../entities/user/dtos/register-user.dto";
 import { LoginUserDTO } from "src/entities/user/dtos/login-user.dto";
 import { getPublicUser } from "src/entities/user/user.model";
+import { config } from "src/config";
 
-export const AUTH_THROTTLE = { ttl: 60_000, limit: 10 };
+export const AUTH_THROTTLE = { ttl: 60_000, limit: config.AUTH_THROTTLE_LIMIT };
 
 @ApiTags("auth")
 @SetMetadata("skipAuth", true)

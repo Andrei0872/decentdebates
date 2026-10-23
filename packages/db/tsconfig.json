@@ -23,6 +23,7 @@
     "src/**/*.ts",
     "data/**/*.ts",
     "migrations/**/*.ts",
-    "knexfile.ts"
+    "knexfile.ts",
+    "knexfile.load.ts"
   ]
 }

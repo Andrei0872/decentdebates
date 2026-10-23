@@ -51,7 +51,7 @@
       "dependsOn": ["build"],
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["OTEL_*"]
+      "passThroughEnv": ["OTEL_*", "THROTTLE_LIMIT", "AUTH_THROTTLE_LIMIT"]
     }
   }
 }

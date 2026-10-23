@@ -15,6 +15,8 @@ const envSchema = z
     REDIS_SESSIONS_URL: z.url().optional(),
     REDIS_QUEUE_URL: z.url().optional(),
     REDIS_CACHE_URL: z.url().optional(),
+    THROTTLE_LIMIT: z.coerce.number().int().positive().optional(),
+    AUTH_THROTTLE_LIMIT: z.coerce.number().int().positive().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") {
