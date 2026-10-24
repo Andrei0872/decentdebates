@@ -10,33 +10,17 @@ To test GitHub Actions workflows locally, see [`docs/act.md`](act.md).
 
 ## Environment files
 
-### DB
+Each package loads its own env files with [dotenv-flow](https://github.com/kerimdzhanov/dotenv-flow) and validates them with Zod in its `config.ts` (`packages/db/src/config.ts`, `apps/api/src/config.ts`, `apps/notification-worker/src/config.ts`). The client uses Next.js's built-in loading and validates in `apps/client/src/env.ts`.
+
+Precedence, highest first: real environment variables, `.env.{NODE_ENV}.local`, `.env.{NODE_ENV}`, `.env.local`, `.env`. `NODE_ENV` defaults to `development`. In `test`, `.env.local` is skipped.
+
+Everything is committed except `.env*.local`, which holds secrets and personal overrides. The only required one is the API's cookie secret:
 
 ```bash
-# Ensure you're in the `packages/db` folder.
-cp .env.example .env
+echo "COOKIE_SECRET=$(openssl rand -base64 32)" > apps/api/.env.local
 ```
 
-### API
-
-```bash
-# Ensure you're in the `apps/api` directory.
-cp .env.example .env
-```
-
-For test-specific overrides, create `apps/api/.env.test` from `apps/api/.env.test.example`.
-
-### Client
-
-```bash
-# Ensure you're in the `apps/client` directory.
-
-# Dev server URLs (defaults work out of the box).
-cp .env.development.example .env.development
-
-# E2E credentials — fill in E2E_USERNAME and E2E_PASSWORD after copying.
-cp .env.test.local.example .env.test.local
-```
+The dev Postgres credentials in `packages/db/.env` (including `POSTGRES_PASSWORD`) are dev-only: they only reach the local compose Postgres and the test databases. A deployment supplies its own as real env vars. To use other ones (e.g. an existing volume), put them in `packages/db/.env.local`; docker compose reads that file too.
 
 ## Spinning up
 
@@ -86,8 +70,34 @@ pnpm run seed:file -- 03_debates.js
 
 While the API runs in development mode (`pnpm run dev` or `pnpm run dev:api`), Swagger UI is served at [http://localhost:3001/docs](http://localhost:3001/docs) and the raw OpenAPI JSON at [http://localhost:3001/docs-json](http://localhost:3001/docs-json).
 
-The docs are only registered when `NODE_ENV` is unset or `development`.
+The docs are only registered when `NODE_ENV` is `development` (the default when unset).
 ## Running tests
 
 - **API E2E** (`pnpm --filter api test:e2e`) is self-contained — it starts Docker and bootstraps the NestJS app in-process.
-- **Client E2E** (`pnpm --filter client test:e2e`) needs the full stack already running (`pnpm run dev`, or `pnpm run start:prod:local`) and a seeded database. Playwright does not start any server; `apps/client/.env.test.local` must also be filled in.
+- **Client E2E** (`pnpm --filter client test:e2e`) needs the full stack already running (`pnpm run dev`, or `pnpm run start:prod:local`) and a seeded database. The E2E credentials are the seed accounts, committed in `apps/client/.env.test`.
+
+## Observability and load testing
+
+The o11y stack (OTel Collector, Prometheus, Loki, Tempo, Grafana and the exporters) runs in the prod-local compose project. It uses the same host ports as dev, so stop dev first (`pnpm run docker:down`).
+
+```bash
+# API and notification worker in containers, plus the o11y stack
+pnpm run start:prod:containers -d --wait
+
+pnpm run docker:prod-local:down
+```
+
+- Grafana: [http://localhost:3030](http://localhost:3030), user `admin`, password `admin` (or `GRAFANA_ADMIN_PASSWORD`). Dashboards are provisioned from `infra/o11y/grafana/dashboards/` into the DecentDebates folder and can't be edited in the UI; change the JSON files instead.
+- Prometheus: [http://localhost:9090](http://localhost:9090).
+- On Docker Desktop, node-exporter and cAdvisor report its Linux VM, not the Mac.
+
+### k6
+
+Install k6 with `brew install k6`. Load tests run against the load-test seed, which replaces the regular seed (re-seed when switching back for Playwright):
+
+```bash
+pnpm run seed:load
+pnpm run k6 <script.js> [k6 run flags]
+```
+
+`pnpm run k6` pushes the results to Prometheus via remote write and tags the run with `testid` (`K6_TESTID`, or the script name plus a timestamp). The run appears on the `k6` dashboard, and as a "k6 runs" annotation on the other dashboards.

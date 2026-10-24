@@ -64,6 +64,10 @@ pnpm run start:prod:local:client  # client only
 # (compose profile `app`), plus the o11y stack, in the prod-local compose project
 pnpm run start:prod:containers
 
+# k6 run (`brew install k6`), results pushed to the prod-local Prometheus via
+# remote write, tagged with `testid` (set K6_TESTID, otherwise script name + time)
+pnpm run k6 <script.js> [k6 run flags]
+
 # Compose projects: dev (`decentdebates`), prod-local (`decentdebates-prodlocal`),
 # test (`decentdebates-test`, `docker-compose.test.yml`: other host ports, data on tmpfs)
 pnpm run docker:up                # dev
