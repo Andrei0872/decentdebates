@@ -1,0 +1,371 @@
+{
+  "uid": "host-containers",
+  "title": "Host and containers",
+  "description": "USE (utilization, saturation, errors) for the host (node-exporter) and each container (cAdvisor). On Docker Desktop both report its Linux VM.",
+  "tags": ["o11y", "use"],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "label": "Environment",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(node_load1, deployment_environment)", "refId": "env" },
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1
+      },
+      {
+        "name": "node",
+        "label": "Host",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(node_load1{deployment_environment=\"$env\"}, instance)", "refId": "node" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "project",
+        "label": "Compose project",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(container_last_seen{deployment_environment=\"$env\"}, container_label_com_docker_compose_project)", "refId": "project" },
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1
+      },
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(container_last_seen{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\"}, container_label_com_docker_compose_service)", "refId": "service" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Host",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "CPU utilization by mode",
+      "description": "Share of all cores. High iowait means CPUs idle waiting on disk; steal means the hypervisor gave the time to another VM.",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "max": 1, "custom": { "stacking": { "mode": "normal" }, "fillOpacity": 20 } },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (instance, mode) (rate(node_cpu_seconds_total{deployment_environment=\"$env\", instance=~\"$node\", mode!=\"idle\"}[$__rate_interval])) / on (instance) group_left () count by (instance) (node_cpu_seconds_total{deployment_environment=\"$env\", instance=~\"$node\", mode=\"idle\"})",
+          "legendFormat": "{{mode}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Pressure stall (PSI)",
+      "description": "Saturation: share of time at least one task was stalled waiting for CPU, memory or IO. Unlike utilization, it rises only when work is actually queuing.",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_pressure_cpu_waiting_seconds_total{deployment_environment=\"$env\", instance=~\"$node\"}[$__rate_interval])",
+          "legendFormat": "cpu {{instance}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_pressure_memory_waiting_seconds_total{deployment_environment=\"$env\", instance=~\"$node\"}[$__rate_interval])",
+          "legendFormat": "memory {{instance}}"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_pressure_io_waiting_seconds_total{deployment_environment=\"$env\", instance=~\"$node\"}[$__rate_interval])",
+          "legendFormat": "io {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Memory used",
+      "description": "Used = total minus MemAvailable (page cache the kernel can reclaim counts as available). Swap in use on a server usually means memory is saturated.",
+      "gridPos": { "x": 0, "y": 9, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "1 - node_memory_MemAvailable_bytes{deployment_environment=\"$env\", instance=~\"$node\"} / node_memory_MemTotal_bytes{deployment_environment=\"$env\", instance=~\"$node\"}",
+          "legendFormat": "memory {{instance}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "1 - node_memory_SwapFree_bytes{deployment_environment=\"$env\", instance=~\"$node\"} / (node_memory_SwapTotal_bytes{deployment_environment=\"$env\", instance=~\"$node\"} > 0)",
+          "legendFormat": "swap {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Disk busy",
+      "description": "Share of time each block device had IO in flight. Near 100% on a single disk means saturation; SSDs can serve parallel IO, so check IO pressure too.",
+      "gridPos": { "x": 8, "y": 9, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_disk_io_time_seconds_total{deployment_environment=\"$env\", instance=~\"$node\", device=~\"(sd|vd|xvd|nvme).*\"}[$__rate_interval])",
+          "legendFormat": "{{device}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Filesystem used",
+      "description": "Per device: several mountpoints can share one disk.",
+      "gridPos": { "x": 16, "y": 9, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "max by (instance, device) (1 - node_filesystem_avail_bytes{deployment_environment=\"$env\", instance=~\"$node\", fstype=~\"ext4|xfs|btrfs\"} / node_filesystem_size_bytes{deployment_environment=\"$env\", instance=~\"$node\", fstype=~\"ext4|xfs|btrfs\"})",
+          "legendFormat": "{{device}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Network throughput",
+      "description": "Physical and VM interfaces only. Locally node-exporter runs on the compose bridge network, so this is its own interface, not the host NIC.",
+      "gridPos": { "x": 0, "y": 17, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "rate(node_network_receive_bytes_total{deployment_environment=\"$env\", instance=~\"$node\", device=~\"(en|eth|wl|bond).*\"}[$__rate_interval])",
+          "legendFormat": "rx {{device}} {{instance}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "-rate(node_network_transmit_bytes_total{deployment_environment=\"$env\", instance=~\"$node\", device=~\"(en|eth|wl|bond).*\"}[$__rate_interval])",
+          "legendFormat": "tx {{device}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "row",
+      "title": "Containers",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 25, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "CPU usage",
+      "description": "In cores: 1 = one core fully busy. A Node process tops out near 1 on its main thread, plus some libuv/GC threads.",
+      "gridPos": { "x": 0, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_cpu_usage_seconds_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "CPU throttled",
+      "description": "Share of CFS periods in which the container hit its CPU limit and was paused. Only containers with a CPU limit report it.",
+      "gridPos": { "x": 8, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_cpu_cfs_throttled_periods_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval])) / sum by (container_label_com_docker_compose_service) (rate(container_cpu_cfs_periods_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "CPU pressure",
+      "description": "Share of time at least one of the container's tasks waited for CPU, including time throttled by its limit.",
+      "gridPos": { "x": 16, "y": 26, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_pressure_cpu_waiting_seconds_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Memory working set",
+      "description": "Working set is what the OOM killer compares against the limit (RSS plus active page cache).",
+      "gridPos": { "x": 0, "y": 34, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"})",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Memory vs limit",
+      "description": "Working set as a share of the memory limit. Only containers with a limit appear.",
+      "gridPos": { "x": 8, "y": 34, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.8 },
+              { "color": "red", "value": 0.95 }
+            ]
+          },
+          "custom": { "thresholdsStyle": { "mode": "line+area" } }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (container_memory_working_set_bytes{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}) / sum by (container_label_com_docker_compose_service) (container_spec_memory_limit_bytes{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"} > 0)",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "OOM kills and restarts",
+      "description": "Errors: OOM kills inside the container, and restarts of the same container (a recreated container starts a new series instead).",
+      "gridPos": { "x": 16, "y": 34, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0, "decimals": 0, "custom": { "drawStyle": "bars" } }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (increase(container_oom_events_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval])) > 0",
+          "legendFormat": "OOM {{container_label_com_docker_compose_service}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (changes(container_start_time_seconds{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval])) > 0",
+          "legendFormat": "restart {{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Network throughput",
+      "gridPos": { "x": 0, "y": 42, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "Bps" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_network_receive_bytes_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "rx {{container_label_com_docker_compose_service}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "-sum by (container_label_com_docker_compose_service) (rate(container_network_transmit_bytes_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "tx {{container_label_com_docker_compose_service}}"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "IO pressure",
+      "description": "Share of time at least one of the container's tasks waited on IO, e.g. Postgres flushing WAL or reading pages not in cache.",
+      "gridPos": { "x": 12, "y": 42, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (container_label_com_docker_compose_service) (rate(container_pressure_io_waiting_seconds_total{deployment_environment=\"$env\", container_label_com_docker_compose_project=\"$project\", container_label_com_docker_compose_service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{container_label_com_docker_compose_service}}"
+        }
+      ]
+    }
+  ]
+}

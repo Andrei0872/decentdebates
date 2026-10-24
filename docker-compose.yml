@@ -294,6 +294,41 @@ services:
       redis-cache:
         condition: service_healthy
 
+  # On Docker Desktop, node-exporter and cadvisor see its Linux VM, not the
+  # macOS host.
+  node-exporter:
+    <<: *o11y
+    image: quay.io/prometheus/node-exporter:v1.12.1
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro
+
+  cadvisor:
+    <<: *o11y
+    image: ghcr.io/google/cadvisor:v0.60.6
+    command:
+      - --docker_only=true
+      # The default (1s) is far finer than the 15s scrape.
+      - --housekeeping_interval=15s
+      # Per-CPU, scheduler, TCP/UDP and similar series multiply cardinality
+      # and aren't on any dashboard.
+      - --disable_metrics=percpu,sched,tcp,udp,process,hugetlb,referenced_memory,cpu_topology,resctrl,advtcp,memory_numa
+      # Keeps only the compose labels instead of one series label per
+      # container label.
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.compose.project,com.docker.compose.service
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+
   # Might need this to quickly generate a UML.
   # pgadmin:
   #   image: dpage/pgadmin4
