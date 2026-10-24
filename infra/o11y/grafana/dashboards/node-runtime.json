@@ -1,0 +1,226 @@
+{
+  "uid": "node-runtime",
+  "title": "Node runtime",
+  "description": "Event loop, GC and heap per Node process, from RuntimeNodeInstrumentation.",
+  "tags": ["o11y", "use"],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "label": "Environment",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(nodejs_eventloop_time_seconds_total, deployment_environment)", "refId": "env" },
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1
+      },
+      {
+        "name": "job",
+        "label": "Service",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(nodejs_eventloop_time_seconds_total{deployment_environment=\"$env\"}, job)", "refId": "job" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      },
+      {
+        "name": "instance",
+        "label": "Instance",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "qryType": 1, "query": "label_values(nodejs_eventloop_time_seconds_total{deployment_environment=\"$env\", job=~\"$job\"}, instance)", "refId": "instance" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Event loop",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Event-loop utilization",
+      "description": "Share of wall time the event loop spent running callbacks. Close to 100% means the process is CPU-saturated on its single thread.",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
+            ]
+          },
+          "custom": { "thresholdsStyle": { "mode": "line+area" } }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance) (rate(nodejs_eventloop_time_seconds_total{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\", nodejs_eventloop_state=\"active\"}[$__rate_interval])) / sum by (job, instance) (rate(nodejs_eventloop_time_seconds_total{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "{{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Event-loop delay",
+      "description": "How late timers fire, i.e. how long a ready callback waits for the loop. Percentiles cover each export interval only; the histogram resets after every export.",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_delay_p50_seconds{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}",
+          "legendFormat": "p50 {{job}} {{instance}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_delay_p99_seconds{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}",
+          "legendFormat": "p99 {{job}} {{instance}}"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_delay_max_seconds{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}",
+          "legendFormat": "max {{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Time spent in GC",
+      "description": "Share of wall time spent in garbage collection, by GC type. GC pauses block the event loop.",
+      "gridPos": { "x": 0, "y": 9, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "custom": { "stacking": { "mode": "normal" }, "fillOpacity": 20 } },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance, v8js_gc_type) (rate(v8js_gc_duration_seconds_sum{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}[$__rate_interval]))",
+          "legendFormat": "{{v8js_gc_type}} {{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "GC p99 pause",
+      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (job, instance, v8js_gc_type, le) (rate(v8js_gc_duration_seconds_bucket{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"}[$__rate_interval])))",
+          "legendFormat": "{{v8js_gc_type}} {{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "Memory and resources",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 17, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Heap used vs committed",
+      "description": "Used heap that keeps rising across GC cycles, without returning to a baseline, suggests a leak.",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance) (v8js_memory_heap_used_bytes{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"})",
+          "legendFormat": "used {{job}} {{instance}}"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance) (v8js_memory_heap_space_physical_size_bytes{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"})",
+          "legendFormat": "committed {{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Heap used by space",
+      "description": "new_space churns with short-lived allocations; steady growth in old_space is what outlives GC.",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "min": 0, "custom": { "stacking": { "mode": "normal" }, "fillOpacity": 20 } },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance, v8js_heap_space_name) (v8js_memory_heap_used_bytes{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"})",
+          "legendFormat": "{{v8js_heap_space_name}} {{job}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Active resources",
+      "description": "Handles keeping the event loop alive (sockets, timers, ...). A count that grows with no load points to leaked connections or timers.",
+      "gridPos": { "x": 0, "y": 26, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (job, instance, v8js_resource_type) (v8js_resource_active{deployment_environment=\"$env\", job=~\"$job\", instance=~\"$instance\"})",
+          "legendFormat": "{{v8js_resource_type}} {{job}} {{instance}}"
+        }
+      ]
+    }
+  ]
+}

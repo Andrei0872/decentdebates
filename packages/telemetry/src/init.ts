@@ -17,6 +17,7 @@ import { METRIC_VIEWS } from "./views";
 const ATTR_DEPLOYMENT_ENVIRONMENT = "deployment.environment";
 
 const SHUTDOWN_TIMEOUT_MS = 5_000;
+const METRIC_EXPORT_INTERVAL_MS = 15_000;
 
 let sdk: NodeSDK | undefined;
 let started = false;
@@ -45,6 +46,11 @@ export function initTelemetry({
   if (!isTelemetryEnabledByEnv()) {
     return;
   }
+
+  // Matches the collector's scrape interval and the Prometheus datasource's
+  // `timeInterval`, which `$__rate_interval` is derived from. At the SDK's 60s
+  // default, rate() windows would often hold a single sample.
+  process.env.OTEL_METRIC_EXPORT_INTERVAL ??= String(METRIC_EXPORT_INTERVAL_MS);
 
   sdk = new NodeSDK({
     serviceName,

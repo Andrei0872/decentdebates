@@ -10,6 +10,8 @@ datasources:
     editable: false
     jsonData:
       httpMethod: POST
+      # The collector's scrape interval and the apps' OTLP export interval.
+      timeInterval: 15s
 
   - name: Loki
     uid: loki
