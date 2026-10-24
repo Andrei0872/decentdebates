@@ -14,6 +14,7 @@ Monorepo with `pnpm` workspaces and Turborepo.
 - `packages/config` — Env loading (`loadEnv`, dotenv-flow) and Zod validation helpers (`parseEnv`, shared schemas) used by each package's `config.ts`
 - `packages/telemetry` — OpenTelemetry SDK setup (`initTelemetry`, loaded via each app's `src/instrumentation.ts`), BullMQ telemetry and queue-depth metrics
 - `packages/eslint-config` — Shared ESLint config
+- `load-tests` — k6 scripts (run with `pnpm run k6`)
 
 ## Boundaries
 
@@ -66,7 +67,7 @@ pnpm run start:prod:containers
 
 # k6 run (`brew install k6`), results pushed to the prod-local Prometheus via
 # remote write, tagged with `testid` (set K6_TESTID, otherwise script name + time)
-pnpm run k6 <script.js> [k6 run flags]
+pnpm run k6 load-tests/smoke.js [k6 run flags]
 
 # Compose projects: dev (`decentdebates`), prod-local (`decentdebates-prodlocal`),
 # test (`decentdebates-test`, `docker-compose.test.yml`: other host ports, data on tmpfs)

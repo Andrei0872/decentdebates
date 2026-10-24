@@ -97,7 +97,9 @@ Install k6 with `brew install k6`. Load tests run against the load-test seed, wh
 
 ```bash
 pnpm run seed:load
-pnpm run k6 <script.js> [k6 run flags]
+pnpm run k6 load-tests/smoke.js [k6 run flags]
 ```
+
+Scripts live in `load-tests/`. They target `http://localhost:3001` unless `BASE_URL` is set. `smoke.js` sends 5 requests/s for 1 minute and fails if any check fails: run it first to confirm the target and the metrics pipeline work.
 
 `pnpm run k6` pushes the results to Prometheus via remote write and tags the run with `testid` (`K6_TESTID`, or the script name plus a timestamp). The run appears on the `k6` dashboard, and as a "k6 runs" annotation on the other dashboards.
