@@ -13,6 +13,7 @@ import {
 import { Request, Response } from "express";
 import {
   concat,
+  defer,
   filter,
   finalize,
   forkJoin,
@@ -22,16 +23,26 @@ import {
   takeUntil,
 } from "rxjs";
 import { fromEventPattern } from "rxjs";
+import { metrics, type UpDownCounter } from "@opentelemetry/api";
 import { NotificationMessage } from "@decentdebates/shared-types";
 import { UserCookieData, UserRoles } from "../user/user.model";
 import { NotificationService } from "./notification.service";
+import { NOTIFICATION_COUNT_SSE_PATH } from "./notification.paths";
 
 @ApiTags("notification")
 @Controller("notification")
 export class NotificationController {
   private readonly logger = new Logger(NotificationController.name);
+  private readonly sseConnections: UpDownCounter;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationService: NotificationService) {
+    this.sseConnections = metrics
+      .getMeter("@decentdebates/api")
+      .createUpDownCounter("app.sse.active_connections", {
+        description: "Open SSE streams",
+        unit: "{connection}",
+      });
+  }
 
   @Get()
   async getNotifications(@Res() res: Response, @Req() req: Request) {
@@ -67,20 +78,26 @@ export class NotificationController {
       (handler) => req.off("close", handler),
     );
 
-    return concat(
-      from(this.notificationService.getUnreadCount(user)).pipe(
-        map((count) => ({ data: { unreadCount: +count } })),
-      ),
-      this.notificationService.notifications$.pipe(
-        filter((msg: NotificationMessage) =>
-          msg.kind === "generic-moderator"
-            ? user.role === UserRoles.MODERATOR
-            : msg.recipientId === user.id,
+    const attributes = { "http.route": NOTIFICATION_COUNT_SSE_PATH };
+
+    return defer(() => {
+      this.sseConnections.add(1, attributes);
+      return concat(
+        from(this.notificationService.getUnreadCount(user)).pipe(
+          map((count) => ({ data: { unreadCount: +count } })),
         ),
-        map(() => ({ data: { unreadCount: 1 } })),
-      ),
-    ).pipe(
+        this.notificationService.notifications$.pipe(
+          filter((msg: NotificationMessage) =>
+            msg.kind === "generic-moderator"
+              ? user.role === UserRoles.MODERATOR
+              : msg.recipientId === user.id,
+          ),
+          map(() => ({ data: { unreadCount: 1 } })),
+        ),
+      );
+    }).pipe(
       finalize(() => {
+        this.sseConnections.add(-1, attributes);
         if (shouldEmitRoutineLogs()) {
           this.logger.debug("Notification count SSE stream closed.");
         }

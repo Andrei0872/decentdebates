@@ -17,7 +17,8 @@ import {
   DebateReviewUpdated,
   SocketIOServer,
 } from "./review.model";
-import { Socket } from "socket.io";
+import { Namespace, Socket } from "socket.io";
+import { metrics } from "@opentelemetry/api";
 import { ReviewService } from "./review.service";
 import { UserCookieData, UserRoles } from "../user/user.model";
 import { CommentService } from "../comment/comment.service";
@@ -62,7 +63,19 @@ export class ReviewGateway
     @InjectQueue(NOTIFICATION_QUEUE) private notificationsQueue: Queue,
   ) {}
 
-  afterInit(_server: any) {
+  afterInit(namespace: Namespace) {
+    metrics
+      .getMeter("@decentdebates/api")
+      .createObservableUpDownCounter("app.socketio.active_connections", {
+        description: "Connected Socket.IO sockets",
+        unit: "{connection}",
+      })
+      .addCallback((result) =>
+        result.observe(namespace.sockets.size, {
+          "app.socketio.namespace": namespace.name,
+        }),
+      );
+
     if (shouldEmitRoutineLogs()) {
       this.logger.log(`Websocket server up & running on port ${PORT}.`);
     }
