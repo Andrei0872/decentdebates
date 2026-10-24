@@ -8,6 +8,22 @@
   "editable": false,
   "time": { "from": "now-1h", "to": "now" },
   "refresh": "30s",
+  "annotations": {
+    "list": [
+      {
+        "name": "k6 runs",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "iconColor": "orange",
+        "expr": "max by (testid) (k6_vus_max) > 0",
+        "step": "5s",
+        "titleFormat": "k6 {{testid}}"
+      }
+    ]
+  },
   "templating": {
     "list": [
       {

@@ -27,7 +27,8 @@
     "start:prod:local": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && SESSION_COOKIE_SECURE=false turbo run start:prod",
     "start:prod:local:api": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && SESSION_COOKIE_SECURE=false turbo run start:prod --filter api --filter notification-worker",
     "start:prod:local:client": "turbo run start:prod --filter client",
-    "start:prod:containers": "bash ./scripts/start-prod-containers.sh"
+    "start:prod:containers": "bash ./scripts/start-prod-containers.sh",
+    "k6": "bash ./scripts/k6-run.sh"
   },
   "devDependencies": {
     "turbo": "2.9.6"

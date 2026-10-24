@@ -214,6 +214,8 @@ services:
       - --storage.tsdb.retention.time=7d
       - --storage.tsdb.retention.size=2GB
       - --web.enable-otlp-receiver
+      # k6 pushes its results here (`experimental-prometheus-rw` output).
+      - --web.enable-remote-write-receiver
     volumes:
       - ./infra/o11y/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
