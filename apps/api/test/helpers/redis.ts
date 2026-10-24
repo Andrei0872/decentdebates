@@ -1,13 +1,14 @@
 import { createClient } from "redis";
-import { loadTestEnv } from "./db";
+import { config } from "../../src/config";
+import { assertTestEnv } from "./db";
 
 export async function flushTestRedis() {
-  loadTestEnv();
+  assertTestEnv();
 
   const urls = [
-    process.env.REDIS_SESSIONS_URL,
-    process.env.REDIS_QUEUE_URL,
-    process.env.REDIS_CACHE_URL,
+    config.REDIS_SESSIONS_URL,
+    config.REDIS_QUEUE_URL,
+    config.REDIS_CACHE_URL,
   ];
 
   await Promise.all(

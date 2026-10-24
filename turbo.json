@@ -10,6 +10,7 @@
       "dependsOn": [
         "^build"
       ],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [
         "dist/**",
         ".next/**"
@@ -51,7 +52,12 @@
       "dependsOn": ["build"],
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["OTEL_*", "THROTTLE_LIMIT", "AUTH_THROTTLE_LIMIT"]
+      "passThroughEnv": [
+        "OTEL_*",
+        "THROTTLE_LIMIT",
+        "AUTH_THROTTLE_LIMIT",
+        "SESSION_COOKIE_SECURE"
+      ]
     }
   }
 }

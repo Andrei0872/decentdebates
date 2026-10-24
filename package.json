@@ -24,8 +24,8 @@
     "seed": "corepack pnpm --filter @decentdebates/db run seed",
     "seed:file": "corepack pnpm --filter @decentdebates/db run seed:file",
     "seed:load": "corepack pnpm --filter @decentdebates/db run seed:load",
-    "start:prod:local": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && turbo run start:prod",
-    "start:prod:local:api": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && turbo run start:prod --filter api --filter notification-worker",
+    "start:prod:local": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && SESSION_COOKIE_SECURE=false turbo run start:prod",
+    "start:prod:local:api": "corepack pnpm run docker:prod-local:up && corepack pnpm run db:migrate && SESSION_COOKIE_SECURE=false turbo run start:prod --filter api --filter notification-worker",
     "start:prod:local:client": "turbo run start:prod --filter client",
     "start:prod:containers": "bash ./scripts/start-prod-containers.sh"
   },

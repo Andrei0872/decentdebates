@@ -1,51 +1,34 @@
-import * as fs from "fs";
 import * as path from "path";
 import { Pool, type PoolConfig } from "pg";
-import { migrateLatest } from "@decentdebates/db";
+import { z } from "zod";
+import { readEnvFile } from "@decentdebates/config";
+import { dbConfig, migrateLatest } from "@decentdebates/db";
 
-const REPO_ROOT = path.resolve(__dirname, "../../../..");
-const DB_ENV_FILE = path.resolve(REPO_ROOT, "packages/db/.env");
-const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
+const DB_TEST_ENV_FILE = path.resolve(
+  __dirname,
+  "../../../../packages/db/.env.test",
+);
 
-let envLoaded = false;
+// Checked on `.env.test` alone: a key missing there would fall back to the dev
+// value in `.env`, and the tests would wipe the dev database.
+const testEnvSchema = z.object({
+  POSTGRES_PORT: z.string().regex(/^\d+$/, "Expected a port number"),
+  POSTGRES_DB: z.string().min(1),
+});
 
-function maybeLoadEnv(pathname: string, override = false) {
-  if (!fs.existsSync(pathname)) {
-    return;
+let envChecked = false;
+
+function assertTestEnv() {
+  if (envChecked) return;
+
+  const result = testEnvSchema.safeParse(readEnvFile(DB_TEST_ENV_FILE));
+  if (!result.success) {
+    throw new Error(
+      `Invalid ${DB_TEST_ENV_FILE}:\n${z.prettifyError(result.error)}`,
+    );
   }
 
-  const lines = fs.readFileSync(pathname, "utf8").split(/\r?\n/);
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    const separatorIndex = trimmed.indexOf("=");
-    if (separatorIndex === -1) continue;
-
-    const key = trimmed.slice(0, separatorIndex).trim();
-    const value = trimmed
-      .slice(separatorIndex + 1)
-      .trim()
-      .replace(/^['"]|['"]$/g, "");
-
-    if (override || process.env[key] === undefined) {
-      process.env[key] = value;
-    }
-  }
-}
-
-export function loadTestEnv() {
-  if (envLoaded) return;
-
-  maybeLoadEnv(DB_ENV_FILE);
-  maybeLoadEnv(API_TEST_ENV_FILE, true);
-
-  const baseDbName = process.env.POSTGRES_DB ?? "decentdebates";
-  process.env.POSTGRES_DB =
-    process.env.POSTGRES_DB_TEST ?? `${baseDbName}_test`;
-
-  envLoaded = true;
+  envChecked = true;
 }
 
 function quoteIdentifier(identifier: string) {
@@ -53,19 +36,13 @@ function quoteIdentifier(identifier: string) {
 }
 
 function getConnectionConfig(database: string): PoolConfig {
-  loadTestEnv();
-  return {
-    host: process.env.POSTGRES_HOST,
-    port: +(process.env.POSTGRES_PORT ?? 5432),
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database,
-  };
+  assertTestEnv();
+  return { ...dbConfig, database };
 }
 
 export function getTestDatabaseName() {
-  loadTestEnv();
-  return process.env.POSTGRES_DB as string;
+  assertTestEnv();
+  return dbConfig.database;
 }
 
 export function createTestPool() {

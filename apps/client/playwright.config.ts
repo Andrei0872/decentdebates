@@ -1,7 +1,7 @@
-import { config } from 'dotenv';
+import { config } from 'dotenv-flow';
 import { defineConfig, devices } from '@playwright/test';
 
-config({ path: '.env.test.local' });
+config({ node_env: 'test', silent: true });
 
 export default defineConfig({
   testDir: './tests/e2e',

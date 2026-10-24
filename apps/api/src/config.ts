@@ -1,20 +1,56 @@
-// Decided to use this file over adding values to the `api`'s `.env` file
-// because some of these values are required in decorators and I thought
-// it is not worth spending the time on how to inject those values there.
-// Examples: `redis.module.ts`, `review.gateway.ts`.
+import { z } from "zod";
+import { loadEnv, nodeEnv, parseEnv, redisUrl } from "@decentdebates/config";
 
-// On other environments except `DEV`, it is expected that this app
-// will be containerized.
+loadEnv(__dirname);
 
-export const config = {
-  CLIENT_URL: process.env.CLIENT_URL ?? "http://localhost:3000",
-  REDIS_SESSIONS_URL:
-    process.env.REDIS_SESSIONS_URL ?? "redis://localhost:6379",
-  REDIS_QUEUE_URL: process.env.REDIS_QUEUE_URL ?? "redis://localhost:6380",
-  REDIS_CACHE_URL: process.env.REDIS_CACHE_URL ?? "redis://localhost:6381",
-  THROTTLE_LIMIT: Number(process.env.THROTTLE_LIMIT ?? 30),
-  AUTH_THROTTLE_LIMIT: Number(process.env.AUTH_THROTTLE_LIMIT ?? 10),
-  SWAGGER_ENABLED:
-    Boolean(process.env.NODE_ENV) === false ||
-    process.env.NODE_ENV.toLowerCase() === "development",
-};
+const MIN_PRODUCTION_SECRET_LENGTH = 32;
+
+const apiSchema = z
+  .object({
+    NODE_ENV: nodeEnv,
+    COOKIE_SECRET: z
+      .string({ error: "required; set it in apps/api/.env.local" })
+      .min(1),
+    SESSION_COOKIE_NAME: z.string().min(1).default("sessionId"),
+    // `start:prod:local` serves plain HTTP.
+    SESSION_COOKIE_SECURE: z.stringbool().optional(),
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
+    CLIENT_URL: z.url(),
+    REDIS_SESSIONS_URL: redisUrl,
+    REDIS_QUEUE_URL: redisUrl,
+    REDIS_CACHE_URL: redisUrl,
+    THROTTLE_LIMIT: z.coerce.number().int().positive().default(30),
+    AUTH_THROTTLE_LIMIT: z.coerce.number().int().positive().default(10),
+  })
+  .superRefine((env, ctx) => {
+    if (env.NODE_ENV !== "production") {
+      return;
+    }
+
+    if (
+      env.COOKIE_SECRET.length < MIN_PRODUCTION_SECRET_LENGTH ||
+      env.COOKIE_SECRET.toLowerCase() === "null"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["COOKIE_SECRET"],
+        message: `must be at least ${MIN_PRODUCTION_SECRET_LENGTH} random characters in production (e.g. \`openssl rand -base64 32\`)`,
+      });
+    }
+  })
+  .transform((env) => ({
+    ...env,
+    SESSION_COOKIE_SECURE:
+      env.SESSION_COOKIE_SECURE ?? env.NODE_ENV === "production",
+    SWAGGER_ENABLED: env.NODE_ENV === "development",
+  }));
+
+export type ApiConfig = z.output<typeof apiSchema>;
+
+export function parseApiConfig(
+  env: Record<string, string | undefined>,
+): ApiConfig {
+  return parseEnv(apiSchema, env);
+}
+
+export const config = parseApiConfig(process.env);

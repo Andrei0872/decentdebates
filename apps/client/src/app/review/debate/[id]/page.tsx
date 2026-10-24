@@ -35,6 +35,7 @@ import {
 import buttonStyles from "@/styles/shared/button.module.scss";
 import tagStyles from "@/styles/shared/debate-tag.module.scss";
 import { BoardLists } from "@/dtos/moderator/get-activity.dto";
+import { env } from "@/env";
 
 interface ModeratorDebateContentProps {
   debateData: DebateAsModerator;
@@ -205,7 +206,7 @@ function Debate() {
   }, [dispatch, router, ticketId, user]);
 
   useEffect(() => {
-    socket = io(`${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL!}/review`, {
+    socket = io(`${env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL}/review`, {
       autoConnect: false,
       withCredentials: true,
       query: { ticketId },

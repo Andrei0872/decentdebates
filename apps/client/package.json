@@ -29,6 +29,7 @@
     "@lexical/selection": "^0.43.0",
     "@lexical/utils": "^0.43.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@t3-oss/env-nextjs": "0.13.11",
     "@types/node": "^24.0.0",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
@@ -42,16 +43,17 @@
     "react-hook-form": "^7.72.1",
     "react-redux": "^9.2.0",
     "socket.io-client": "^4.8.3",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@decentdebates/eslint-config": "workspace:*",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.1",
-    "@decentdebates/eslint-config": "workspace:*",
-    "dotenv": "^16.0.0",
+    "dotenv-flow": "4.1.0",
     "eslint": "^9.39.4",
     "jsdom": "^29.0.2",
     "prettier": "^3.0.0",

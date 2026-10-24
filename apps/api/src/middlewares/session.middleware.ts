@@ -1,31 +1,26 @@
 import * as session from "express-session";
 import { FactoryProvider } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { SESSION_STORE_TOKEN } from "src/redis/redis.module";
+import { config } from "src/config";
 
 export const SESSION_MIDDLEWARE_TOKEN = "@SESSION_MIDDLEWARE_TOKEN";
 
-const DEFAULT_SESSION_COOKIE_NAME = "sessionId";
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-
-export function getSessionCookieName(cs: ConfigService): string {
-  return cs.get("SESSION_COOKIE_NAME") ?? DEFAULT_SESSION_COOKIE_NAME;
-}
 
 export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
   provide: SESSION_MIDDLEWARE_TOKEN,
-  useFactory: (cs: ConfigService, sessionStore: session.Store) => {
+  useFactory: (sessionStore: session.Store) => {
     const sessionMiddleware = session({
       store: sessionStore,
-      secret: cs.get("COOKIE_SECRET"),
+      secret: config.COOKIE_SECRET,
       saveUninitialized: false,
       resave: false,
       rolling: true,
-      name: getSessionCookieName(cs),
+      name: config.SESSION_COOKIE_NAME,
       cookie: {
         // Behind a proxy, `req.secure` comes from `X-Forwarded-Proto`, which
         // Express only trusts with `trust proxy` set (`TRUST_PROXY_HOPS`).
-        secure: cs.get<boolean>("SESSION_COOKIE_SECURE"),
+        secure: config.SESSION_COOKIE_SECURE,
         httpOnly: true,
         maxAge: SESSION_MAX_AGE_MS,
         sameSite: "lax",
@@ -33,5 +28,5 @@ export const SESSION_MIDDLEWARE_PROVIDER: FactoryProvider<any> = {
     });
     return sessionMiddleware;
   },
-  inject: [ConfigService, SESSION_STORE_TOKEN],
+  inject: [SESSION_STORE_TOKEN],
 };

@@ -1,32 +1,18 @@
 import { FactoryProvider, Global, Logger, Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import * as fs from "fs";
-import * as path from "path";
 import { Pool } from "pg";
 import { registerPoolMetrics } from "./pool-metrics";
+import { dbConfig } from "./config";
 
 const LOGGER_CONTEXT = "DB";
 
 export const PG_PROVIDER_TOKEN = "PG_PROVIDER_TOKEN";
 
-const SOURCE_ENV_FILE = path.resolve(__dirname, "../.env");
-const DIST_ENV_FILE = path.resolve(__dirname, "../../.env");
-const DB_ENV_FILE = fs.existsSync(SOURCE_ENV_FILE)
-  ? SOURCE_ENV_FILE
-  : DIST_ENV_FILE;
-
 const PG_PROVIDER: FactoryProvider<Pool> = {
   provide: PG_PROVIDER_TOKEN,
-  useFactory: async (cs: ConfigService) => {
+  useFactory: async () => {
     const logger = new Logger(LOGGER_CONTEXT);
 
-    const pool = new Pool({
-      user: cs.get("POSTGRES_USER"),
-      host: cs.get("POSTGRES_HOST"),
-      database: cs.get("POSTGRES_DB"),
-      password: cs.get("POSTGRES_PASSWORD"),
-      port: cs.get("POSTGRES_PORT"),
-    });
+    const pool = new Pool(dbConfig);
 
     try {
       await new Promise((resolve, reject) => {
@@ -50,17 +36,11 @@ const PG_PROVIDER: FactoryProvider<Pool> = {
 
     return pool;
   },
-  inject: [ConfigService],
 };
 
 @Global()
 @Module({
   providers: [PG_PROVIDER],
-  exports: [PG_PROVIDER, ConfigModule],
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: DB_ENV_FILE,
-    }),
-  ],
+  exports: [PG_PROVIDER],
 })
 export class DbModule {}

@@ -1,3 +1,10 @@
-export const config = {
-  REDIS_QUEUE_URL: process.env.REDIS_QUEUE_URL ?? "redis://localhost:6380",
-};
+import { z } from "zod";
+import { loadEnv, parseEnv, redisUrl } from "@decentdebates/config";
+
+loadEnv(__dirname);
+
+const workerSchema = z.object({
+  REDIS_QUEUE_URL: redisUrl,
+});
+
+export const config = parseEnv(workerSchema);

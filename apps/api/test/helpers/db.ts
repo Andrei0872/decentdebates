@@ -1,125 +1,57 @@
-import * as fs from "fs";
 import * as path from "path";
-import { createRequire } from "module";
 import { Pool, type PoolConfig } from "pg";
 import { z } from "zod";
-import { migrateLatest } from "@decentdebates/db";
-import { seed as seedDebates } from "../../../../packages/db/data/seeds/03_debates";
+import { readEnvFile } from "@decentdebates/config";
+import { dbConfig, migrateLatest, runSeeds } from "@decentdebates/db";
 
 const REPO_ROOT = path.resolve(__dirname, "../../../..");
-const DB_ENV_FILE = path.resolve(REPO_ROOT, "packages/db/.env");
-const API_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env");
-const API_TEST_ENV_FILE = path.resolve(REPO_ROOT, "apps/api/.env.test");
-const DB_PACKAGE_JSON = path.resolve(REPO_ROOT, "packages/db/package.json");
-const requireFromDbPackage = createRequire(DB_PACKAGE_JSON);
+const TEST_ENV_FILES = [
+  path.resolve(REPO_ROOT, "packages/db/.env.test"),
+  path.resolve(REPO_ROOT, "apps/api/.env.test"),
+];
 
-// Validated on the file alone: once merged, apps/api/.env would fill in the
-// dev Redis URLs and the tests would wipe the dev instances.
+// Checked on the `.env.test` files alone: a key missing there would fall back
+// to the dev value in `.env`, and the tests would wipe the dev instances.
 const testEnvSchema = z.object({
   POSTGRES_PORT: z.string().regex(/^\d+$/, "Expected a port number"),
+  POSTGRES_DB: z.string().min(1),
   REDIS_SESSIONS_URL: z.url(),
   REDIS_QUEUE_URL: z.url(),
   REDIS_CACHE_URL: z.url(),
 });
 
-let envLoaded = false;
-
-function createKnexClient(config: PoolConfig) {
-  const knexFactory = requireFromDbPackage("knex") as (
-    options: Record<string, unknown>,
-  ) => {
-    destroy: () => Promise<void>;
-  };
-
-  return knexFactory({ client: "pg", connection: config });
-}
-
-function parseEnvFile(pathname: string) {
-  const vars: Record<string, string> = {};
-
-  if (!fs.existsSync(pathname)) {
-    return vars;
-  }
-
-  const lines = fs.readFileSync(pathname, "utf8").split(/\r?\n/);
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (!trimmed || trimmed.startsWith("#")) {
-      continue;
-    }
-
-    const separatorIndex = trimmed.indexOf("=");
-    if (separatorIndex === -1) {
-      continue;
-    }
-
-    const key = trimmed.slice(0, separatorIndex).trim();
-    const value = trimmed
-      .slice(separatorIndex + 1)
-      .trim()
-      .replace(/^['"]|['"]$/g, "");
-
-    vars[key] = value;
-  }
-
-  return vars;
-}
-
-function applyEnv(vars: Record<string, string>, override = false) {
-  for (const [key, value] of Object.entries(vars)) {
-    if (override || process.env[key] === undefined) {
-      process.env[key] = value;
-    }
-  }
-}
+let envChecked = false;
 
 function quoteIdentifier(identifier: string) {
   return `"${identifier.replace(/"/g, '""')}"`;
 }
 
-export function loadTestEnv() {
-  if (envLoaded) {
+export function assertTestEnv() {
+  if (envChecked) {
     return;
   }
 
-  const testEnv = parseEnvFile(API_TEST_ENV_FILE);
+  const testEnv = Object.assign({}, ...TEST_ENV_FILES.map(readEnvFile));
   const result = testEnvSchema.safeParse(testEnv);
   if (!result.success) {
     throw new Error(
-      `Invalid ${API_TEST_ENV_FILE} (copy it from .env.test.example):\n${z.prettifyError(result.error)}`,
+      `Invalid ${TEST_ENV_FILES.join(" + ")}:\n${z.prettifyError(result.error)}`,
     );
   }
 
-  applyEnv(parseEnvFile(DB_ENV_FILE));
-  applyEnv(parseEnvFile(API_ENV_FILE));
-  applyEnv(testEnv, true);
-
-  const baseDbName = process.env.POSTGRES_DB ?? "decentdebates";
-  process.env.POSTGRES_DB =
-    process.env.POSTGRES_DB_TEST ?? `${baseDbName}_test`;
-  process.env.COOKIE_SECRET = process.env.COOKIE_SECRET ?? "test-cookie-secret";
-
-  envLoaded = true;
+  envChecked = true;
 }
 
 export function getTestDatabaseName() {
-  loadTestEnv();
+  assertTestEnv();
 
-  return process.env.POSTGRES_DB as string;
+  return dbConfig.database;
 }
 
 function getConnectionConfig(database: string): PoolConfig {
-  loadTestEnv();
+  assertTestEnv();
 
-  return {
-    host: process.env.POSTGRES_HOST,
-    port: +(process.env.POSTGRES_PORT ?? 5432),
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database,
-  };
+  return { ...dbConfig, database };
 }
 
 export function createAdminPool() {
@@ -155,21 +87,10 @@ export async function runMigrations() {
   await migrateLatest(getConnectionConfig(getTestDatabaseName()));
 }
 
-export async function runSeeds() {
-  const db = createKnexClient(getConnectionConfig(getTestDatabaseName()));
-
-  try {
-    await seedDebates(db as never);
-  } finally {
-    await db.destroy();
-  }
-}
-
 export async function resetTestDatabase() {
-  loadTestEnv();
   await recreateTestDatabase();
   await runMigrations();
-  await runSeeds();
+  await runSeeds(getConnectionConfig(getTestDatabaseName()));
 }
 
 export async function queryOne<T = Record<string, unknown>>(

@@ -12,9 +12,7 @@ dist/
 *.tsbuildinfo
 .turbo/
 
-# Environment files (`*.example` files are committed)
-.env
-.env.test
+# Secrets and personal overrides; the other env files are committed.
 .env*.local
 
 # Tests

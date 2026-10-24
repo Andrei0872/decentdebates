@@ -2,7 +2,7 @@ name: decentdebates
 
 # Settings shared by the containerized (backend) services.
 x-app: &app
-  environment:
+  environment: &app-environment
     POSTGRES_HOST: db
     POSTGRES_PORT: "5432"
     REDIS_SESSIONS_URL: redis://redis-sessions:6379
@@ -40,6 +40,13 @@ x-app: &app
   networks:
     - decent_debates_dev
 
+# Same order as dotenv-flow: the gitignored `.env.local` overrides the
+# committed `.env`.
+x-db-env-file: &db-env-file
+  - packages/db/.env
+  - path: packages/db/.env.local
+    required: false
+
 x-app-labels: &app-labels
   service.version: ${GIT_SHA:-unknown}
   deployment.environment: ${DEPLOYMENT_ENVIRONMENT:-prod-local}
@@ -62,8 +69,7 @@ services:
 
   db:
     image: postgres:13.6
-    env_file:
-      - packages/db/.env
+    env_file: *db-env-file
     restart: on-failure
     healthcheck:
       test: "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
@@ -125,8 +131,7 @@ services:
       context: .
       dockerfile: packages/db/Dockerfile
     image: decentdebates-migrate:local
-    env_file:
-      - packages/db/.env
+    env_file: *db-env-file
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
@@ -151,7 +156,16 @@ services:
       service.name: api
     env_file:
       - packages/db/.env
+      - path: packages/db/.env.local
+        required: false
       - apps/api/.env
+      - path: apps/api/.env.local
+        required: false
+    environment:
+      <<: *app-environment
+      # Served over plain HTTP, where express-session silently refuses to set
+      # a `Secure` cookie.
+      SESSION_COOKIE_SECURE: "false"
     ports:
       - "3001:3001" # HTTP
       - "3002:3002" # WebSocket (ReviewGateway)
@@ -168,8 +182,7 @@ services:
     labels:
       <<: *app-labels
       service.name: notification-worker
-    env_file:
-      - packages/db/.env
+    env_file: *db-env-file
 
   otel-collector:
     <<: *o11y
@@ -256,8 +269,7 @@ services:
   postgres-exporter:
     <<: *o11y
     image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
-    env_file:
-      - packages/db/.env
+    env_file: *db-env-file
     entrypoint:
       - /bin/sh
       - -c

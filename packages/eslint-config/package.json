@@ -11,7 +11,8 @@
   "files": [
     "base.js",
     "node.js",
-    "next.js"
+    "next.js",
+    "process-env.js"
   ],
   "scripts": {
     "format": "prettier --check \"*.js\"",

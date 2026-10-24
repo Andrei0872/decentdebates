@@ -1,5 +1,4 @@
 import { ValidationPipe } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import * as cors from "cors";
 import helmet from "helmet";
@@ -8,11 +7,9 @@ import { SESSION_MIDDLEWARE_TOKEN } from "./middlewares/session.middleware";
 import { trackConnectionsForDrain } from "./connection-drain";
 
 export function setupApp(app: NestExpressApplication) {
-  const cs = app.get(ConfigService);
-
   trackConnectionsForDrain(app.getHttpServer());
 
-  app.set("trust proxy", cs.get<number>("TRUST_PROXY_HOPS"));
+  app.set("trust proxy", config.TRUST_PROXY_HOPS);
 
   app.use(helmet());
 

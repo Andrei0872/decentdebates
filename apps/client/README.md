@@ -6,23 +6,12 @@ This package contains the Next.js client for Decent Debates.
 
 | File | Tracked | Purpose |
 |------|---------|---------|
-| `.env.development` | yes | API and WebSocket URLs for local dev |
-| `.env.test.local` | no | E2E test credentials (copy from `.env.test.local.example`) |
-| `.env.production.local` | no | API and WebSocket URLs for a local production build (copy from `.env.production.local.example`) |
+| `.env.development` | yes | API and WebSocket URLs (`NEXT_PUBLIC_*`) for `next dev` |
+| `.env.production` | yes | The same for `next build`; the prod-local URLs until there is a deployment |
+| `.env.test` | yes | E2E credentials (seed accounts) and the API URL, loaded by `playwright.config.ts` |
+| `.env*.local` | no | Personal overrides |
 
-### Setup
-
-```bash
-# Ensure you're in the apps/client directory.
-
-cp .env.development.example .env.development
-
-cp .env.test.local.example .env.test.local
-# Then fill in E2E_USERNAME and E2E_PASSWORD in .env.test.local
-
-cp .env.production.local.example .env.production.local
-# Then fill in the URLs in .env.production.local (used when running a local production build)
-```
+`src/env.ts` validates the `NEXT_PUBLIC_*` variables; `next.config.ts` imports it, so an invalid value fails the build. `NEXT_PUBLIC_*` values are inlined at build time, so changing one needs a rebuild.
 
 ## Development
 

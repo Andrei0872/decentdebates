@@ -4,11 +4,11 @@ import type { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../../src/app.module";
 import { setupApp } from "../../src/app.setup";
 import { closeApp } from "../../src/shutdown";
-import { loadTestEnv, resetTestDatabase } from "./db";
+import { assertTestEnv, resetTestDatabase } from "./db";
 import { flushTestRedis } from "./redis";
 
 export async function createTestApp(options?: { reset?: boolean }) {
-  loadTestEnv();
+  assertTestEnv();
 
   if (options?.reset !== false) {
     await Promise.all([resetTestDatabase(), flushTestRedis()]);

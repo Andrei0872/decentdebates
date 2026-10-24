@@ -39,16 +39,16 @@ jobs:
       postgres:
         image: postgres:13.6
         env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: ci
-          POSTGRES_DB: decentdebates_test
+          POSTGRES_USER: decentdebates
+          POSTGRES_PASSWORD: decentdebates
+          POSTGRES_DB: decentdebates
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
         ports:
-          - 5432:5432
+          - 15432:5432
       redis-sessions:
         image: redis:7.0.5
         options: >-
@@ -57,7 +57,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
         ports:
-          - 6379:6379
+          - 16379:6379
       redis-queue:
         image: redis:7.0.5
         options: >-
@@ -66,7 +66,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
         ports:
-          - 6380:6379
+          - 16380:6379
       redis-cache:
         image: redis:7.0.5
         options: >-
@@ -75,15 +75,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
         ports:
-          - 6381:6379
-    env:
-      POSTGRES_USER: ci
-      POSTGRES_PASSWORD: ci
-      POSTGRES_DB: decentdebates_test
-      POSTGRES_DB_TEST: decentdebates_test
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
-      COOKIE_SECRET: ci-test-secret
+          - 16381:6379
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -95,18 +87,6 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        # Temporary hack because: `API_TEST_ENV_FILE`.
-      - name: Write API test env
-        run: |
-          cat > apps/api/.env.test << EOF
-          POSTGRES_USER=$POSTGRES_USER
-          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-          POSTGRES_DB=$POSTGRES_DB
-          POSTGRES_DB_TEST=$POSTGRES_DB_TEST
-          POSTGRES_HOST=$POSTGRES_HOST
-          POSTGRES_PORT=$POSTGRES_PORT
-          COOKIE_SECRET=$COOKIE_SECRET
-          EOF
       - name: Integration tests
         run: pnpm turbo run test:integration:only
 

@@ -12,8 +12,6 @@
 # Environment files: env vars are passed at runtime (see docker-compose.yml).
 **/.env
 **/.env.*
-!**/.env.example
-!**/.env.*.example
 
 # Client build output and test artifacts
 apps/client/.next

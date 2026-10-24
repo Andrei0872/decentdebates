@@ -2,6 +2,7 @@ import nextBase from "eslint-config-next";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier";
+import { restrictProcessEnv } from "./process-env.js";
 
 export default [
   ...nextBase,
@@ -15,6 +16,13 @@ export default [
       "@typescript-eslint/explicit-module-boundary-types": "off",
     },
   },
+  ...restrictProcessEnv([
+    "src/env.ts",
+    "playwright.config.ts",
+    "next.config.*",
+    "tests/**",
+    "**/*.test.{ts,tsx}",
+  ]),
   {
     ignores: [
       "**/dist/**",

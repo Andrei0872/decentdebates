@@ -1,6 +1,11 @@
 services:
   db:
     restart: "no"
+    # Postgres creates its user from these on first start. The tests skip
+    # `.env.local` (dotenv-flow's test mode) and connect with `.env`'s
+    # credentials, so a personal override here would fail their auth.
+    env_file: !override
+      - packages/db/.env
     volumes: !reset []
     tmpfs:
       - /var/lib/postgresql/data

@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { DbModule } from "@decentdebates/db";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./entities/user/user.module";
@@ -20,7 +19,6 @@ import { createLoggerModuleParams, LoggerModule } from "@decentdebates/logging";
 import { createBullMqTelemetry } from "@decentdebates/telemetry";
 import { RequestContextMiddleware } from "./request-context";
 import { HttpRouteInterceptor } from "./interceptors/http-route.interceptor";
-import { validateEnv } from "./env";
 import {
   THROTTLER_GUARD_PROVIDER,
   THROTTLER_IMPORT,
@@ -37,10 +35,6 @@ import {
     DbModule,
     AuthModule,
     UserModule,
-    ConfigModule.forRoot({
-      envFilePath: ".env",
-      validate: validateEnv,
-    }),
     THROTTLER_IMPORT,
     DebatesModule,
     ModeratorModule,

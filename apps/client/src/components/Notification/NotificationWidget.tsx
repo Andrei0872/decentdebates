@@ -13,6 +13,7 @@ import { MouseEvent, useEffect, useState } from "react";
 import RichEditor from "../RichEditor/RichEditor";
 import styles from "./NotificationWidget.module.scss";
 import { useRouter } from "next/navigation";
+import { env } from "@/env";
 
 function NotificationWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +27,7 @@ function NotificationWidget() {
 
   useEffect(() => {
     const notifSource = new EventSource(
-      `${process.env.NEXT_PUBLIC_API_SERVER_URL}/notification/count`,
+      `${env.NEXT_PUBLIC_API_SERVER_URL}/notification/count`,
       { withCredentials: true },
     );
 
